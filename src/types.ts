@@ -118,6 +118,7 @@ export interface MilestoneTask extends BaseEntity {
   text: string;
   isCompleted: boolean;
   priority: Priority;
+  status?: TaskStatus; // 칸반보드 4단계 상태 (기본값: TODO, isCompleted true면 DONE)
 }
 
 export interface WeeklyMilestone {
