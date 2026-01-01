@@ -91,65 +91,73 @@ export function CampaignSection({
             initial="hidden"
             animate="visible"
         >
-            <div className="flex items-center justify-end mb-8 px-4 border-b border-white/5 pb-6">
 
-                <div className="flex items-center gap-6">
-                    {/* Minimalist Navigation */}
-                    <div className="flex items-center gap-1 bg-black/40 border border-white/5 rounded-full p-1 pl-3 pr-1 backdrop-blur-sm">
-                        <span className="text-[9px] font-mono text-white/20 mr-2 uppercase tracking-widest hidden sm:block">Navigate</span>
-                        <div className="flex items-center gap-px">
-                            <button
-                                onClick={() => scroll('left')}
-                                className="w-8 h-8 flex items-center justify-center text-white/20 hover:text-cyber-cyan hover:bg-white/5 rounded-full transition-all active:scale-95 group"
-                                aria-label="Scroll Left"
-                            >
-                                <ChevronLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />
-                            </button>
-                            <div className="w-px h-3 bg-white/5" />
-                            <button
-                                onClick={() => scroll('right')}
-                                className="w-8 h-8 flex items-center justify-center text-white/20 hover:text-cyber-cyan hover:bg-white/5 rounded-full transition-all active:scale-95 group"
-                                aria-label="Scroll Right"
-                            >
-                                <ChevronRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Minimalist Hardcore Trigger */}
+            <div className="relative group/container">
+                {/* Gradient Masks & Integrated Navigation */}
+                <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-black via-black/50 to-transparent z-[60] flex items-center justify-start pl-2 pointer-events-none opacity-0 group-hover/container:opacity-100 transition-opacity duration-500">
                     <button
-                        onClick={() => setCompressModalOpen(true)}
-                        disabled={isCompressing}
-                        className={`
-                            group relative flex items-center justify-center
-                            w-8 h-8 hover:w-32 transition-all duration-500 ease-out
-                            bg-black/40 border border-white/5 hover:border-red-500/50 rounded-full
-                            overflow-hidden backdrop-blur-sm
-                        `}
+                        onClick={() => scroll('left')}
+                        className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm border border-white/10 text-white/40 hover:text-cyber-cyan hover:border-cyber-cyan hover:bg-black flex items-center justify-center transition-all pointer-events-auto hover:scale-110 active:scale-95 shadow-lg group/nav"
                     >
-                        <div className="absolute inset-0 bg-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-
-                        <div className="flex items-center gap-3 absolute left-1/2 -translate-x-1/2 group-hover:translate-x-0 group-hover:left-3 transition-all duration-500">
-                            <FastForward
-                                size={14}
-                                className={`
-                                    min-w-[14px]
-                                    ${isCompressing ? 'text-red-500 animate-pulse' : 'text-white/20 group-hover:text-red-500'}
-                                    transition-colors
-                                `}
-                            />
-                            <span className="text-[9px] font-cyber font-black text-red-500 uppercase tracking-widest opacity-0 group-hover:opacity-100 whitespace-nowrap transition-opacity duration-300 delay-75">
-                                Hardcore
-                            </span>
-                        </div>
+                        <ChevronLeft size={20} className="group-hover/nav:-translate-x-0.5 transition-transform" />
                     </button>
                 </div>
-            </div>
+                <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-black via-black/50 to-transparent z-[60] flex items-center justify-end pr-2 pointer-events-none opacity-0 group-hover/container:opacity-100 transition-opacity duration-500">
+                    <button
+                        onClick={() => scroll('right')}
+                        className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm border border-white/10 text-white/40 hover:text-cyber-cyan hover:border-cyber-cyan hover:bg-black flex items-center justify-center transition-all pointer-events-auto hover:scale-110 active:scale-95 shadow-lg group/nav"
+                    >
+                        <ChevronRight size={20} className="group-hover/nav:translate-x-0.5 transition-transform" />
+                    </button>
+                </div>
 
-            <div className="relative">
-                {/* Gradient Masks for scrolling indication */}
-                <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-black via-black/50 to-transparent z-10 pointer-events-none" />
-                <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-black via-black/50 to-transparent z-10 pointer-events-none" />
+                {/* Integrated Hardcore Trigger (Top Right Floating) */}
+                <div className="absolute top-0 right-0 z-[70] p-4">
+                    <motion.button
+                        onClick={() => setCompressModalOpen(true)}
+                        disabled={isCompressing}
+                        initial="idle"
+                        whileHover="burning"
+                        animate={isCompressing ? "burning" : "idle"}
+                        className="relative group flex items-center justify-center"
+                    >
+                        <motion.div
+                            variants={{
+                                idle: { opacity: 0, scale: 0.5 },
+                                burning: { opacity: 1, scale: 1.2 }
+                            }}
+                            transition={{ duration: 0.3 }}
+                            className="absolute inset-0 bg-red-500/20 blur-xl rounded-full"
+                        />
+                        <div className={`
+                            relative flex items-center gap-2 px-3 py-1.5 rounded-full border backdrop-blur-md transition-all duration-300
+                            ${isCompressing
+                                ? 'bg-red-500/10 border-red-500 text-red-500'
+                                : 'bg-black/20 border-white/5 text-white/20 hover:border-red-500/50 hover:text-white'
+                            }
+                        `}>
+                            <motion.div
+                                variants={{
+                                    idle: { rotate: 0 },
+                                    burning: {
+                                        rotate: [-5, 5, -5],
+                                        scale: [1, 1.2, 1],
+                                        filter: "brightness(1.5) drop-shadow(0 0 5px #ef4444)"
+                                    }
+                                }}
+                                transition={{
+                                    rotate: { duration: 0.2, repeat: Infinity, repeatType: 'mirror' },
+                                    scale: { duration: 0.4, repeat: Infinity, repeatType: 'mirror' }
+                                }}
+                            >
+                                <FastForward size={14} fill={isCompressing ? "currentColor" : "none"} />
+                            </motion.div>
+                            <span className="text-[9px] font-cyber font-black uppercase tracking-widest hidden group-hover:block whitespace-nowrap overflow-hidden">
+                                {isCompressing ? 'COMPRESSING' : 'HARDCORE'}
+                            </span>
+                        </div>
+                    </motion.button>
+                </div>
 
                 <div
                     ref={scrollContainerRef}
@@ -204,7 +212,7 @@ export function CampaignSection({
                                                         Sector_{idx + 1 < 10 ? `0${idx + 1}` : idx + 1}
                                                     </span>
                                                     <div className={`text-3xl font-black tracking-tighter ${isSelected ? 'text-white' : 'text-zinc-500'}`}>
-                                                        MONTH_{idx + 1}
+                                                        {idx + 1 < 10 ? `0${idx + 1}` : idx + 1}
                                                     </div>
                                                 </div>
 

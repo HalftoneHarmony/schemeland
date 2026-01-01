@@ -217,7 +217,7 @@ export function CampaignDetailView({
 
                         <div className="inline-block skew-x-[-10deg]">
                             <span className="bg-cyber-pink text-white font-cyber font-black text-[10px] px-6 py-2 uppercase tracking-[0.4em] shadow-neon-pink">
-                                Sector_0{monthPlan.month}_Protocol::섹터_{monthPlan.month}_프로토콜
+                                Scrum_0{monthPlan.month}_Protocol::스크럼_{monthPlan.month}_프로토콜
                             </span>
                         </div>
 
@@ -290,7 +290,7 @@ export function CampaignDetailView({
                                     </div>
                                 </div>
                                 <div className="text-center">
-                                    <span className={`text-[10px] font-cyber font-black uppercase tracking-widest transition-colors ${idx === 0 ? 'text-cyber-cyan' : 'text-white/20'}`}>W{week.weekNumber}</span>
+                                    <span className={`text-[10px] font-cyber font-black uppercase tracking-widest transition-colors ${idx === 0 ? 'text-cyber-cyan' : 'text-white/20'}`}>S{week.weekNumber}</span>
                                 </div>
                             </div>
                         )) : (
@@ -329,8 +329,7 @@ export function CampaignDetailView({
                             ))}
                         </div>
                         <p className="mt-2 text-[10px] text-white/30 font-mono flex items-center gap-2">
-                            <Terminal size={10} />
-                            DRAG_TO_SECTOR::섹터로_드래그하여_할당하십시오
+                            DRAG_TO_SPRINT::스프린트로_드래그하여_할당하십시오
                         </p>
                     </div>
                 )}
@@ -404,7 +403,7 @@ export function CampaignDetailView({
                                                 </div>
                                                 <div className="flex items-center gap-2 mb-3">
                                                     <div className={`w-1.5 h-1.5 rounded-full ${idx === 0 ? 'bg-cyber-cyan animate-pulse shadow-neon-cyan' : 'bg-white/10'}`}></div>
-                                                    <span className="text-[9px] font-cyber font-black text-white/20 uppercase tracking-[0.3em]">섹터_업데이트</span>
+                                                    <span className="text-[9px] font-cyber font-black text-white/20 uppercase tracking-[0.3em]">스프린트_업데이트</span>
                                                     <button
                                                         onClick={() => setEditingWeekIndex(editingWeekIndex === idx ? null : idx)}
                                                         className="ml-auto text-[10px] text-white/20 hover:text-cyber-cyan font-cyber mr-8"
@@ -564,9 +563,9 @@ export function CampaignDetailView({
                     <div className="text-center py-32 border-2 border-dashed border-white/5 bg-black/40 skew-x-[-1deg]">
                         <div className="skew-x-[1deg]">
                             <Map size={64} className="mx-auto text-white/5 mb-8" />
-                            <h3 className="text-3xl font-cyber font-black text-white/20 mb-4 uppercase tracking-[0.3em]">섹터_데이터_누락</h3>
+                            <h3 className="text-3xl font-cyber font-black text-white/20 mb-4 uppercase tracking-[0.3em]">스크럼_데이터_누락</h3>
                             <p className="text-white/20 max-w-md mx-auto mb-10 font-mono text-sm uppercase">
-                                이 섹터 프로토콜이 초기화되지 않았습니다. <br />
+                                이 스크럼 프로토콜이 초기화되지 않았습니다. <br />
                                 생성 시퀀스를 시작하려면 지휘 본부로 귀환하십시오.
                             </p>
                             <Button onClick={onBack} className="bg-cyber-pink text-white font-cyber font-black text-xs px-10 py-5 shadow-neon-pink border-none skew-x-[-10deg]">
