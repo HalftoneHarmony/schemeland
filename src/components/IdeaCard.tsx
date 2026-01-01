@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ProjectIdea } from '../types';
-import { Trash2, Wand2, Sparkles, AlertCircle, Loader2 } from 'lucide-react';
+import { Trash2, Wand2, Sparkles, AlertCircle, Loader2, Hash, FileText } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { Button } from './Button';
 import { clsx } from 'clsx';
 
@@ -25,128 +26,184 @@ export const IdeaCard: React.FC<IdeaCardProps> = ({
   const isComplete = idea.title && idea.description;
 
   return (
-    <div
+    <motion.div
       className={clsx(
-        "glass-panel border-white/5 p-6 space-y-6 relative group transition-all duration-500 skew-x-[-1deg]",
-        "hover:border-cyber-pink/40 hover:shadow-[0_0_40px_rgba(255,0,255,0.15)]",
-        "hover:-translate-y-1",
-        isFocused && "border-cyber-cyan/30 shadow-[0_0_30px_rgba(0,255,255,0.1)]"
+        "relative group transition-all duration-500 rounded-2xl overflow-hidden",
+        "hover:-translate-y-1"
       )}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      whileHover={{ scale: 1.01 }}
     >
-      {/* Animated background glow */}
+      {/* Card Background */}
       <div className={clsx(
-        "absolute -inset-px bg-gradient-to-r from-cyber-pink/0 via-cyber-pink/10 to-cyber-cyan/0 opacity-0 transition-opacity duration-700 pointer-events-none",
-        isHovered && "opacity-100"
+        "absolute inset-0 rounded-2xl transition-all duration-500",
+        "bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-xl",
+        isFocused ? "border-cyber-cyan/40" : "border-white/10",
+        "border"
       )} />
 
-      <div className="skew-x-[1deg] relative z-10">
-        <div className="flex flex-col md:flex-row justify-between items-start gap-6 mb-6">
+      {/* Hover Glow Effect */}
+      <motion.div
+        className="absolute inset-0 rounded-2xl pointer-events-none"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isHovered ? 1 : 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-br from-cyber-pink/10 via-transparent to-cyber-cyan/5 rounded-2xl" />
+        <div className="absolute inset-0 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] rounded-2xl" />
+      </motion.div>
 
-          {/* Status Badge with animation */}
-          <div className="flex flex-col gap-2">
-            <div className={clsx(
-              "shrink-0 w-14 h-14 border-2 border-white/10 bg-black flex items-center justify-center text-3xl shadow-inner relative transition-all duration-300",
-              isHovered && "border-cyber-cyan scale-110 shadow-neon-cyan"
-            )}>
-              {idea.emoji || '💡'}
-              {isMagicLoading && (
-                <div className="absolute inset-0 bg-cyber-pink/30 flex items-center justify-center backdrop-blur-sm">
-                  <Loader2 size={24} className="text-cyber-pink animate-spin" />
-                </div>
-              )}
-              {/* Success indicator */}
-              {isComplete && !isMagicLoading && (
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-cyber-cyan rounded-full animate-pulse shadow-neon-cyan" />
-              )}
-            </div>
-          </div>
+      {/* Focus Glow */}
+      {isFocused && (
+        <motion.div
+          className="absolute inset-0 rounded-2xl pointer-events-none"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <div className="absolute inset-0 shadow-[0_0_30px_rgba(0,255,255,0.15)] rounded-2xl" />
+        </motion.div>
+      )}
 
-          <div className="flex-1 w-full relative pt-2">
-            <div className={clsx(
-              "text-[10px] font-cyber font-black uppercase tracking-[0.3em] mb-1 transition-colors duration-300",
-              isFocused ? "text-cyber-cyan" : "text-white/20"
-            )}>
-              Entity_Identification::개체_식별
-            </div>
+      <div className="relative z-10 p-6">
+        {/* Top Row: Emoji, Title, Actions */}
+        <div className="flex items-start gap-5 mb-6">
+          {/* Emoji Box */}
+          <motion.div
+            className={clsx(
+              "shrink-0 w-16 h-16 rounded-xl bg-black/40 border flex items-center justify-center text-4xl relative transition-all duration-300",
+              isHovered ? "border-cyber-pink/50 shadow-[0_0_20px_rgba(255,0,255,0.2)]" : "border-white/10"
+            )}
+            whileHover={{ scale: 1.05, rotate: 5 }}
+          >
+            {idea.emoji || '💡'}
+
+            {/* Loading overlay */}
+            {isMagicLoading && (
+              <motion.div
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center rounded-xl"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
+                <Loader2 size={24} className="text-cyber-pink animate-spin" />
+              </motion.div>
+            )}
+
+            {/* Complete indicator */}
+            {isComplete && !isMagicLoading && (
+              <motion.div
+                className="absolute -top-1 -right-1 w-4 h-4 bg-cyber-cyan rounded-full shadow-[0_0_10px_rgba(0,255,255,0.8)] flex items-center justify-center"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 500 }}
+              >
+                <span className="text-[8px] text-black font-bold">✓</span>
+              </motion.div>
+            )}
+          </motion.div>
+
+          {/* Title Input */}
+          <div className="flex-1 min-w-0">
+            <label className="text-[10px] font-medium text-white/30 uppercase tracking-widest mb-2 flex items-center gap-2">
+              <Hash size={10} /> Project Title
+            </label>
             <input
-              className="bg-transparent text-2xl font-cyber font-black text-white placeholder-white/10 w-full border-none focus:ring-0 focus:outline-none py-1 transition-all uppercase tracking-tight hover:text-cyber-pink focus:text-white"
-              placeholder="프로젝트_제목_입력..."
+              className="w-full bg-transparent text-2xl font-bold text-white placeholder-white/20 border-none focus:ring-0 focus:outline-none py-1 transition-all tracking-tight"
+              placeholder="프로젝트 제목을 입력하세요..."
               value={idea.title}
               onChange={(e) => onChange(idea.id, 'title', e.target.value)}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
             />
-            {/* Animated hint when ready for AI */}
-            {idea.title.length > 2 && idea.description.length < 10 && !isMagicLoading && (
-              <div className="absolute right-0 top-1/2 -translate-y-1/2 text-[10px] font-cyber font-black text-cyber-cyan animate-pulse hidden md:flex items-center gap-2 bg-cyber-cyan/5 px-3 py-1 border border-cyber-cyan/30">
-                <Sparkles size={12} className="animate-bounce" /> AI_정제_초기화
-              </div>
-            )}
           </div>
 
+          {/* Action Buttons */}
           <div className={clsx(
-            "flex items-center gap-4 self-end md:self-auto transition-all duration-300",
-            isHovered ? "opacity-100 translate-x-0" : "opacity-60 translate-x-2"
+            "flex items-center gap-2 transition-all duration-300",
+            isHovered ? "opacity-100" : "opacity-0"
           )}>
             {onMagic && (
-              <Button
-                variant="ghost"
-                className={clsx(
-                  "h-10 px-4 text-[10px] font-cyber font-black tracking-widest text-cyber-cyan border-2 border-cyber-cyan/20 hover:bg-cyber-cyan hover:text-black hover:shadow-neon-cyan transition-all uppercase skew-x-[-10deg]",
-                  isMagicLoading && "animate-pulse"
-                )}
-                onClick={() => onMagic(idea.id)}
-                isLoading={isMagicLoading}
-              >
-                <span className="skew-x-[10deg] flex items-center gap-2">
-                  <Wand2 size={14} className={isMagicLoading ? "animate-spin" : "group-hover:rotate-12 transition-transform"} />
-                  {isMagicLoading ? '처리_중' : 'REFINER.EXE'}
-                </span>
-              </Button>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button
+                  variant="ghost"
+                  className={clsx(
+                    "h-10 px-4 rounded-lg text-[11px] font-medium tracking-wide",
+                    "text-cyber-cyan border border-cyber-cyan/30",
+                    "hover:bg-cyber-cyan hover:text-black hover:shadow-[0_0_20px_rgba(0,255,255,0.3)]",
+                    "transition-all"
+                  )}
+                  onClick={() => onMagic(idea.id)}
+                  isLoading={isMagicLoading}
+                >
+                  <span className="flex items-center gap-2">
+                    <Wand2 size={14} className={isMagicLoading ? "animate-spin" : ""} />
+                    {isMagicLoading ? '처리중' : 'AI 정제'}
+                  </span>
+                </Button>
+              </motion.div>
             )}
-            <button
+
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
               onClick={() => onDelete(idea.id)}
-              className="text-white/10 hover:text-red-500 transition-all p-3 border border-white/5 hover:border-red-500/50 hover:bg-red-500/5 hover:scale-110 active:scale-95"
+              className="w-10 h-10 rounded-lg border border-white/10 flex items-center justify-center text-white/20 hover:text-red-500 hover:border-red-500/50 hover:bg-red-500/10 transition-all"
             >
-              <Trash2 size={18} />
-            </button>
+              <Trash2 size={16} />
+            </motion.button>
           </div>
         </div>
 
+        {/* Description Textarea */}
         <div className="relative">
-          <div className={clsx(
-            "absolute top-0 left-0 w-1 h-full transition-all duration-500",
-            isFocused ? "bg-cyber-cyan shadow-neon-cyan" : "bg-white/5"
-          )} />
-          <textarea
-            className="w-full bg-black/40 border-2 border-white/5 p-6 text-sm text-white/60 font-mono placeholder-white/10 resize-none focus:ring-0 focus:border-cyber-pink/30 focus:text-white focus:outline-none h-32 leading-relaxed transition-all pl-8 hover:border-white/10"
-            placeholder="뉴럴 범위 정의: 해결하려는 문제, 프로토콜, 대상 시장 등..."
-            value={idea.description}
-            onChange={(e) => onChange(idea.id, 'description', e.target.value)}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
-          />
-          <div className={clsx(
-            "absolute top-4 left-3 transition-colors duration-300",
-            isFocused ? "text-cyber-cyan" : "text-white/10"
-          )}>
-            <AlertCircle size={14} />
+          <label className="text-[10px] font-medium text-white/30 uppercase tracking-widest mb-2 flex items-center gap-2">
+            <FileText size={10} /> Description
+          </label>
+          <div className="relative">
+            <textarea
+              className={clsx(
+                "w-full bg-black/30 rounded-xl border p-4 text-sm text-white/70 placeholder-white/20 resize-none",
+                "focus:ring-0 focus:outline-none focus:text-white h-28 leading-relaxed transition-all",
+                isFocused ? "border-cyber-cyan/30" : "border-white/5 hover:border-white/10"
+              )}
+              placeholder="프로젝트에 대한 설명, 해결하려는 문제, 대상 시장 등을 입력하세요..."
+              value={idea.description}
+              onChange={(e) => onChange(idea.id, 'description', e.target.value)}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
+            />
+
+            {/* AI hint */}
+            {idea.title.length > 2 && idea.description.length < 10 && !isMagicLoading && (
+              <motion.div
+                className="absolute right-3 top-3 flex items-center gap-2 text-[10px] font-medium text-cyber-cyan bg-cyber-cyan/10 px-3 py-1.5 rounded-full border border-cyber-cyan/30"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+              >
+                <Sparkles size={12} className="animate-pulse" /> AI로 자동 완성
+              </motion.div>
+            )}
           </div>
         </div>
 
-        <div className="mt-4 flex justify-between items-center text-[8px] font-cyber font-black text-white/10 uppercase tracking-widest">
-          <span className="flex items-center gap-2">
-            <span className={clsx(
-              "w-2 h-2 rounded-full transition-all duration-300",
-              isComplete ? "bg-cyber-cyan animate-pulse" : "bg-white/20"
-            )} />
-            DATA_STATUS: {isComplete ? 'STABLE::안정' : 'INCOMPLETE::불완전'}
+        {/* Footer Status */}
+        <div className="mt-4 flex justify-between items-center">
+          <div className="flex items-center gap-2 text-[10px] font-medium text-white/20">
+            <motion.div
+              className={clsx(
+                "w-2 h-2 rounded-full transition-all",
+                isComplete ? "bg-cyber-cyan shadow-[0_0_8px_rgba(0,255,255,0.8)]" : "bg-white/20"
+              )}
+              animate={isComplete ? { scale: [1, 1.2, 1] } : {}}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+            <span>{isComplete ? 'Ready for Analysis' : 'Incomplete'}</span>
+          </div>
+          <span className="text-[9px] font-mono text-white/10 uppercase tracking-wider">
+            ID: {idea.id.substring(0, 8)}
           </span>
-          <span className="opacity-50 hover:opacity-100 transition-opacity">CID: {idea.id.substring(0, 8)}</span>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
