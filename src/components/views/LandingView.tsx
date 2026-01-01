@@ -1,12 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { BrainCircuit, ChevronRight, Sparkles, Scroll, Trophy, Zap, Terminal, Activity, Cpu } from 'lucide-react';
+import { BrainCircuit, ChevronRight, Sparkles, Scroll, Trophy, Zap, Terminal, Activity, Cpu, Play, Clock, ArrowRight } from 'lucide-react';
 import { motion, useScroll, useTransform, useSpring, useMotionValue } from 'framer-motion';
 import { Button } from '../Button';
+export interface RecentProjectSummary {
+    id: string;
+    title: string;
+    emoji?: string;
+    vision: string;
+    updatedAt: string;
+}
 
 interface LandingViewProps {
     onStart: () => void;
     onLoadSave: () => void;
     hasProjects: boolean;
+    recentProject?: RecentProjectSummary | null;
+    onResume?: (projectId: string) => void;
 }
 
 const containerVariants = {
@@ -133,12 +142,14 @@ const NeuralBackground = () => {
     );
 };
 
-export function LandingView({ onStart, onLoadSave, hasProjects }: LandingViewProps) {
+export function LandingView({ onStart, onLoadSave, hasProjects, recentProject, onResume }: LandingViewProps) {
     const { scrollY } = useScroll();
     const y1 = useTransform(scrollY, [0, 500], [0, 200]);
     const y2 = useTransform(scrollY, [0, 500], [0, -150]);
-    const heroOpacity = useTransform(scrollY, [0, 400], [1, 0]);
-    const heroScale = useTransform(scrollY, [0, 400], [1, 0.95]);
+
+    // Adjusted scroll animation: Starts fading out much later to prevent premature disappearance
+    const heroOpacity = useTransform(scrollY, [200, 600], [1, 0]);
+    const heroScale = useTransform(scrollY, [200, 600], [1, 0.95]);
 
     return (
         <div className="flex flex-col items-center min-h-[160vh] text-center px-4 relative overflow-hidden pb-40 bg-black font-sans">
@@ -172,8 +183,48 @@ export function LandingView({ onStart, onLoadSave, hasProjects }: LandingViewPro
                 initial="hidden"
                 animate="visible"
                 style={{ opacity: heroOpacity, scale: heroScale }}
-                className="mt-32 md:mt-56 max-w-6xl mx-auto z-10"
+                className="mt-24 md:mt-40 max-w-6xl mx-auto z-10 w-full"
             >
+                {/* Active Mission Card (Returning User Feature) */}
+                {recentProject && onResume && (
+                    <motion.div
+                        variants={itemVariants}
+                        className="mb-12 flex justify-center w-full"
+                    >
+                        <motion.button
+                            onClick={() => onResume(recentProject.id)}
+                            whileHover={{ scale: 1.02, y: -5 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="relative group w-full max-w-2xl"
+                        >
+                            <div className="absolute -inset-1 bg-gradient-to-r from-cyber-cyan via-white to-cyber-pink rounded-2xl opacity-50 group-hover:opacity-100 blur-md transition-opacity duration-300" />
+                            <div className="relative bg-black/80 backdrop-blur-xl border border-white/20 rounded-xl p-6 flex flex-col md:flex-row items-center justify-between gap-6 skew-x-[-2deg] overflow-hidden">
+                                {/* Progress Bar Background */}
+                                <div className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-cyber-cyan via-white to-cyber-pink w-[65%]" />
+
+                                <div className="flex items-center gap-6 skew-x-[2deg]">
+                                    <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 flex items-center justify-center text-4xl shadow-inner">
+                                        {recentProject.emoji || '🚀'}
+                                    </div>
+                                    <div className="text-left">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <span className="text-[10px] font-cyber font-black text-cyber-cyan uppercase tracking-widest animate-pulse">Running_Process::활성_세션</span>
+                                            <span className="text-[10px] text-white/40 font-mono">{recentProject.updatedAt.split('T')[0]}</span>
+                                        </div>
+                                        <h3 className="text-xl font-bold text-white mb-1 line-clamp-1">{recentProject.title}</h3>
+                                        <p className="text-xs text-white/50 line-clamp-1">{recentProject.vision}</p>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-3 skew-x-[2deg] bg-white/5 px-4 py-2 rounded-lg border border-white/10 group-hover:bg-cyber-cyan group-hover:text-black transition-colors">
+                                    <span className="text-xs font-cyber font-black tracking-widest uppercase">Resume Mission</span>
+                                    <ArrowRight size={16} />
+                                </div>
+                            </div>
+                        </motion.button>
+                    </motion.div>
+                )}
+
                 <motion.div
                     variants={itemVariants}
                     className="inline-flex items-center gap-3 px-6 py-2 bg-black border border-cyber-pink/30 text-[10px] font-cyber font-black text-cyber-pink mb-12 tracking-[0.4em] uppercase skew-x-[-15deg] shadow-neon-pink"
@@ -185,12 +236,12 @@ export function LandingView({ onStart, onLoadSave, hasProjects }: LandingViewPro
 
                 <motion.div
                     variants={itemVariants}
-                    className="relative group mb-12 px-10"
+                    className="relative group mb-12 px-4 md:px-10"
                 >
                     <div className="absolute -inset-20 bg-cyber-pink/10 blur-[120px] opacity-0 group-hover:opacity-40 transition-opacity duration-1000" />
-                    <h1 className="text-8xl md:text-[11rem] font-cyber font-black tracking-tighter text-white leading-[0.8] uppercase italic relative">
-                        <span className="block mb-2 text-white/90 drop-shadow-sm pr-10">SCHEME</span>
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyber-cyan via-white to-cyber-pink relative inline-block drop-shadow-[0_0_40px_rgba(0,255,255,0.2)] pr-12">
+                    <h1 className="text-6xl md:text-9xl lg:text-[11rem] font-cyber font-black tracking-tighter text-white leading-[0.9] uppercase italic relative">
+                        <span className="block mb-2 text-white/90 drop-shadow-sm pr-4 md:pr-10">SCHEME</span>
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyber-cyan via-white to-cyber-pink relative inline-block drop-shadow-[0_0_40px_rgba(0,255,255,0.2)] pr-4 md:pr-12">
                             LAND
                         </span>
                     </h1>
@@ -210,7 +261,7 @@ export function LandingView({ onStart, onLoadSave, hasProjects }: LandingViewPro
 
                     <div className="relative">
                         <div className="absolute -left-6 top-0 bottom-0 w-1 bg-gradient-to-b from-cyber-cyan to-transparent opacity-50" />
-                        <p className="text-xl md:text-2xl text-white/60 max-w-3xl mx-auto leading-loose font-mono uppercase tracking-[0.2em] relative pl-6">
+                        <p className="text-lg md:text-xl lg:text-2xl text-white/60 max-w-3xl mx-auto leading-loose font-mono uppercase tracking-[0.2em] relative pl-6">
                             뉴럴 개념과 실질적인 배포 사이의 간극을 해소합니다.
                         </p>
                     </div>
@@ -218,9 +269,9 @@ export function LandingView({ onStart, onLoadSave, hasProjects }: LandingViewPro
 
                 <motion.div
                     variants={itemVariants}
-                    className="flex flex-col sm:flex-row gap-10 justify-center items-center"
+                    className="flex flex-col sm:flex-row gap-8 justify-center items-center px-4"
                 >
-                    <div className="relative group">
+                    <div className="relative group w-full sm:w-auto">
                         {/* Animated Gradient Border Layer */}
                         <motion.div
                             animate={{
@@ -235,13 +286,13 @@ export function LandingView({ onStart, onLoadSave, hasProjects }: LandingViewPro
                         <Button
                             size="lg"
                             onClick={onStart}
-                            className="h-28 px-20 text-4xl bg-gradient-to-r from-cyber-pink via-cyber-pink/90 to-cyber-cyan border-none relative overflow-hidden group/btn hover:scale-105 transition-all duration-500 shadow-[0_0_50px_rgba(255,0,255,0.4)]"
+                            className="w-full sm:w-auto h-24 sm:h-28 px-8 sm:px-12 md:px-20 text-2xl sm:text-3xl md:text-4xl bg-gradient-to-r from-cyber-pink via-cyber-pink/90 to-cyber-cyan border-none relative overflow-hidden group/btn hover:scale-105 transition-all duration-500 shadow-[0_0_50px_rgba(255,0,255,0.4)]"
                         >
                             {/* Inner Gloss Layer */}
                             <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.3)_50%,transparent_75%)] bg-[length:200%_200%] animate-shimmer opacity-0 group-hover/btn:opacity-100 transition-opacity" />
 
-                            <Zap className="mr-8 group-hover/btn:rotate-12 transition-transform text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]" fill="white" size={42} />
-                            <span className="relative z-10 font-cyber font-black tracking-widest text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.9)] group-hover/btn:scale-110 transition-transform duration-300">
+                            <Zap className="mr-4 sm:mr-8 group-hover/btn:rotate-12 transition-transform text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.8)] shrink-0" fill="white" size={32} />
+                            <span className="relative z-10 font-cyber font-black tracking-widest text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.9)] group-hover/btn:scale-110 transition-transform duration-300 whitespace-nowrap">
                                 새로운 프로젝트 추가
                             </span>
 
@@ -255,17 +306,17 @@ export function LandingView({ onStart, onLoadSave, hasProjects }: LandingViewPro
                     </div>
 
                     {hasProjects && (
-                        <div className="relative group">
+                        <div className="relative group w-full sm:w-auto">
                             <div className="absolute -inset-2 bg-cyber-cyan/20 blur-[20px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 skew-x-[-10deg]" />
                             <Button
                                 variant="secondary"
                                 size="lg"
                                 onClick={onLoadSave}
-                                className="h-28 px-20 text-4xl bg-black/60 backdrop-blur-3xl border-[3px] border-cyber-cyan/50 hover:border-cyber-cyan transition-all duration-500 hover:scale-105 overflow-hidden group/btn"
+                                className="w-full sm:w-auto h-24 sm:h-28 px-8 sm:px-12 md:px-20 text-2xl sm:text-3xl md:text-4xl bg-black/60 backdrop-blur-3xl border-[3px] border-cyber-cyan/50 hover:border-cyber-cyan transition-all duration-500 hover:scale-105 overflow-hidden group/btn"
                             >
                                 <div className="absolute inset-0 bg-cyber-cyan/10 group-hover/btn:bg-cyber-cyan/20 transition-colors" />
-                                <Terminal className="mr-8 group-hover/btn:text-cyber-cyan group-hover/btn:scale-110 transition-all drop-shadow-[0_0_15px_rgba(0,255,255,0.6)]" size={42} />
-                                <span className="font-cyber font-black tracking-widest text-cyber-cyan group-hover/btn:text-white drop-shadow-[0_0_15px_rgba(0,255,255,0.8)] transition-colors">
+                                <Terminal className="mr-4 sm:mr-8 group-hover/btn:text-cyber-cyan group-hover/btn:scale-110 transition-all drop-shadow-[0_0_15px_rgba(0,255,255,0.6)] shrink-0" size={32} />
+                                <span className="font-cyber font-black tracking-widest text-cyber-cyan group-hover/btn:text-white drop-shadow-[0_0_15px_rgba(0,255,255,0.8)] transition-colors whitespace-nowrap">
                                     저장_데이터_로드
                                 </span>
 

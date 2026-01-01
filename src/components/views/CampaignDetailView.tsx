@@ -3,7 +3,7 @@ import { ProjectScheme, MonthlyGoal, Priority, TaskStatus } from '../../types';
 import { Button } from '../Button';
 import {
     ArrowLeft, Map, Calendar, Flag, Zap, Plus, Shield, Activity, Terminal, Trash2, Edit3,
-    Circle, Loader2, AlertCircle, CheckCircle2, ChevronRight
+    Circle, Loader2, AlertCircle, CheckCircle2, ChevronRight, ChevronLeft
 } from 'lucide-react';
 
 interface CampaignDetailViewProps {
@@ -11,12 +11,13 @@ interface CampaignDetailViewProps {
     selectedMonthIndex: number;
     onBack: () => void;
     toggleTask: (weekIndex: number, taskId: string) => void;
-    addTask: (weekIndex: number) => void;
+    addTask: (weekIndex: number, text?: string) => void;
     deleteTask: (weekIndex: number, taskId: string) => void;
     updateTaskText: (weekIndex: number, taskId: string, text: string) => void;
     updateWeekTheme: (weekIndex: number, theme: string) => void;
     updateTaskStatus?: (weekIndex: number, taskId: string, status: TaskStatus) => void;
     moveTask?: (taskId: string, sourceWeekIndex: number, targetWeekIndex: number) => void;
+    onSelectMonth: (index: number) => void;
 }
 
 // 상태별 설정
@@ -64,7 +65,7 @@ const statusConfig: Record<TaskStatus, {
 
 export function CampaignDetailView({
     activeProject, selectedMonthIndex, onBack,
-    toggleTask, addTask, deleteTask, updateTaskText, updateWeekTheme, updateTaskStatus, moveTask
+    toggleTask, addTask, deleteTask, updateTaskText, updateWeekTheme, updateTaskStatus, moveTask, onSelectMonth
 }: CampaignDetailViewProps) {
     const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
     const [editingWeekIndex, setEditingWeekIndex] = useState<number | null>(null);
@@ -131,6 +132,12 @@ export function CampaignDetailView({
         }
         setShowStatusMenu(null);
     };
+
+    // Calculate unassigned goals
+    const allTasks = weeks.flatMap(w => w.tasks);
+    const unassignedGoals = monthPlan.goals.filter(goal =>
+        !allTasks.some(t => t.text.trim() === goal.trim())
+    );
 
     return (
         <div className="min-h-screen relative overflow-hidden bg-black">
@@ -199,17 +206,35 @@ export function CampaignDetailView({
                         </div>
                     </div>
 
-                    <div className="inline-block mb-6 skew-x-[-10deg]">
-                        <span className="bg-cyber-pink text-white font-cyber font-black text-[10px] px-6 py-2 uppercase tracking-[0.4em] shadow-neon-pink">
-                            Sector_0{monthPlan.month}_Protocol::섹터_{monthPlan.month}_프로토콜
-                        </span>
+                    <div className="flex items-center justify-center gap-6 mb-6">
+                        <button
+                            onClick={() => selectedMonthIndex > 0 && onSelectMonth(selectedMonthIndex - 1)}
+                            disabled={selectedMonthIndex <= 0}
+                            className={`p-2 transition-all duration-300 ${selectedMonthIndex <= 0 ? 'opacity-20 cursor-not-allowed text-white' : 'text-white hover:text-cyber-cyan hover:scale-125 hover:shadow-neon-cyan bg-black border border-white/10'}`}
+                        >
+                            <ChevronLeft size={24} />
+                        </button>
+
+                        <div className="inline-block skew-x-[-10deg]">
+                            <span className="bg-cyber-pink text-white font-cyber font-black text-[10px] px-6 py-2 uppercase tracking-[0.4em] shadow-neon-pink">
+                                Sector_0{monthPlan.month}_Protocol::섹터_{monthPlan.month}_프로토콜
+                            </span>
+                        </div>
+
+                        <button
+                            onClick={() => selectedMonthIndex < activeProject.monthlyPlan.length - 1 && onSelectMonth(selectedMonthIndex + 1)}
+                            disabled={selectedMonthIndex >= activeProject.monthlyPlan.length - 1}
+                            className={`p-2 transition-all duration-300 ${selectedMonthIndex >= activeProject.monthlyPlan.length - 1 ? 'opacity-20 cursor-not-allowed text-white' : 'text-white hover:text-cyber-cyan hover:scale-125 hover:shadow-neon-cyan bg-black border border-white/10'}`}
+                        >
+                            <ChevronRight size={24} />
+                        </button>
                     </div>
 
-                    <div className="relative inline-block">
-                        <h1 className="text-8xl font-cyber font-black text-white mb-6 tracking-tighter uppercase italic scale-y-110 drop-shadow-[0_0_30px_rgba(0,255,255,0.2)]">
+                    <div className="relative inline-block max-w-full px-4">
+                        <h1 className="text-4xl md:text-6xl font-cyber font-black text-white mb-6 tracking-tighter uppercase italic scale-y-110 drop-shadow-[0_0_30px_rgba(0,255,255,0.2)] whitespace-normal break-words leading-[0.85] max-w-full">
                             {monthPlan.theme}
                         </h1>
-                        <div className="absolute -right-12 top-0 animate-bounce">
+                        <div className="absolute -right-4 -top-2 animate-bounce">
                             <Zap className="text-cyber-yellow" fill="currentColor" size={32} style={{ filter: 'drop-shadow(0 0 10px #fce70a)' }} />
                         </div>
                     </div>
@@ -276,6 +301,40 @@ export function CampaignDetailView({
                     </div>
                 </div>
 
+
+
+                {/* Objective Staging Area */}
+                {hasPlan && unassignedGoals.length > 0 && (
+                    <div className="mb-12 max-w-7xl mx-auto">
+                        <div className="flex items-center gap-4 mb-4">
+                            <div className="w-1.5 h-1.5 bg-cyber-pink animate-pulse shadow-neon-pink rounded-full" />
+                            <h3 className="text-[10px] font-cyber font-black text-cyber-pink uppercase tracking-[0.2em]">OBJECTIVE_STAGING_AREA::목표_할당_대기열</h3>
+                            <div className="h-px flex-1 bg-gradient-to-r from-cyber-pink/50 to-transparent" />
+                        </div>
+                        <div className="flex flex-wrap gap-4 p-6 border-2 border-dashed border-white/10 bg-white/[0.02] rounded-lg">
+                            {unassignedGoals.map((goal, idx) => (
+                                <div
+                                    key={idx}
+                                    draggable
+                                    onDragStart={(e) => {
+                                        e.dataTransfer.setData('type', 'goal');
+                                        e.dataTransfer.setData('text', goal);
+                                        e.dataTransfer.effectAllowed = 'copy';
+                                    }}
+                                    className="group flex items-center gap-3 px-4 py-3 bg-black border border-white/20 hover:border-cyber-pink hover:bg-cyber-pink/10 hover:shadow-neon-pink transition-all w-fit cursor-grab active:cursor-grabbing skew-x-[-10deg]"
+                                >
+                                    <div className="w-1.5 h-1.5 bg-white/20 group-hover:bg-cyber-pink rotate-45 skew-x-[10deg] transition-colors" />
+                                    <span className="text-xs font-mono text-white/80 group-hover:text-white skew-x-[10deg]">{goal}</span>
+                                </div>
+                            ))}
+                        </div>
+                        <p className="mt-2 text-[10px] text-white/30 font-mono flex items-center gap-2">
+                            <Terminal size={10} />
+                            DRAG_TO_SECTOR::섹터로_드래그하여_할당하십시오
+                        </p>
+                    </div>
+                )}
+
                 {/* Weekly Tactical Columns */}
                 {hasPlan ? (
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -301,6 +360,15 @@ export function CampaignDetailView({
                                     onDrop={(e) => {
                                         e.preventDefault();
                                         setDragOverWeekIndex(null);
+                                        setDragOverWeekIndex(null);
+
+                                        const type = e.dataTransfer.getData('type');
+                                        if (type === 'goal') {
+                                            const text = e.dataTransfer.getData('text');
+                                            if (text) addTask(idx, text);
+                                            return;
+                                        }
+
                                         const taskId = e.dataTransfer.getData('taskId');
                                         const sourceWeekIndex = parseInt(e.dataTransfer.getData('sourceWeekIndex'), 10);
 
@@ -403,23 +471,29 @@ export function CampaignDetailView({
                                                                     {config.labelKo}
                                                                 </div>
 
-                                                                <div className="pl-2 flex justify-between items-center group/task">
+                                                                <div className="pl-2 flex justify-between items-start group/task mt-3">
                                                                     {editingTaskId === task.id ? (
-                                                                        <input
-                                                                            className="bg-black/50 border-b border-cyber-cyan w-full text-white focus:outline-none"
+                                                                        <textarea
+                                                                            className="bg-black/50 border-b border-cyber-cyan w-full text-white focus:outline-none resize-none"
                                                                             value={task.text}
                                                                             autoFocus
                                                                             onClick={(e) => e.stopPropagation()}
                                                                             onBlur={() => setEditingTaskId(null)}
                                                                             onChange={(e) => updateTaskText(idx, task.id, e.target.value)}
-                                                                            onKeyDown={(e) => e.key === 'Enter' && setEditingTaskId(null)}
+                                                                            onKeyDown={(e) => {
+                                                                                if (e.key === 'Enter' && !e.shiftKey) {
+                                                                                    e.preventDefault();
+                                                                                    setEditingTaskId(null);
+                                                                                }
+                                                                            }}
+                                                                            rows={2}
                                                                         />
                                                                     ) : (
                                                                         <>
-                                                                            <div className={`flex items-center pr-16 ${taskStatus === TaskStatus.DONE ? 'line-through text-white/40' : 'text-white/80'}`}>
+                                                                            <div className={`flex-1 min-w-0 break-words pr-2 ${taskStatus === TaskStatus.DONE ? 'line-through text-white/40' : 'text-white/80'}`}>
                                                                                 {task.text}
                                                                             </div>
-                                                                            <div className="flex items-center gap-1 opacity-0 group-hover/task:opacity-100 transition-all">
+                                                                            <div className="flex items-center gap-1 opacity-0 group-hover/task:opacity-100 transition-all shrink-0 ml-1">
                                                                                 <button
                                                                                     onClick={(e) => { e.stopPropagation(); setEditingTaskId(task.id); }}
                                                                                     className="p-1 hover:text-cyber-cyan transition-all"
@@ -502,6 +576,6 @@ export function CampaignDetailView({
                     </div>
                 )}
             </div>
-        </div>
+        </div >
     );
 }

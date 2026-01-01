@@ -246,7 +246,7 @@ export const generateFullPlan = async (idea: ProjectIdea, context: string): Prom
     이 프로젝트의 장기적인 성공을 위해 연간(Yearly), 월간(Monthly), 주간(Weekly) 목표를 수립해주세요.
     
     **1. 연간 목표 (Yearly Plan)**:
-    - 1년 후의 모습을 상상하는 R=VD 비전.
+    - 1년 후의 모습을 상상하는 R=VD (생생하게 꿈꾸면 이루어진다) 기법을 사용하여, 마치 이미 성공한 시점에서 되돌아보듯이 생생하고 감각적인 비전 문장(Core Directive) 작성.
     - 1년 안에 달성할 3가지 핵심 목표 (Key Results).
 
     **2. 월간 로드맵 (Monthly Plan - 6개월치)**:

@@ -51,6 +51,7 @@ interface DashboardViewProps {
     handleRefineVision: () => void;
     handleMonthClick: (index: number) => void;
     handleUpdateMonthGoal: (text: string) => void;
+    handleUpdateMonthObjectives: (goals: string[]) => void;
     triggerSmartAdjustment: () => void;
     handleExtendRoadmap: () => void;
 
@@ -80,6 +81,14 @@ const sectionVariants = {
 
 export function DashboardView(props: DashboardViewProps) {
     if (!props.activeProject) return null;
+
+    const [compressingId, setCompressingId] = React.useState<number | null>(null);
+
+    React.useEffect(() => {
+        if (!props.isCompressing) {
+            setCompressingId(null);
+        }
+    }, [props.isCompressing]);
 
     const { activeProject } = props;
     const isPreviewMode = props.previewOptions !== null;
@@ -223,6 +232,7 @@ export function DashboardView(props: DashboardViewProps) {
                             handleMonthClick={props.handleMonthClick}
                             handleExtendRoadmap={props.handleExtendRoadmap}
                             handleUpdateMonthGoal={props.handleUpdateMonthGoal}
+                            handleUpdateMonthObjectives={props.handleUpdateMonthObjectives}
                             triggerSmartAdjustment={props.triggerSmartAdjustment}
                             onOpenCampaignDetail={props.onOpenCampaignDetail}
                         />
@@ -261,18 +271,42 @@ export function DashboardView(props: DashboardViewProps) {
                                     </p>
 
                                     <div className="grid grid-cols-3 gap-6 mb-10">
-                                        {[2, 3, 4].map(months => (
-                                            <motion.button
-                                                key={months}
-                                                whileHover={{ scale: 1.05, backgroundColor: "rgba(239,68,68,0.1)" }}
-                                                whileTap={{ scale: 0.95 }}
-                                                onClick={() => props.onCompressRoadmap(months)}
-                                                className="group p-6 border-2 border-white/5 bg-black hover:border-red-500 transition-all flex flex-col items-center gap-2"
-                                            >
-                                                <span className="text-4xl font-cyber font-black text-white group-hover:text-red-500 transition-colors">{months}</span>
-                                                <span className="text-[10px] font-cyber font-black text-white/20 uppercase tracking-widest">개월</span>
-                                            </motion.button>
-                                        ))}
+                                        {[2, 3, 4].map(months => {
+                                            const isSelected = compressingId === months;
+                                            return (
+                                                <motion.button
+                                                    key={months}
+                                                    whileHover={!props.isCompressing ? { scale: 1.05, backgroundColor: "rgba(239,68,68,0.1)" } : {}}
+                                                    whileTap={!props.isCompressing ? { scale: 0.9 } : {}}
+                                                    animate={isSelected ? {
+                                                        scale: 0.98,
+                                                        backgroundColor: "rgba(239,68,68,1)",
+                                                        borderColor: "rgba(239,68,68,1)"
+                                                    } : {
+                                                        opacity: props.isCompressing ? 0.3 : 1
+                                                    }}
+                                                    onClick={() => {
+                                                        if (props.isCompressing) return;
+                                                        setCompressingId(months);
+                                                        props.onCompressRoadmap(months);
+                                                    }}
+                                                    disabled={props.isCompressing}
+                                                    className={`group p-6 border-2 border-white/5 bg-black hover:border-red-500 transition-all flex flex-col items-center gap-2 ${isSelected ? 'border-red-500 shadow-[0_0_20px_rgba(239,68,68,0.5)]' : ''}`}
+                                                >
+                                                    {isSelected ? (
+                                                        <div className="flex flex-col items-center gap-2 py-2">
+                                                            <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                                            <span className="text-[10px] font-cyber font-black text-white uppercase tracking-widest animate-pulse">COMPRESSING...</span>
+                                                        </div>
+                                                    ) : (
+                                                        <>
+                                                            <span className="text-4xl font-cyber font-black text-white group-hover:text-red-500 transition-colors">{months}</span>
+                                                            <span className="text-[10px] font-cyber font-black text-white/20 uppercase tracking-widest">개월</span>
+                                                        </>
+                                                    )}
+                                                </motion.button>
+                                            );
+                                        })}
                                     </div>
                                     <button
                                         onClick={() => props.setCompressModalOpen(false)}

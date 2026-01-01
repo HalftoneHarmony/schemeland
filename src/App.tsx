@@ -55,7 +55,7 @@ export default function App() {
         store.updateTask(taskId, { text });
     };
 
-    const handleAddTask = (weekIndex: number) => {
+    const handleAddTask = (weekIndex: number, text?: string) => {
         const activeMonth = store.getActiveMonthPlan();
         if (!activeMonth) return;
 
@@ -63,7 +63,7 @@ export default function App() {
         if (!month || !month.weekIds[weekIndex]) return;
 
         const weekId = month.weekIds[weekIndex];
-        store.addTask(weekId);
+        store.addTask(weekId, text);
     };
 
     const handleDeleteTask = (taskId: string) => {
@@ -236,6 +236,39 @@ export default function App() {
                             onStart={() => handleNavigate(AppView.BRAIN_DUMP)}
                             onLoadSave={() => handleNavigate(AppView.PROJECT_LIST)}
                             hasProjects={projectFeature.projects.length > 0}
+                            recentProject={(() => {
+                                const projectList = projectFeature.projects;
+                                if (projectList.length === 0) return null;
+
+                                let targetProject = null;
+
+                                // 1. Try active project
+                                if (activeProjectId && store.projects[activeProjectId]) {
+                                    targetProject = store.projects[activeProjectId];
+                                } else {
+                                    // 2. Try most recently updated
+                                    // Use Array.from to avoid mutating if it's read-only, though slice or spread is fine
+                                    targetProject = [...projectList].sort((a, b) =>
+                                        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+                                    )[0];
+                                }
+
+                                if (!targetProject) return null;
+
+                                // Denormalize data for LandingView
+                                const idea = store.ideas[targetProject.ideaId];
+                                return {
+                                    id: targetProject.id,
+                                    title: idea ? idea.title : 'Unknown Project',
+                                    emoji: idea?.emoji,
+                                    vision: targetProject.yearlyPlan.vision,
+                                    updatedAt: targetProject.updatedAt
+                                };
+                            })()}
+                            onResume={(projectId) => {
+                                projectFeature.handleSelectProject(projectId);
+                                handleNavigate(AppView.DASHBOARD);
+                            }}
                         />
                     )}
 
@@ -339,6 +372,7 @@ export default function App() {
                             handleRefineVision={projectFeature.handleRefineVision}
                             onAbandonQuest={projectFeature.handleAbandonQuest}
                             handleUpdateMonthGoal={projectFeature.handleUpdateMonthGoal}
+                            handleUpdateMonthObjectives={projectFeature.handleUpdateMonthObjectives}
 
                             onOpenCampaignDetail={() => handleNavigate(AppView.CAMPAIGN_DETAIL)}
                         />
@@ -357,6 +391,7 @@ export default function App() {
                             updateWeekTheme={handleUpdateWeekTheme}
                             updateTaskStatus={handleUpdateTaskStatusWrapper}
                             moveTask={handleMoveTask}
+                            onSelectMonth={projectFeature.handleMonthClick}
                         />
                     )}
 

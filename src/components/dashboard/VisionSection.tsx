@@ -144,33 +144,7 @@ export function VisionSection({
             initial="hidden"
             animate="visible"
         >
-            {/* Animated Header */}
-            <motion.div
-                className="flex justify-between items-center mb-8 px-4"
-                variants={cardVariants}
-            >
-                <motion.h2
-                    className="text-3xl font-cyber font-black text-white flex items-center gap-4 uppercase tracking-[0.1em]"
-                    whileHover={{ x: 5 }}
-                    transition={{ type: "spring", stiffness: 300 }}
-                >
-                    <motion.div
-                        animate={{ rotate: [0, 10, -10, 0] }}
-                        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                    >
-                        <Target className="text-white/20" />
-                    </motion.div>
-                    <span className="relative">
-                        STRATEGIC_VISION::전략적_비전
-                        <motion.span
-                            className="absolute -bottom-1 left-0 h-[2px] bg-gradient-to-r from-cyber-cyan via-cyber-pink to-cyber-yellow"
-                            initial={{ width: 0 }}
-                            animate={{ width: "100%" }}
-                            transition={{ duration: 1, delay: 0.5 }}
-                        />
-                    </span>
-                </motion.h2>
-            </motion.div>
+
 
             <div className="relative max-w-5xl mx-auto px-16">
                 {/* Navigation Buttons with enhanced animations */}
@@ -338,7 +312,7 @@ export function VisionSection({
                                                 transition={{ duration: 0.3 }}
                                             >
                                                 <VisionTextarea
-                                                    label={`${activeYearIndex + 1}년차_핵심_지침 (Core Directive)`}
+                                                    label={`${activeYearIndex + 1}년_후의_나는 (R=VD)`}
                                                     value={getYearValue(activeYearIndex === 0 ? visionDraft.year1 : activeYearIndex === 1 ? visionDraft.year2 : visionDraft.year3).vision}
                                                     onChange={(e) => {
                                                         const key = activeYearIndex === 0 ? 'year1' : activeYearIndex === 1 ? 'year2' : 'year3';
@@ -401,7 +375,7 @@ export function VisionSection({
                                                             >
                                                                 <Activity size={14} />
                                                             </motion.span>
-                                                            Core_Directive::핵심_지침
+                                                            Future_Self::{activeYearIndex + 1}년_후의_나는
                                                         </motion.div>
                                                         <motion.h3
                                                             initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}

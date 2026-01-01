@@ -217,6 +217,12 @@ export function useProjectHandlers() {
         store.updateMonthTheme(activeMonth.id, newText);
     }, [store]);
 
+    const handleUpdateMonthObjectives = useCallback((goals: string[]) => {
+        const activeMonth = store.getActiveMonthPlan();
+        if (!activeMonth) return;
+        store.updateMonthGoals(activeMonth.id, goals);
+    }, [store]);
+
     // 스마트 조정 (Smart Adjustment)
     const triggerSmartAdjustment = useCallback(() => {
         setAdjustmentModalOpen(true);
@@ -308,8 +314,13 @@ export function useProjectHandlers() {
     const handleGeneratePlanOptions = useCallback(async (monthIndex: number) => {
         if (!activeProject) return;
         // monthIndex로 month 찾기
-        const monthId = activeProject.monthIds[monthIndex]; // activeProject는 normalized 일수도, denormalized일수도.
-        // 위 activeProject는 Denormalized임.
+        const normalizedProject = store.projects[activeProject.id];
+        const monthId = normalizedProject?.monthIds[monthIndex];
+
+        if (!monthId) {
+            alert("월 정보를 찾을 수 없습니다.");
+            return;
+        }
         const targetMonth = activeProject.monthlyPlan[monthIndex];
 
         setIsGeneratingMonthDetail(true);
@@ -388,11 +399,72 @@ export function useProjectHandlers() {
     }, [activeProject, store]);
 
     // 로드맵 압축
+    // 로드맵 압축
     const handleCompressRoadmap = useCallback(async (targetMonths: number) => {
-        // 구현 복잡도 높음, 생략 또는 alert
-        alert("로드맵 압축 기능은 준비 중입니다.");
-        setCompressModalOpen(false);
-    }, []);
+        if (!activeProject) return;
+
+        setIsCompressing(true);
+        try {
+            const compressedPlan = await compressRoadmap(
+                activeProject.selectedIdea,
+                activeProject.monthlyPlan,
+                targetMonths
+            );
+
+            // 기존 데이터 정리
+            const normalizedProject = store.projects[activeProject.id];
+            if (normalizedProject && normalizedProject.monthIds) {
+                normalizedProject.monthIds.forEach(monthId => {
+                    const month = store.months[monthId];
+                    if (month) {
+                        month.weekIds.forEach(weekId => store.deleteWeek(weekId));
+                        store.deleteMonth(monthId);
+                    }
+                });
+            }
+
+            // 새 데이터 주입
+            const newMonthIds: string[] = [];
+            const now = new Date().toISOString();
+
+            compressedPlan.forEach(m => {
+                const monthId = crypto.randomUUID();
+                newMonthIds.push(monthId);
+
+                store.addMonth({
+                    id: monthId,
+                    month: m.month,
+                    theme: m.theme,
+                    goals: m.goals,
+                    weekIds: [],
+                    projectId: activeProject.id,
+                    createdAt: now,
+                    updatedAt: now
+                });
+
+                store.initializeMonthWeeks(monthId);
+            });
+
+            // 프로젝트 업데이트
+            store.updateProject(activeProject.id, {
+                monthIds: newMonthIds,
+                settings: {
+                    isHardcoreMode: true,
+                    notificationsEnabled: store.projects[activeProject.id]?.settings?.notificationsEnabled ?? false,
+                }
+            });
+
+            setCompressModalOpen(false);
+            alert(`${targetMonths}개월 하드코어 모드로 전환되었습니다!`);
+            store.setSelectedMonthIndex(0);
+
+        } catch (e) {
+            console.error(e);
+            alert("로드맵 압축에 실패했습니다.");
+        } finally {
+            setIsCompressing(false);
+        }
+    }, [activeProject, store]);
 
     // 비전 수정
     const handleEditVision = useCallback(() => {
@@ -462,6 +534,7 @@ export function useProjectHandlers() {
         setAdjustmentModalOpen,
         setCompressModalOpen,
         setPreviewIndex,
+        setVisionDraft,
 
         // Handlers
         handleSelectProject,
@@ -472,6 +545,7 @@ export function useProjectHandlers() {
         handleAbandonQuest,
 
         handleUpdateMonthGoal,
+        handleUpdateMonthObjectives,
         triggerSmartAdjustment,
         confirmAdjustment,
         handleExpandVision,

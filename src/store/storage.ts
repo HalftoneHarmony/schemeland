@@ -278,3 +278,92 @@ export function createStorage(type: StorageType = 'localStorage'): StorageAdapte
 // ============================================
 
 export const storage = createStorage('localStorage');
+
+// ============================================
+// Zustand-compatible Server Storage
+// ============================================
+
+/**
+ * Zustand persist 미들웨어를 위한 서버 사이드 스토리지 어댑터
+ * - 로컬 파일 시스템(via Vite API)에 데이터를 저장합니다.
+ * - 오프라인 시 localStorage를 폴백으로 사용합니다.
+ * - 최초 실행 시 localStorage 데이터를 서버로 자동 마이그레이션합니다.
+ */
+export const serverStorage = {
+    getItem: async (name: string): Promise<string | null> => {
+        try {
+            // 1. 서버에서 데이터 로드
+            const res = await fetch('/api/storage');
+            if (!res.ok) throw new Error('Server unreachable');
+
+            const db = await res.json();
+
+            // 2. 서버에 데이터가 존재하면 반환
+            if (db[name]) {
+                // 로컬스토리지도 업데이트 (캐시)
+                localStorage.setItem(name, db[name]);
+                return db[name];
+            }
+
+            // 3. 서버에 없다면 로컬스토리지 확인 (마이그레이션)
+            const localData = localStorage.getItem(name);
+            if (localData) {
+                console.log(`[mnt] Migrating ${name} to server storage...`);
+                // 서버로 업로드
+                const newDb = { ...db, [name]: localData };
+                fetch('/api/storage', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newDb)
+                }).catch(e => console.error('Migration failed:', e));
+
+                return localData;
+            }
+
+            return null;
+        } catch (error) {
+            console.warn('[ServerStorage] Fetch failed, using local cache', error);
+            return localStorage.getItem(name);
+        }
+    },
+
+    setItem: async (name: string, value: string): Promise<void> => {
+        try {
+            // 1. 로컬 캐시 업데이트
+            localStorage.setItem(name, value);
+
+            // 2. 서버 DB 업데이트
+            const res = await fetch('/api/storage');
+            const db = res.ok ? await res.json() : {};
+
+            if (db[name] === value) return;
+
+            db[name] = value;
+
+            await fetch('/api/storage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(db)
+            });
+        } catch (error) {
+            console.error('[ServerStorage] Save failed:', error);
+        }
+    },
+
+    removeItem: async (name: string): Promise<void> => {
+        localStorage.removeItem(name);
+        try {
+            const res = await fetch('/api/storage');
+            const db = res.ok ? await res.json() : {};
+            delete db[name];
+            await fetch('/api/storage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(db)
+            });
+        } catch (error) {
+            console.error('[ServerStorage] Remove failed:', error);
+        }
+    },
+};
+

@@ -15,6 +15,7 @@
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { serverStorage } from './storage';
 import {
     ProjectIdea,
     IdeaAnalysis,
@@ -381,6 +382,15 @@ export const useStore = create<Store>()(
                 }));
             },
 
+            updateMonthGoals: (monthId, goals) => {
+                set((state) => ({
+                    months: {
+                        ...state.months,
+                        [monthId]: { ...state.months[monthId], goals, updatedAt: now() },
+                    },
+                }));
+            },
+
             updateMonthWeekIds: (monthId, weekIds) => {
                 set((state) => ({
                     months: {
@@ -721,7 +731,7 @@ export const useStore = create<Store>()(
         }),
         {
             name: 'schemeland-store',
-            storage: createJSONStorage(() => localStorage),
+            storage: createJSONStorage(() => serverStorage),
             partialize: (state) => ({
                 ideas: state.ideas,
                 analyses: state.analyses,

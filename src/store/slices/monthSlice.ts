@@ -16,6 +16,7 @@ export interface MonthState {
 
 export interface MonthActions {
     updateMonthTheme: (monthId: string, theme: string) => void;
+    updateMonthGoals: (monthId: string, goals: string[]) => void;
     updateMonthWeekIds: (monthId: string, weekIds: string[]) => void;
     getMonth: (monthId: string) => NormalizedMonthlyGoal | undefined;
     getMonthsForProject: (projectId: string) => NormalizedMonthlyGoal[];
@@ -65,6 +66,15 @@ export const createMonthSlice: StateCreator<
             months: {
                 ...state.months,
                 [monthId]: { ...state.months[monthId], theme, updatedAt: now() },
+            },
+        }));
+    },
+
+    updateMonthGoals: (monthId, goals) => {
+        set((state) => ({
+            months: {
+                ...state.months,
+                [monthId]: { ...state.months[monthId], goals, updatedAt: now() },
             },
         }));
     },
