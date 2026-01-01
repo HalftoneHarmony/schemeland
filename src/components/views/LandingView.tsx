@@ -147,34 +147,47 @@ export function LandingView({ onStart, onLoadSave, hasProjects, recentProject, o
     const y1 = useTransform(scrollY, [0, 500], [0, 200]);
     const y2 = useTransform(scrollY, [0, 500], [0, -150]);
 
-    // Adjusted scroll animation: Starts fading out much later to prevent premature disappearance
-    const heroOpacity = useTransform(scrollY, [200, 600], [1, 0]);
-    const heroScale = useTransform(scrollY, [200, 600], [1, 0.95]);
+    // Adjusted scroll animation: Slower fade-out for better prolonged visibility
+    const heroOpacity = useTransform(scrollY, [100, 1000], [1, 0]);
+    const heroScale = useTransform(scrollY, [200, 800], [1, 0.95]);
 
     return (
         <div className="flex flex-col items-center min-h-[160vh] text-center px-4 relative overflow-hidden pb-40 bg-black font-sans">
             <NeuralBackground />
 
-            {/* Cyberpunk Grid Background */}
-            <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
-                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,0,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,0,255,0.05)_1px,transparent_1px)] bg-[size:50px_50px]" />
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(0,255,255,0.1),transparent_70%)]" />
+            {/* Cyberpunk Grid Background with pulsating intersection points */}
+            <div className="absolute inset-0 z-0 opacity-30 pointer-events-none">
+                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,0,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,0,255,0.05)_1px,transparent_1px)] bg-[size:50px_50px]">
+                    <motion.div
+                        animate={{ opacity: [0.3, 0.5, 0.3] }}
+                        transition={{ duration: 4, repeat: Infinity }}
+                        className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(0,255,255,0.05),transparent_70%)]"
+                    />
+                </div>
             </div>
 
-            {/* Dynamic Background Parallax Blobs */}
+            {/* Dynamic Background Parallax Blobs - Enhanced Motion */}
             <motion.div
                 style={{ y: y1 }}
                 initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 0.4, scale: 1 }}
-                transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
-                className="absolute top-1/4 left-1/4 w-[800px] h-[800px] bg-cyber-pink/20 rounded-full blur-[150px] -z-10"
+                animate={{
+                    opacity: [0.3, 0.5, 0.3],
+                    scale: [0.9, 1.1, 0.9],
+                    rotate: [0, 90]
+                }}
+                transition={{ duration: 15, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
+                className="absolute top-1/4 left-1/4 w-[800px] h-[800px] bg-cyber-pink/20 rounded-full blur-[180px] -z-10 mix-blend-screen"
             />
             <motion.div
                 style={{ y: y2 }}
                 initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 0.3, scale: 1 }}
-                transition={{ duration: 4, delay: 1, repeat: Infinity, repeatType: "reverse" }}
-                className="absolute bottom-1/2 right-1/4 w-[600px] h-[600px] bg-cyber-cyan/10 rounded-full blur-[120px] -z-10"
+                animate={{
+                    opacity: [0.2, 0.4, 0.2],
+                    scale: [0.9, 1.2, 0.9],
+                    rotate: [0, -45]
+                }}
+                transition={{ duration: 20, delay: 1, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
+                className="absolute bottom-1/2 right-1/4 w-[700px] h-[700px] bg-cyber-cyan/15 rounded-full blur-[150px] -z-10 mix-blend-screen"
             />
 
             {/* Hero Section */}
@@ -239,11 +252,17 @@ export function LandingView({ onStart, onLoadSave, hasProjects, recentProject, o
                     className="relative group mb-12 px-4 md:px-10"
                 >
                     <div className="absolute -inset-20 bg-cyber-pink/10 blur-[120px] opacity-0 group-hover:opacity-40 transition-opacity duration-1000" />
-                    <h1 className="text-6xl md:text-9xl lg:text-[11rem] font-cyber font-black tracking-tighter text-white leading-[0.9] uppercase italic relative">
+                    <h1 className="text-5xl md:text-8xl lg:text-9xl font-cyber font-black tracking-tighter text-white leading-[0.9] uppercase italic relative">
                         <span className="block mb-2 text-white/90 drop-shadow-sm pr-4 md:pr-10">SCHEME</span>
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyber-cyan via-white to-cyber-pink relative inline-block drop-shadow-[0_0_40px_rgba(0,255,255,0.2)] pr-4 md:pr-12">
+                        <motion.span
+                            animate={{
+                                backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+                            }}
+                            transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+                            className="text-transparent bg-clip-text bg-gradient-to-r from-cyber-cyan via-white to-cyber-pink relative inline-block drop-shadow-[0_0_40px_rgba(0,255,255,0.2)] pr-4 md:pr-12 bg-[length:200%_auto]"
+                        >
                             LAND
-                        </span>
+                        </motion.span>
                     </h1>
                 </motion.div>
 
