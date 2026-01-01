@@ -14,11 +14,13 @@ interface DashboardHeaderProps {
     statusColor: string;
     statusMessage: string;
     isPreviewMode: boolean;
+    onAbandonQuest: () => void;
+
 }
 
 export function DashboardHeader({
     activeProject, progress, daysPassed, timeProgress, isAhead, statusColor, statusMessage,
-    isPreviewMode
+    isPreviewMode, onAbandonQuest
 }: DashboardHeaderProps) {
 
     return (
@@ -49,6 +51,17 @@ export function DashboardHeader({
                         </p>
                     </div>
                 </div>
+
+                <button
+                    onClick={() => {
+                        if (confirm("경고: 프로젝트를 포기하면 모든 진행 상황이 삭제됩니다. 계속하시겠습니까?")) {
+                            onAbandonQuest();
+                        }
+                    }}
+                    className="px-4 py-2 border border-red-500/30 text-red-500/50 hover:text-red-500 hover:border-red-500 hover:bg-red-500/10 transition-all text-xs font-cyber font-black uppercase tracking-widest skew-x-[-10deg]"
+                >
+                    <span className="skew-x-[10deg]">PROJECT_ABANDON::포기</span>
+                </button>
             </div>
 
 

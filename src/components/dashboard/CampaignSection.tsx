@@ -50,7 +50,7 @@ export function CampaignSection({
     const activeLineWidth = 150 + (selectedMonthIndex * itemFullWidth);
 
     return (
-        <section className="mb-16">
+        <section className="w-full">
             <div className="flex items-center justify-between mb-10 px-4">
                 <h2 className="text-3xl font-cyber font-black text-white flex items-center gap-4">
                     <Calendar className="text-cyber-cyan shadow-neon-cyan" />

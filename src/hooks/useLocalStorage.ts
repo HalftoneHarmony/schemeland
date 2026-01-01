@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Dispatch, SetStateAction } from 'react';
 
 /**
  * 로컬 저장소와 상태를 동기화하는 커스텀 훅입니다.
@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
  * @param key localStorage에 사용할 키
  * @param initialValue 초기값
  */
-function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val: T) => T)) => void] {
+function useLocalStorage<T>(key: string, initialValue: T): [T, Dispatch<SetStateAction<T>>] {
     // 상태 초기화
     const [storedValue, setStoredValue] = useState<T>(() => {
         try {
@@ -20,18 +20,15 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val
     });
 
     // 상태가 바뀔 때마다 localStorage를 업데이트합니다.
-    const setValue = (value: T | ((val: T) => T)) => {
+    useEffect(() => {
         try {
-            // 함수형 업데이트 지원
-            const valueToStore = value instanceof Function ? value(storedValue) : value;
-            setStoredValue(valueToStore);
-            window.localStorage.setItem(key, JSON.stringify(valueToStore));
+            window.localStorage.setItem(key, JSON.stringify(storedValue));
         } catch (error) {
             console.error(`localStorage key "${key}"를 저장하는 중 오류 발생:`, error);
         }
-    };
+    }, [key, storedValue]);
 
-    return [storedValue, setValue];
+    return [storedValue, setStoredValue];
 }
 
 export default useLocalStorage;

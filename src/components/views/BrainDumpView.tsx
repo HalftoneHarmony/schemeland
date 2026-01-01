@@ -15,6 +15,7 @@ interface BrainDumpViewProps {
     onMagic: (id: string) => void;
     isRefiningMap: Record<string, boolean>;
     onAnalyze: () => void;
+    onQuickStart: () => void;
     isAnalyzing: boolean;
 }
 
@@ -29,6 +30,7 @@ export function BrainDumpView({
     onMagic,
     isRefiningMap,
     onAnalyze,
+    onQuickStart,
     isAnalyzing
 }: BrainDumpViewProps) {
     return (
@@ -89,13 +91,22 @@ export function BrainDumpView({
             </div>
 
             <div className="sticky bottom-10 z-30 flex gap-6 backdrop-blur-3xl p-6 rounded-none border-2 border-white/5 bg-black/80 shadow-[0_-20px_50px_rgba(0,0,0,0.8)] skew-x-[-2deg]">
-                <div className="skew-x-[2deg] flex gap-6 w-full">
+                <div className="skew-x-[2deg] flex gap-4 w-full">
                     <Button
                         variant="ghost"
                         onClick={onAddIdea}
                         className="flex-1 h-16 border-2 border-white/10 hover:border-white/30 text-white font-cyber font-black tracking-widest text-xs"
                     >
-                        <Plus className="mr-3" size={24} /> NEW_DATA_SLOT::새_데이터_슬롯
+                        <Plus className="mr-3" size={24} /> NEW_DATA_SLOT
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        onClick={onQuickStart}
+                        className="flex-1 h-16 border-2 border-cyber-cyan/30 text-cyber-cyan hover:bg-cyber-cyan/10 font-cyber font-black tracking-widest text-xs"
+                    >
+                        <span className="flex items-center justify-center gap-2">
+                            SKIP_AI::바로_시작
+                        </span>
                     </Button>
                     <Button
                         onClick={onAnalyze}

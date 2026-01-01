@@ -7,7 +7,6 @@ import { ProjectScheme, WeeklyPlanOption, ThreeYearVision, Difficulty } from '..
 import { DashboardHeader } from '../dashboard/DashboardHeader';
 import { VisionSection } from '../dashboard/VisionSection';
 import { CampaignSection } from '../dashboard/CampaignSection';
-import { MissionSection } from '../dashboard/MissionSection';
 import { FloatingControls } from '../dashboard/FloatingControls';
 
 interface DashboardViewProps {
@@ -19,7 +18,6 @@ interface DashboardViewProps {
     timeLeft: number;
     timerMode: 'FOCUS' | 'SHORT_BREAK' | 'LONG_BREAK';
     pomodoroCount: number;
-
 
     compressModalOpen: boolean;
     adjustmentModalOpen: boolean;
@@ -55,15 +53,7 @@ interface DashboardViewProps {
     handleUpdateMonthGoal: (text: string) => void;
     triggerSmartAdjustment: () => void;
     handleExtendRoadmap: () => void;
-    handleGeneratePlanOptions: (index: number) => void;
-    cancelPreview: () => void;
-    confirmPreviewPlan: () => void;
-    toggleTask: (weekIndex: number, taskId: string) => void;
-    updateTaskText: (weekIndex: number, taskId: string, text: string) => void;
-    addTask: (weekIndex: number) => void;
-    deleteTask: (weekIndex: number, taskId: string) => void;
-    updateWeekTheme: (weekIndex: number, theme: string) => void;
-    initManualPlan: () => void;
+
     onAbandonQuest: () => void;
     onOpenCampaignDetail: () => void;
 }
@@ -133,14 +123,15 @@ export function DashboardView(props: DashboardViewProps) {
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                className="max-w-7xl mx-auto px-4 py-12 relative"
+                className="max-w-7xl mx-auto px-4 py-8 relative"
             >
-                {/* Background Grid Accent */}
-                <div className="fixed inset-0 pointer-events-none opacity-20">
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(var(--cyber-cyan),0.1),transparent_70%)]" />
+                {/* Cyberpunk Grid Background */}
+                <div className="fixed inset-0 z-0 opacity-40 pointer-events-none">
+                    <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,255,0.05)_1px,transparent_1px)] bg-[size:40px_40px]" />
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,transparent_0%,black_90%)]" />
                 </div>
 
-                <motion.div variants={sectionVariants} className="mb-20">
+                <motion.div variants={sectionVariants} className="mb-8">
                     <DashboardHeader
                         activeProject={activeProject}
                         progress={progress}
@@ -150,62 +141,41 @@ export function DashboardView(props: DashboardViewProps) {
                         statusColor={statusColor}
                         statusMessage={statusMessage}
                         isPreviewMode={isPreviewMode}
-                    />
-                </motion.div>
-
-                <motion.div variants={sectionVariants}>
-                    <VisionSection
-                        activeProject={activeProject}
-                        isEditingVision={props.isEditingVision}
-                        visionDraft={props.visionDraft}
-                        isExpandingVision={props.isExpandingVision}
-                        handleEditVision={props.handleEditVision}
-                        handleCancelEditVision={props.handleCancelEditVision}
-                        handleSaveVision={props.handleSaveVision}
-                        handleExpandVision={props.handleExpandVision}
-                        setVisionDraft={props.setVisionDraft}
-                    />
-                </motion.div>
-
-                <motion.div variants={sectionVariants}>
-                    <CampaignSection
-                        activeProject={activeProject}
-                        selectedMonthIndex={props.selectedMonthIndex}
-                        isCompressing={props.isCompressing}
-                        isExtending={props.isExtending}
-                        isAdjustingPlan={props.isAdjustingPlan}
-                        setCompressModalOpen={props.setCompressModalOpen}
-                        handleMonthClick={props.handleMonthClick}
-                        handleExtendRoadmap={props.handleExtendRoadmap}
-                        handleUpdateMonthGoal={props.handleUpdateMonthGoal}
-                        triggerSmartAdjustment={props.triggerSmartAdjustment}
-                        onOpenCampaignDetail={props.onOpenCampaignDetail}
-                    />
-                </motion.div>
-
-                <motion.div variants={sectionVariants}>
-                    <MissionSection
-                        activeProject={activeProject}
-                        activeMonthlyPlan={activeMonthlyPlan}
-                        weeklyPlan={weeklyPlan}
-                        isPreviewMode={isPreviewMode}
-                        previewOptions={props.previewOptions}
-                        previewIndex={props.previewIndex}
-                        isGeneratingMonthDetail={props.isGeneratingMonthDetail}
-                        selectedMonthIndex={props.selectedMonthIndex}
-                        setPreviewIndex={props.setPreviewIndex}
-                        handleGeneratePlanOptions={props.handleGeneratePlanOptions}
-                        cancelPreview={props.cancelPreview}
-                        confirmPreviewPlan={props.confirmPreviewPlan}
-                        toggleTask={props.toggleTask}
-                        updateTaskText={props.updateTaskText}
-                        addTask={props.addTask}
-                        deleteTask={props.deleteTask}
-                        updateWeekTheme={props.updateWeekTheme}
-                        initManualPlan={props.initManualPlan}
                         onAbandonQuest={props.onAbandonQuest}
                     />
                 </motion.div>
+
+                <div className="flex flex-col gap-12">
+                    <motion.div variants={sectionVariants}>
+                        <VisionSection
+                            activeProject={activeProject}
+                            isEditingVision={props.isEditingVision}
+                            visionDraft={props.visionDraft}
+                            isExpandingVision={props.isExpandingVision}
+                            handleEditVision={props.handleEditVision}
+                            handleCancelEditVision={props.handleCancelEditVision}
+                            handleSaveVision={props.handleSaveVision}
+                            handleExpandVision={props.handleExpandVision}
+                            setVisionDraft={props.setVisionDraft}
+                        />
+                    </motion.div>
+
+                    <motion.div variants={sectionVariants}>
+                        <CampaignSection
+                            activeProject={activeProject}
+                            selectedMonthIndex={props.selectedMonthIndex}
+                            isCompressing={props.isCompressing}
+                            isExtending={props.isExtending}
+                            isAdjustingPlan={props.isAdjustingPlan}
+                            setCompressModalOpen={props.setCompressModalOpen}
+                            handleMonthClick={props.handleMonthClick}
+                            handleExtendRoadmap={props.handleExtendRoadmap}
+                            handleUpdateMonthGoal={props.handleUpdateMonthGoal}
+                            triggerSmartAdjustment={props.triggerSmartAdjustment}
+                            onOpenCampaignDetail={props.onOpenCampaignDetail}
+                        />
+                    </motion.div>
+                </div>
 
                 {/* Modals with Cyberpunk Aesthetics */}
                 <AnimatePresence>

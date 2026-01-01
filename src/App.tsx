@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AppView, ProjectIdea, IdeaAnalysis, ProjectScheme, Difficulty, WeeklyPlanOption, ThreeYearVision, IdeaStatus, ProjectStatus, Priority, WeeklyMilestone } from './types';
+import { AppView, ProjectIdea, IdeaAnalysis, ProjectScheme, Difficulty, WeeklyPlanOption, ThreeYearVision, IdeaStatus, ProjectStatus, Priority, WeeklyMilestone, KanbanTask, TaskStatus } from './types';
 import { Zap, Briefcase } from 'lucide-react';
 import { analyzeIdeas, generateFullPlan, refineIdea, suggestIdeas, adjustWeeklyPlan, expandToThreeYears, generateMonthPlanOptions, extendRoadmap, compressRoadmap, refineThreeYearVision } from './services/geminiService';
 
@@ -10,6 +10,11 @@ import { AnalysisView } from './components/views/AnalysisView';
 import { ProjectListView } from './components/views/ProjectListView';
 import { DashboardView } from './components/views/DashboardView';
 import { CampaignDetailView } from './components/views/CampaignDetailView';
+import { KanbanView } from './components/views/KanbanView';
+
+// Navigation
+import { SideNavigation } from './components/navigation/SideNavigation';
+import { QuickSearch } from './components/navigation/QuickSearch';
 
 import useLocalStorage from './hooks/useLocalStorage';
 import { useProjectManager } from './hooks/useProjectManager';
@@ -27,7 +32,7 @@ const INITIAL_IDEAS: ProjectIdea[] = [
 ];
 
 export default function App() {
-    const [view, setView] = useState<AppView>(AppView.LANDING);
+    const [view, setView] = useLocalStorage<AppView>('schemeland_view', AppView.LANDING);
 
     // -- Persistence Logic with Custom Data Hook --
     const {
@@ -36,7 +41,7 @@ export default function App() {
     } = useProjectManager(INITIAL_IDEAS);
     // -- End Persistence Logic --
 
-    const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
+    const [activeProjectId, setActiveProjectId] = useLocalStorage<string | null>('schemeland_active_id', null);
 
     // Computed: Active Project
     const activeProject = projects.find(p => p.id === activeProjectId) || null;
@@ -60,7 +65,7 @@ export default function App() {
     const [isEditingVision, setIsEditingVision] = useState(false);
     const [isRefiningVision, setIsRefiningVision] = useState(false);
     const [visionDraft, setVisionDraft] = useState<ThreeYearVision | null>(null);
-    const [projectStartDate, setProjectStartDate] = useState<string>(new Date().toISOString().split('T')[0]);
+    const [projectStartDate, setProjectStartDate] = useLocalStorage<string>('schemeland_start_date', new Date().toISOString().split('T')[0]);
 
 
     // Preview Mode State
@@ -72,6 +77,9 @@ export default function App() {
     const [timeLeft, setTimeLeft] = useState(25 * 60); // 25 min
     const [timerMode, setTimerMode] = useState<'FOCUS' | 'SHORT_BREAK' | 'LONG_BREAK'>('FOCUS');
     const [pomodoroCount, setPomodoroCount] = useState(1); // 1-4
+
+    // Quick Search State
+    const [isQuickSearchOpen, setIsQuickSearchOpen] = useState(false);
 
 
     // Timer Effect
@@ -112,6 +120,20 @@ export default function App() {
         }
         return () => clearInterval(interval);
     }, [timerActive, timeLeft, timerMode, pomodoroCount]);
+
+    // Keyboard Shortcuts Effect
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            // Cmd+K or Ctrl+K for Quick Search
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                setIsQuickSearchOpen(prev => !prev);
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, []);
 
     // --- Handlers ---
 
@@ -172,6 +194,66 @@ export default function App() {
         }
     };
 
+    const handleQuickStart = () => {
+        const validIdeas = ideas.filter(i => i.title.trim() || i.description.trim());
+        if (validIdeas.length === 0) {
+            alert("프로젝트로 만들 아이디어를 입력해주세요.");
+            return;
+        }
+
+        let lastProjectId = null;
+
+        // Batch create projects (reverse to keep order intuitive effectively)
+        validIdeas.forEach(idea => {
+            const mockAnalysis: IdeaAnalysis = {
+                id: crypto.randomUUID(),
+                ideaId: idea.id,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                metrics: {
+                    feasibility: 50,
+                    marketPotential: 50,
+                    excitement: 50,
+                    speedToMVP: 50
+                },
+                reasoning: "AI 분석 없이 생성된 프로젝트입니다. 직접 계획을 수립하세요.",
+                oneLiner: idea.description || idea.title
+            };
+            setAnalyses(prev => [...prev, mockAnalysis]);
+
+            // Mock Plan Structure
+            const mockPlan = {
+                yearlyPlan: {
+                    vision: "나만의 비전을 수립하세요.",
+                    keyResults: ["주요 목표 1", "주요 목표 2", "주요 목표 3"]
+                },
+                monthlyPlan: Array.from({ length: 12 }, (_, i) => ({
+                    month: i + 1,
+                    theme: `${i + 1}월 목표`,
+                    goals: ["목표를 설정하세요"],
+                    detailedPlan: [] as WeeklyMilestone[]
+                })),
+                weeklyPlan: [] as WeeklyMilestone[] // This will be assigned to month 1 in createProject
+            };
+
+            // Initialize Month 1 Weeks
+            mockPlan.weeklyPlan = [1, 2, 3, 4].map(num => ({
+                weekNumber: num,
+                theme: `${num}주차`,
+                tasks: []
+            }));
+
+            const newProject = createProject(idea, mockAnalysis, mockPlan, projectStartDate);
+            lastProjectId = newProject.id;
+        });
+
+        if (lastProjectId) {
+            setActiveProjectId(lastProjectId);
+            setSelectedMonthIndex(0);
+            setView(AppView.DASHBOARD);
+        }
+    };
+
     const handleAnalyze = async () => {
         const validation = validateAllIdeas(ideas);
         if (!validation.isValid) {
@@ -191,6 +273,8 @@ export default function App() {
             setIsAnalyzing(false);
         }
     };
+
+
 
     const handleCommit = async (ideaId: string) => {
         const idea = ideas.find(i => i.id === ideaId);
@@ -545,156 +629,185 @@ export default function App() {
         setTimerActive(false);
     };
 
+    // Helper: check if we need sidebar
+    const showSidebar = view !== AppView.LANDING && view !== AppView.BRAIN_DUMP && view !== AppView.ANALYSIS;
+
     return (
         <div className="min-h-screen bg-background text-textMain font-sans selection:bg-cyber-pink/30">
-            {/* Header */}
-            <nav className="border-b border-cyber-pink/20 bg-background/80 backdrop-blur-xl sticky top-0 z-40 transition-all">
-                <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
-                    <div
-                        className="flex items-center gap-3 cursor-pointer group"
-                        onClick={() => {
-                            if (projects.length > 0) setView(AppView.PROJECT_LIST);
-                            else setView(AppView.LANDING);
-                        }}
-                    >
-                        <div className="w-10 h-10 bg-cyber-pink flex items-center justify-center text-white shadow-neon-pink group-hover:scale-110 transition-transform skew-x-[-10deg]">
-                            <Zap size={20} fill="currentColor" className="skew-x-[10deg]" />
+            {/* Quick Search Modal */}
+            <QuickSearch
+                isOpen={isQuickSearchOpen}
+                onClose={() => setIsQuickSearchOpen(false)}
+                projects={projects}
+                onNavigate={(newView) => setView(newView)}
+                onSelectProject={handleSelectProject}
+            />
+
+            {/* Side Navigation */}
+            {showSidebar && (
+                <SideNavigation
+                    currentView={view}
+                    projects={projects}
+                    activeProjectId={activeProjectId}
+                    onNavigate={(newView) => setView(newView)}
+                    onSelectProject={handleSelectProject}
+                />
+            )}
+
+            {/* Main Content Wrapper */}
+            <div className={showSidebar ? 'ml-[260px] transition-all duration-300' : ''}>
+                {/* Header - Only show on pages without sidebar */}
+                {!showSidebar && (
+                    <nav className="border-b border-cyber-pink/20 bg-background/80 backdrop-blur-xl sticky top-0 z-40 transition-all">
+                        <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
+                            <div
+                                className="flex items-center gap-3 cursor-pointer group"
+                                onClick={() => {
+                                    if (projects.length > 0) setView(AppView.PROJECT_LIST);
+                                    else setView(AppView.LANDING);
+                                }}
+                            >
+                                <div className="w-10 h-10 bg-cyber-pink flex items-center justify-center text-white shadow-neon-pink group-hover:scale-110 transition-transform skew-x-[-10deg]">
+                                    <Zap size={20} fill="currentColor" className="skew-x-[10deg]" />
+                                </div>
+                                <span className="font-cyber font-black text-2xl tracking-tighter text-white uppercase italic">SchemeLand</span>
+                            </div>
                         </div>
-                        <span className="font-cyber font-black text-2xl tracking-tighter text-white uppercase italic">SchemeLand</span>
-                    </div>
-                    {view === AppView.DASHBOARD && (
-                        <div className="text-[10px] font-cyber font-black tracking-widest text-cyber-cyan flex items-center gap-2 bg-cyber-cyan/10 px-4 py-2 border border-cyber-cyan/30 shadow-neon-cyan skew-x-[-15deg]">
-                            <span className="w-2 h-2 rounded-full bg-cyber-cyan animate-pulse skew-x-[15deg]"></span>
-                            <span className="skew-x-[15deg]">SYSTEM_LINK_STABLE</span>
-                        </div>
+                    </nav>
+                )}
+
+                {/* Main Content */}
+                <main className="pb-20">
+                    {view === AppView.LANDING && (
+                        <LandingView
+                            onStart={() => setView(AppView.BRAIN_DUMP)}
+                            onLoadSave={() => setView(AppView.PROJECT_LIST)}
+                            hasProjects={projects.length > 0}
+                        />
                     )}
-                </div>
-            </nav>
 
-            {/* Main Content */}
-            <main className="pb-20">
-                {view === AppView.LANDING && (
-                    <LandingView
-                        onStart={() => setView(AppView.BRAIN_DUMP)}
-                        onLoadSave={() => setView(AppView.PROJECT_LIST)}
-                        hasProjects={projects.length > 0}
-                    />
-                )}
+                    {view === AppView.PROJECT_LIST && (
+                        <ProjectListView
+                            projects={projects}
+                            onSelectProject={handleSelectProject}
+                            onNewAdventure={() => {
+                                setIdeas(INITIAL_IDEAS);
+                                setAnalyses([]);
+                                setView(AppView.BRAIN_DUMP);
+                            }}
+                        />
+                    )}
 
-                {view === AppView.PROJECT_LIST && (
-                    <ProjectListView
-                        projects={projects}
-                        onSelectProject={handleSelectProject}
-                        onNewAdventure={() => {
-                            setIdeas(INITIAL_IDEAS);
-                            setAnalyses([]);
-                            setView(AppView.BRAIN_DUMP);
-                        }}
-                    />
-                )}
+                    {view === AppView.BRAIN_DUMP && (
+                        <BrainDumpView
+                            ideas={ideas}
+                            onBack={() => setView(AppView.LANDING)}
+                            onSuggestion={handleSuggestIdeas}
+                            isSuggesting={isSuggesting}
+                            onAddIdea={handleAddIdea}
+                            onUpdateIdea={handleUpdateIdea}
+                            onDeleteIdea={handleDeleteIdea}
+                            onMagic={handleMagicRefine}
+                            isRefiningMap={isRefiningMap}
+                            onAnalyze={handleAnalyze}
+                            onQuickStart={handleQuickStart}
+                            isAnalyzing={isAnalyzing}
+                        />
+                    )}
 
-                {view === AppView.BRAIN_DUMP && (
-                    <BrainDumpView
-                        ideas={ideas}
-                        onBack={() => setView(AppView.LANDING)}
-                        onSuggestion={handleSuggestIdeas}
-                        isSuggesting={isSuggesting}
-                        onAddIdea={handleAddIdea}
-                        onUpdateIdea={handleUpdateIdea}
-                        onDeleteIdea={handleDeleteIdea}
-                        onMagic={handleMagicRefine}
-                        isRefiningMap={isRefiningMap}
-                        onAnalyze={handleAnalyze}
-                        isAnalyzing={isAnalyzing}
-                    />
-                )}
+                    {view === AppView.ANALYSIS && (
+                        <AnalysisView
+                            analyses={analyses}
+                            ideas={ideas}
+                            onBack={() => setView(AppView.BRAIN_DUMP)}
+                            onCommit={handleCommit}
+                            isGeneratingPlan={isGeneratingPlan}
+                            startDate={projectStartDate}
+                            onStartDateChange={setProjectStartDate}
+                        />
+                    )}
 
-                {view === AppView.ANALYSIS && (
-                    <AnalysisView
-                        analyses={analyses}
-                        ideas={ideas}
-                        onBack={() => setView(AppView.BRAIN_DUMP)}
-                        onCommit={handleCommit}
-                        isGeneratingPlan={isGeneratingPlan}
-                        startDate={projectStartDate}
-                        onStartDateChange={setProjectStartDate}
-                    />
-                )}
+                    {view === AppView.DASHBOARD && (
+                        <DashboardView
+                            activeProject={activeProject}
+                            selectedMonthIndex={selectedMonthIndex}
+                            previewOptions={previewOptions}
+                            previewIndex={previewIndex}
+                            timerActive={timerActive}
+                            timeLeft={timeLeft}
+                            timerMode={timerMode}
+                            pomodoroCount={pomodoroCount}
 
-                {view === AppView.DASHBOARD && (
-                    <DashboardView
-                        activeProject={activeProject}
-                        selectedMonthIndex={selectedMonthIndex}
-                        previewOptions={previewOptions}
-                        previewIndex={previewIndex}
-                        timerActive={timerActive}
-                        timeLeft={timeLeft}
-                        timerMode={timerMode}
-                        pomodoroCount={pomodoroCount}
+                            compressModalOpen={compressModalOpen}
+                            adjustmentModalOpen={adjustmentModalOpen}
+                            isCompressing={isCompressing}
+                            isAdjustingPlan={isAdjustingPlan}
+                            isGeneratingMonthDetail={isGeneratingMonthDetail}
+                            isExpandingVision={isExpandingVision}
+                            isExtending={isExtending}
+                            isEditingVision={isEditingVision}
+                            visionDraft={visionDraft}
+                            isRefiningVision={isRefiningVision}
 
-                        compressModalOpen={compressModalOpen}
-                        adjustmentModalOpen={adjustmentModalOpen}
-                        isCompressing={isCompressing}
-                        isAdjustingPlan={isAdjustingPlan}
-                        isGeneratingMonthDetail={isGeneratingMonthDetail}
-                        isExpandingVision={isExpandingVision}
-                        isExtending={isExtending}
-                        isEditingVision={isEditingVision}
-                        visionDraft={visionDraft}
-                        isRefiningVision={isRefiningVision}
+                            setTimerActive={setTimerActive}
+                            setTimerMode={setTimerMode}
+                            setTimeLeft={setTimeLeft}
+                            setCompressModalOpen={setCompressModalOpen}
+                            setAdjustmentModalOpen={setAdjustmentModalOpen}
 
-                        setTimerActive={setTimerActive}
-                        setTimerMode={setTimerMode}
-                        setTimeLeft={setTimeLeft}
-                        setCompressModalOpen={setCompressModalOpen}
-                        setAdjustmentModalOpen={setAdjustmentModalOpen}
+                            setPreviewIndex={setPreviewIndex}
+                            setVisionDraft={setVisionDraft}
 
-                        setPreviewIndex={setPreviewIndex}
-                        setVisionDraft={setVisionDraft}
+                            onCompressRoadmap={handleCompressRoadmap}
+                            onConfirmAdjustment={confirmAdjustment}
+                            handleExpandVision={handleExpandVision}
+                            handleEditVision={handleEditVision}
+                            handleCancelEditVision={handleCancelEditVision}
+                            handleSaveVision={handleSaveVision}
+                            handleRefineVision={handleRefineVision}
+                            handleMonthClick={handleMonthClick}
+                            handleUpdateMonthGoal={handleUpdateMonthGoal}
+                            triggerSmartAdjustment={triggerSmartAdjustment}
+                            handleExtendRoadmap={handleExtendRoadmap}
 
-                        onCompressRoadmap={handleCompressRoadmap}
-                        onConfirmAdjustment={confirmAdjustment}
-                        handleExpandVision={handleExpandVision}
-                        handleEditVision={handleEditVision}
-                        handleCancelEditVision={handleCancelEditVision}
-                        handleSaveVision={handleSaveVision}
-                        handleRefineVision={handleRefineVision}
-                        handleMonthClick={handleMonthClick}
-                        handleUpdateMonthGoal={handleUpdateMonthGoal}
-                        triggerSmartAdjustment={triggerSmartAdjustment}
-                        handleExtendRoadmap={handleExtendRoadmap}
-                        handleGeneratePlanOptions={handleGeneratePlanOptions}
-                        cancelPreview={cancelPreview}
-                        confirmPreviewPlan={confirmPreviewPlan}
-                        toggleTask={toggleTask}
-                        updateTaskText={updateTaskText}
-                        addTask={addTask}
-                        deleteTask={deleteTask}
-                        updateWeekTheme={updateWeekTheme}
-                        initManualPlan={initManualPlan}
-                        onAbandonQuest={handleAbandonQuest}
-                        onOpenCampaignDetail={() => setView(AppView.CAMPAIGN_DETAIL)}
-                    />
-                )}
+                            onAbandonQuest={handleAbandonQuest}
+                            onOpenCampaignDetail={() => setView(AppView.CAMPAIGN_DETAIL)}
+                        />
+                    )}
 
-                {view === AppView.CAMPAIGN_DETAIL && activeProject && (
-                    <CampaignDetailView
-                        activeProject={activeProject}
-                        selectedMonthIndex={selectedMonthIndex}
-                        onBack={() => setView(AppView.DASHBOARD)}
-                    />
-                )}
-            </main>
+                    {view === AppView.CAMPAIGN_DETAIL && activeProject && (
+                        <CampaignDetailView
+                            activeProject={activeProject}
+                            selectedMonthIndex={selectedMonthIndex}
+                            toggleTask={toggleTask}
+                            addTask={addTask}
+                            deleteTask={deleteTask}
+                            updateTaskText={updateTaskText}
+                            updateWeekTheme={updateWeekTheme}
+                            onBack={() => setView(AppView.DASHBOARD)}
+                        />
+                    )}
 
-            {/* Footer */}
-            <footer className="border-t border-white/5 mt-auto py-12 text-center">
-                <div className="flex justify-center items-center gap-2 text-zinc-600 text-sm font-medium">
-                    <Briefcase size={16} />
-                    <span>Built for Indie Hackers</span>
-                    <span className="mx-2">•</span>
-                    <span>Powered by Gemini</span>
-                </div>
-            </footer>
+                    {view === AppView.KANBAN && (
+                        <KanbanView
+                            projects={projects}
+                            activeProjectId={activeProjectId}
+                            onSelectProject={handleSelectProject}
+                            onBack={() => setView(AppView.PROJECT_LIST)}
+                        />
+                    )}
+                </main>
+
+                {/* Footer */}
+                <footer className="border-t border-white/5 mt-auto py-12 text-center">
+                    <div className="flex justify-center items-center gap-2 text-zinc-600 text-sm font-medium">
+                        <Briefcase size={16} />
+                        <span>Built for Indie Hackers</span>
+                        <span className="mx-2">•</span>
+                        <span>Powered by Gemini</span>
+                    </div>
+                </footer>
+            </div>
         </div>
     );
 }

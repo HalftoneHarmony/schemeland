@@ -1,0 +1,298 @@
+import React, { useState, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+    Kanban,
+    CalendarDays,
+    ChevronDown,
+    ChevronLeft,
+    ChevronRight,
+    Target,
+    TrendingUp,
+    CheckCircle2,
+    Clock,
+    AlertTriangle,
+    Sparkles,
+    Filter,
+    BarChart3,
+    Zap
+} from 'lucide-react';
+import { ProjectScheme, TaskStatus, Priority, KanbanTask } from '../../types';
+import { KanbanBoard } from '../kanban/KanbanBoard';
+
+interface KanbanViewProps {
+    projects: ProjectScheme[];
+    activeProjectId: string | null;
+    onSelectProject: (projectId: string) => void;
+    onBack: () => void;
+}
+
+const months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+];
+
+export const KanbanView: React.FC<KanbanViewProps> = ({
+    projects,
+    activeProjectId,
+    onSelectProject,
+    onBack,
+}) => {
+    const [selectedMonthIndex, setSelectedMonthIndex] = useState(0);
+    const [selectedWeek, setSelectedWeek] = useState<number | null>(null);
+    const [showProjectSelector, setShowProjectSelector] = useState(false);
+
+    const activeProject = projects.find(p => p.id === activeProjectId) || projects[0];
+
+    // 통계 계산
+    const stats = useMemo(() => {
+        if (!activeProject) return { total: 0, completed: 0, inProgress: 0, todo: 0 };
+
+        const month = activeProject.monthlyPlan[selectedMonthIndex];
+        if (!month?.detailedPlan) return { total: 0, completed: 0, inProgress: 0, todo: 0 };
+
+        let total = 0;
+        let completed = 0;
+
+        month.detailedPlan.forEach(week => {
+            week.tasks.forEach(task => {
+                total++;
+                if (task.isCompleted) completed++;
+            });
+        });
+
+        return {
+            total,
+            completed,
+            inProgress: Math.floor((total - completed) * 0.3),
+            todo: total - completed - Math.floor((total - completed) * 0.3),
+            percentage: total > 0 ? Math.round((completed / total) * 100) : 0
+        };
+    }, [activeProject, selectedMonthIndex]);
+
+    const handleTaskStatusChange = (taskId: string, newStatus: TaskStatus) => {
+        // TODO: Implement task status change
+        console.log('Task status change:', taskId, newStatus);
+    };
+
+    const handleAddTask = (weekNumber: number, status: TaskStatus) => {
+        // TODO: Implement add task
+        console.log('Add task:', weekNumber, status);
+    };
+
+    const handleDeleteTask = (taskId: string) => {
+        // TODO: Implement delete task
+        console.log('Delete task:', taskId);
+    };
+
+    const handleUpdateTask = (taskId: string, updates: Partial<KanbanTask>) => {
+        // TODO: Implement update task
+        console.log('Update task:', taskId, updates);
+    };
+
+    if (!activeProject) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="text-center">
+                    <div className="w-20 h-20 rounded-full bg-zinc-800/50 flex items-center justify-center mx-auto mb-4">
+                        <Kanban size={32} className="text-zinc-500" />
+                    </div>
+                    <h2 className="font-cyber text-xl text-white mb-2">NO::ACTIVE::MISSION</h2>
+                    <p className="text-sm text-zinc-400 mb-6">Select a project to view its kanban board</p>
+                    <button
+                        onClick={onBack}
+                        className="px-6 py-3 bg-cyber-pink/20 text-cyber-pink border border-cyber-pink/30 rounded-sm font-cyber hover:bg-cyber-pink/30 transition-colors"
+                    >
+                        GO::BACK
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    const currentMonth = activeProject.monthlyPlan[selectedMonthIndex];
+    const currentYear = new Date(activeProject.startDate).getFullYear();
+
+    return (
+        <div className="min-h-screen pb-12">
+            {/* Header Section */}
+            <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="sticky top-20 z-30 bg-zinc-950/80 backdrop-blur-2xl border-b border-white/5 px-6 py-4"
+            >
+                <div className="max-w-[1800px] mx-auto">
+                    {/* Top Row */}
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-4">
+                            {/* Project Selector */}
+                            <div className="relative">
+                                <button
+                                    onClick={() => setShowProjectSelector(!showProjectSelector)}
+                                    className="flex items-center gap-3 px-4 py-2 bg-zinc-900/50 border border-white/10 rounded-sm hover:border-white/20 transition-colors group"
+                                >
+                                    <span className="text-2xl">{activeProject.selectedIdea.emoji || '🎯'}</span>
+                                    <div className="text-left">
+                                        <div className="text-sm font-medium text-white">
+                                            {activeProject.selectedIdea.title || 'Untitled Mission'}
+                                        </div>
+                                        <div className="text-[10px] font-mono text-zinc-500">
+                                            {activeProject.monthlyPlan.length} months • Active
+                                        </div>
+                                    </div>
+                                    <ChevronDown size={16} className="text-zinc-400 group-hover:text-white transition-colors" />
+                                </button>
+
+                                <AnimatePresence>
+                                    {showProjectSelector && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: -10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: -10 }}
+                                            className="absolute top-full left-0 mt-2 w-72 bg-zinc-900 border border-white/10 rounded-lg shadow-2xl overflow-hidden z-50"
+                                        >
+                                            <div className="p-2 border-b border-white/5">
+                                                <p className="text-[10px] font-cyber text-zinc-500 px-2 tracking-wider">
+                                                    SELECT::MISSION
+                                                </p>
+                                            </div>
+                                            <div className="max-h-64 overflow-y-auto p-2">
+                                                {projects.map((project) => (
+                                                    <button
+                                                        key={project.id}
+                                                        onClick={() => {
+                                                            onSelectProject(project.id);
+                                                            setShowProjectSelector(false);
+                                                        }}
+                                                        className={`w-full px-3 py-2 flex items-center gap-3 rounded-sm transition-all ${project.id === activeProjectId
+                                                                ? 'bg-cyber-pink/10 text-white'
+                                                                : 'hover:bg-white/5 text-zinc-400'
+                                                            }`}
+                                                    >
+                                                        <span className="text-lg">{project.selectedIdea.emoji || '🎯'}</span>
+                                                        <span className="text-sm truncate">{project.selectedIdea.title}</span>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+
+                            {/* Month Navigation */}
+                            <div className="flex items-center gap-2 bg-zinc-900/50 rounded-sm border border-white/10 p-1">
+                                <button
+                                    onClick={() => setSelectedMonthIndex(Math.max(0, selectedMonthIndex - 1))}
+                                    disabled={selectedMonthIndex === 0}
+                                    className="p-2 hover:bg-white/10 rounded-sm disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    <ChevronLeft size={16} className="text-zinc-400" />
+                                </button>
+
+                                <div className="flex items-center gap-2 px-3 py-1 min-w-[160px] justify-center">
+                                    <CalendarDays size={14} className="text-cyber-cyan" />
+                                    <span className="text-sm font-cyber text-white">
+                                        {months[currentMonth?.month - 1 || 0]} {currentYear}
+                                    </span>
+                                </div>
+
+                                <button
+                                    onClick={() => setSelectedMonthIndex(Math.min(activeProject.monthlyPlan.length - 1, selectedMonthIndex + 1))}
+                                    disabled={selectedMonthIndex >= activeProject.monthlyPlan.length - 1}
+                                    className="p-2 hover:bg-white/10 rounded-sm disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    <ChevronRight size={16} className="text-zinc-400" />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Stats Pills */}
+                        <div className="flex items-center gap-3">
+                            <StatPill
+                                icon={<Target size={14} />}
+                                label="Total"
+                                value={stats.total}
+                                color="text-zinc-400"
+                            />
+                            <StatPill
+                                icon={<Clock size={14} />}
+                                label="Todo"
+                                value={stats.todo}
+                                color="text-zinc-400"
+                            />
+                            <StatPill
+                                icon={<Zap size={14} />}
+                                label="In Progress"
+                                value={stats.inProgress}
+                                color="text-cyber-cyan"
+                            />
+                            <StatPill
+                                icon={<CheckCircle2 size={14} />}
+                                label="Done"
+                                value={stats.completed}
+                                color="text-green-400"
+                            />
+
+                            {/* Progress Bar */}
+                            <div className="flex items-center gap-3 pl-3 border-l border-white/10">
+                                <div className="w-32 h-2 bg-zinc-800 rounded-full overflow-hidden">
+                                    <motion.div
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${stats.percentage}%` }}
+                                        transition={{ duration: 0.5, ease: 'easeOut' }}
+                                        className="h-full bg-gradient-to-r from-cyber-pink to-cyber-cyan"
+                                    />
+                                </div>
+                                <span className="text-sm font-cyber text-cyber-cyan">
+                                    {stats.percentage}%
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Month Theme */}
+                    {currentMonth && (
+                        <div className="flex items-center gap-3">
+                            <span className="text-[10px] font-cyber text-zinc-500 tracking-wider">
+                                MONTH::OBJECTIVE
+                            </span>
+                            <span className="text-sm text-zinc-300">
+                                {currentMonth.theme}
+                            </span>
+                        </div>
+                    )}
+                </div>
+            </motion.div>
+
+            {/* Main Content */}
+            <div className="max-w-[1800px] mx-auto px-6 py-6">
+                <KanbanBoard
+                    project={activeProject}
+                    selectedMonthIndex={selectedMonthIndex}
+                    selectedWeek={selectedWeek}
+                    onTaskStatusChange={handleTaskStatusChange}
+                    onAddTask={handleAddTask}
+                    onDeleteTask={handleDeleteTask}
+                    onUpdateTask={handleUpdateTask}
+                />
+            </div>
+        </div>
+    );
+};
+
+// Stat Pill Component
+interface StatPillProps {
+    icon: React.ReactNode;
+    label: string;
+    value: number;
+    color: string;
+}
+
+const StatPill: React.FC<StatPillProps> = ({ icon, label, value, color }) => (
+    <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-900/50 border border-white/10 rounded-sm">
+        <span className={color}>{icon}</span>
+        <span className="text-xs text-zinc-500">{label}</span>
+        <span className={`text-sm font-bold ${color}`}>{value}</span>
+    </div>
+);
+
+export default KanbanView;

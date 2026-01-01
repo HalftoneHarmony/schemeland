@@ -22,6 +22,7 @@ export enum AppView {
   DASHBOARD = 'DASHBOARD',
   PROJECT_LIST = 'PROJECT_LIST',
   CAMPAIGN_DETAIL = 'CAMPAIGN_DETAIL',
+  KANBAN = 'KANBAN',
 }
 
 /**
@@ -63,6 +64,31 @@ export enum Priority {
   MEDIUM = 'MEDIUM',
   HIGH = 'HIGH',
   CRITICAL = 'CRITICAL'
+}
+
+/**
+ * 칸반보드 작업 상태 (4단계)
+ */
+export enum TaskStatus {
+  TODO = 'TODO',
+  IN_PROGRESS = 'IN_PROGRESS',
+  REVIEW = 'REVIEW',
+  DONE = 'DONE'
+}
+
+/**
+ * 칸반보드용 작업 인터페이스
+ */
+export interface KanbanTask extends BaseEntity {
+  text: string;
+  status: TaskStatus;
+  priority: Priority;
+  weekNumber: number;
+  monthIndex: number;
+  projectId: string;
+  dueDate?: string;
+  tags?: string[];
+  description?: string;
 }
 
 export interface ProjectIdea extends BaseEntity {

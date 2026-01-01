@@ -35,8 +35,8 @@ const NeuralBackground = () => {
     const mouseY = useMotionValue(0);
 
     const springConfig = { damping: 25, stiffness: 150 };
-    const dx = useSpring(useTransform(mouseX, [0, typeof window !== 'undefined' ? window.innerWidth : 1920], [-20, 20]), springConfig);
-    const dy = useSpring(useTransform(mouseY, [0, typeof window !== 'undefined' ? window.innerHeight : 1080], [-20, 20]), springConfig);
+    const dx = useSpring(useTransform(mouseX, [0, typeof window !== 'undefined' ? window.innerWidth : 1920], [-30, 30]), springConfig);
+    const dy = useSpring(useTransform(mouseY, [0, typeof window !== 'undefined' ? window.innerHeight : 1080], [-30, 30]), springConfig);
 
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
@@ -47,107 +47,88 @@ const NeuralBackground = () => {
         return () => window.removeEventListener('mousemove', handleMouseMove);
     }, [mouseX, mouseY]);
 
+    // Generate fixed random particles for the connectome to avoid hydration mismatches
+    const particles = React.useMemo(() => [...Array(25)].map((_, i) => ({
+        id: i,
+        x: (i * 13) % 100,
+        y: (i * 17) % 100,
+        size: (i % 3) + 1.5,
+        duration: 4 + (i % 6)
+    })), []);
+
     return (
         <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-            {/* Animated Lines */}
-            <svg className="absolute inset-0 w-full h-full opacity-20">
-                <defs>
-                    <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="var(--cyber-cyan)" stopOpacity="0" />
-                        <stop offset="50%" stopColor="var(--cyber-cyan)" stopOpacity="1" />
-                        <stop offset="100%" stopColor="var(--cyber-cyan)" stopOpacity="0" />
-                    </linearGradient>
-                </defs>
-                {[...Array(15)].map((_, i) => (
-                    <motion.line
-                        key={i}
-                        x1={((i * 7) % 100) + "%"}
-                        y1="-10%"
-                        x2={((i * 7 + 5) % 100) + "%"}
-                        y2="110%"
-                        stroke="url(#lineGrad)"
-                        strokeWidth="1"
-                        initial={{ pathLength: 0, opacity: 0 }}
-                        animate={{
-                            pathLength: [0, 1, 0],
-                            opacity: [0, 0.5, 0],
-                        }}
-                        transition={{
-                            duration: 5 + (i % 5),
-                            repeat: Infinity,
-                            ease: "linear",
-                            delay: i * 0.5
-                        }}
-                    />
+            {/* Cyber Grid with pulsing intersections */}
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px]">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,black_90%)]" />
+            </div>
+
+            {/* Neural Connectome - Moving lines between dots */}
+            <svg className="absolute inset-0 w-full h-full opacity-30">
+                {particles.map((p, i) => (
+                    <React.Fragment key={p.id}>
+                        <motion.circle
+                            cx={`${p.x}%`}
+                            cy={`${p.y}%`}
+                            r={p.size}
+                            fill="var(--cyber-cyan)"
+                            animate={{ opacity: [0.2, 0.8, 0.2] }}
+                            transition={{ duration: p.duration, repeat: Infinity }}
+                        />
+                        {/* Connect to next few particles */}
+                        {particles.slice(i + 1, i + 3).map((p2, j) => (
+                            <motion.line
+                                key={`${p.id}-${p2.id}`}
+                                x1={`${p.x}%`}
+                                y1={`${p.y}%`}
+                                x2={`${p2.x}%`}
+                                y2={`${p2.y}%`}
+                                stroke="var(--cyber-cyan)"
+                                strokeWidth="0.5"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: [0, 0.15, 0] }}
+                                transition={{ duration: 4 + j, repeat: Infinity, delay: i * 0.2 }}
+                            />
+                        ))}
+                    </React.Fragment>
                 ))}
             </svg>
 
-            {/* Floating Particles */}
-            {[...Array(30)].map((_, i) => (
+            {/* Floating Tactical Elements */}
+            {[...Array(8)].map((_, i) => (
                 <motion.div
-                    key={`particle-${i}`}
-                    className="absolute w-1 h-1 bg-cyber-cyan rounded-full"
+                    key={`hex-${i}`}
+                    className="absolute text-cyber-pink/5"
                     style={{
-                        left: ((i * 13) % 100) + "%",
-                        top: ((i * 17) % 100) + "%",
+                        left: ((i * 15) % 100) + "%",
+                        top: ((i * 19) % 100) + "%",
                         x: dx,
                         y: dy,
                     }}
                     animate={{
-                        opacity: [0.1, 0.5, 0.1],
-                        scale: [1, 1.5, 1],
-                    }}
-                    transition={{
-                        duration: 3 + (i % 4),
-                        repeat: Infinity,
-                        delay: i * 0.1
-                    }}
-                />
-            ))}
-
-            {/* Floating Hexagons with Mouse Parallax */}
-            {[...Array(12)].map((_, i) => (
-                <motion.div
-                    key={i}
-                    className="absolute text-cyber-pink/10"
-                    style={{
-                        left: ((i * 23) % 100) + "%",
-                        top: ((i * 29) % 100) + "%",
-                        x: useSpring(useTransform(mouseX, [0, 1920], [-(i + 1) * 5, (i + 1) * 5]), springConfig),
-                        y: useSpring(useTransform(mouseY, [0, 1080], [-(i + 1) * 5, (i + 1) * 5]), springConfig),
-                    }}
-                    animate={{
-                        y: [0, -40, 0],
                         rotate: [0, 360],
-                        opacity: [0.05, 0.15, 0.05],
-                        scale: [1, 1.2, 1]
+                        scale: [0.8, 1.1, 0.8]
                     }}
-                    transition={{
-                        duration: 15 + (i % 10),
-                        repeat: Infinity,
-                        ease: "linear"
-                    }}
+                    transition={{ duration: 20 + i * 2, repeat: Infinity, ease: "linear" }}
                 >
-                    <div className={`border border-current rounded-3xl rotate-45 ${i % 2 === 0 ? 'w-32 h-32' : 'w-16 h-16'}`} />
+                    <div className="w-48 h-48 border border-current rounded-[3rem] rotate-12 flex items-center justify-center">
+                        <div className="w-24 h-24 border border-current rounded-full opacity-20" />
+                    </div>
                 </motion.div>
             ))}
 
-            {/* Pulse Orb behind Text */}
+            {/* Central Glow */}
             <motion.div
                 animate={{
-                    scale: [1, 1.2, 1],
-                    opacity: [0.1, 0.2, 0.1]
+                    scale: [1, 1.1, 1],
+                    opacity: [0.05, 0.1, 0.05]
                 }}
-                transition={{ duration: 4, repeat: Infinity }}
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] bg-cyber-pink/5 rounded-full blur-[150px]"
+                transition={{ duration: 8, repeat: Infinity }}
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1200px] h-[1200px] bg-cyber-pink/10 rounded-full blur-[180px]"
             />
 
-            {/* Scanline flickering effect */}
-            <motion.div
-                animate={{ opacity: [0.02, 0.08, 0.02] }}
-                transition={{ duration: 0.2, repeat: Infinity }}
-                className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent_50%,rgba(0,0,0,0.5)_50%)] bg-[length:100%_4px] pointer-events-none"
-            />
+            {/* CRT Scanline & Glitch */}
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.03),rgba(0,255,0,0.01),rgba(0,0,255,0.03))] bg-[size:100%_4px,3px_100%] pointer-events-none opacity-40" />
         </div>
     );
 };
@@ -204,61 +185,116 @@ export function LandingView({ onStart, onLoadSave, hasProjects }: LandingViewPro
 
                 <motion.div
                     variants={itemVariants}
-                    className="relative group mb-8"
+                    className="relative group mb-12 px-10"
                 >
-                    <div className="absolute -inset-10 bg-cyber-pink/20 blur-[100px] opacity-0 group-hover:opacity-40 transition-opacity duration-1000" />
+                    <div className="absolute -inset-20 bg-cyber-pink/10 blur-[120px] opacity-0 group-hover:opacity-40 transition-opacity duration-1000" />
                     <h1 className="text-8xl md:text-[11rem] font-cyber font-black tracking-tighter text-white leading-[0.8] uppercase italic relative">
-                        <span className="block mb-2 text-white/90">SCHEME</span>
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyber-cyan via-white to-cyber-pink relative inline-block drop-shadow-[0_0_30px_rgba(255,0,255,0.3)]">
+                        <span className="block mb-2 text-white/90 drop-shadow-sm pr-10">SCHEME</span>
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyber-cyan via-white to-cyber-pink relative inline-block drop-shadow-[0_0_40px_rgba(0,255,255,0.2)] pr-12">
                             LAND
-                            <motion.span
-                                initial={{ width: 0 }}
-                                animate={{ width: "115%" }}
-                                transition={{ delay: 1.2, duration: 1.5, ease: "circOut" }}
-                                className="absolute -bottom-4 -left-[7.5%] h-3 bg-gradient-to-r from-cyber-cyan to-cyber-pink shadow-neon-cyan opacity-80"
-                            />
                         </span>
                     </h1>
                 </motion.div>
 
-                <motion.p
+                <motion.div
                     variants={itemVariants}
-                    className="text-lg md:text-xl text-white/50 mb-20 max-w-2xl mx-auto leading-relaxed font-mono uppercase tracking-[0.2em] relative"
+                    className="flex flex-col items-center gap-6 mb-24 relative"
                 >
-                    <span className="block mb-2 border-l-2 border-cyber-cyan pl-4 text-left mx-auto w-fit">
-                        뉴럴 개념과 실질적인 배포 사이의 간극을 해소합니다.
-                    </span>
-                    <span className="block text-cyber-cyan font-bold glow tracking-[0.3em]">
-                        TIER_ONE_EXECUTION_LEVEL_100
-                    </span>
-                </motion.p>
+                    <div className="flex items-center gap-4 text-xs font-mono text-white/40 uppercase tracking-[0.4em] mb-2 bg-black/40 px-6 py-2 border border-white/5 shadow-2xl skew-x-[-10deg]">
+                        <div className="skew-x-[10deg] flex items-center gap-4">
+                            <Activity size={12} className="text-cyber-cyan animate-pulse" />
+                            <span>Neural_Link_Protocol::Active</span>
+                            <div className="w-2 h-2 rounded-full bg-cyber-cyan shadow-neon-cyan animate-pulse" />
+                        </div>
+                    </div>
+
+                    <div className="relative">
+                        <div className="absolute -left-6 top-0 bottom-0 w-1 bg-gradient-to-b from-cyber-cyan to-transparent opacity-50" />
+                        <p className="text-xl md:text-2xl text-white/60 max-w-3xl mx-auto leading-loose font-mono uppercase tracking-[0.2em] relative pl-6">
+                            뉴럴 개념과 실질적인 배포 사이의 간극을 해소합니다.
+                        </p>
+                    </div>
+                </motion.div>
 
                 <motion.div
                     variants={itemVariants}
                     className="flex flex-col sm:flex-row gap-10 justify-center items-center"
                 >
-                    <Button
-                        size="lg"
-                        onClick={onStart}
-                        className="h-24 px-16 text-2xl shadow-neon-pink hover:bg-white hover:text-black transition-all hover:scale-110 group relative overflow-hidden"
-                    >
-                        <Zap className="mr-4 group-hover:rotate-12 transition-transform" fill="currentColor" size={28} />
-                        <span className="relative z-10">새로운 프로젝트 추가</span>
-                        <div className="absolute inset-0 bg-white scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500 opacity-10" />
-                    </Button>
+                    <div className="relative group">
+                        {/* Animated Gradient Border Layer */}
+                        <motion.div
+                            animate={{
+                                background: [
+                                    "conic-gradient(from 0deg at 50% 50%, #ff00ff, #00ffff, #ff00ff)",
+                                    "conic-gradient(from 360deg at 50% 50%, #ff00ff, #00ffff, #ff00ff)"
+                                ]
+                            }}
+                            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                            className="absolute -inset-[4px] blur-[10px] opacity-80 group-hover:opacity-100 group-hover:blur-[15px] transition-all duration-500 skew-x-[-10deg]"
+                        />
+                        <Button
+                            size="lg"
+                            onClick={onStart}
+                            className="h-28 px-20 text-4xl bg-gradient-to-r from-cyber-pink via-cyber-pink/90 to-cyber-cyan border-none relative overflow-hidden group/btn hover:scale-105 transition-all duration-500 shadow-[0_0_50px_rgba(255,0,255,0.4)]"
+                        >
+                            {/* Inner Gloss Layer */}
+                            <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.3)_50%,transparent_75%)] bg-[length:200%_200%] animate-shimmer opacity-0 group-hover/btn:opacity-100 transition-opacity" />
+
+                            <Zap className="mr-8 group-hover/btn:rotate-12 transition-transform text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]" fill="white" size={42} />
+                            <span className="relative z-10 font-cyber font-black tracking-widest text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.9)] group-hover/btn:scale-110 transition-transform duration-300">
+                                새로운 프로젝트 추가
+                            </span>
+
+                            {/* High-speed Scanning Line */}
+                            <motion.div
+                                animate={{ top: ["-10%", "110%"] }}
+                                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                                className="absolute left-0 w-full h-[4px] bg-white shadow-[0_0_15px_#fff] z-20 opacity-60"
+                            />
+                        </Button>
+                    </div>
 
                     {hasProjects && (
-                        <Button
-                            variant="secondary"
-                            size="lg"
-                            onClick={onLoadSave}
-                            className="h-24 px-16 text-2xl group hover:scale-110 bg-black/40 backdrop-blur-xl border-cyber-cyan/30"
-                        >
-                            <Terminal className="mr-4 group-hover:text-cyber-cyan transition-colors" size={28} />
-                            <span>저장_데이터_로드</span>
-                        </Button>
+                        <div className="relative group">
+                            <div className="absolute -inset-2 bg-cyber-cyan/20 blur-[20px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 skew-x-[-10deg]" />
+                            <Button
+                                variant="secondary"
+                                size="lg"
+                                onClick={onLoadSave}
+                                className="h-28 px-20 text-4xl bg-black/60 backdrop-blur-3xl border-[3px] border-cyber-cyan/50 hover:border-cyber-cyan transition-all duration-500 hover:scale-105 overflow-hidden group/btn"
+                            >
+                                <div className="absolute inset-0 bg-cyber-cyan/10 group-hover/btn:bg-cyber-cyan/20 transition-colors" />
+                                <Terminal className="mr-8 group-hover/btn:text-cyber-cyan group-hover/btn:scale-110 transition-all drop-shadow-[0_0_15px_rgba(0,255,255,0.6)]" size={42} />
+                                <span className="font-cyber font-black tracking-widest text-cyber-cyan group-hover/btn:text-white drop-shadow-[0_0_15px_rgba(0,255,255,0.8)] transition-colors">
+                                    저장_데이터_로드
+                                </span>
+
+                                <motion.div
+                                    className="absolute inset-0 border-[4px] border-cyber-cyan opacity-0"
+                                    whileHover={{ opacity: [0, 0.5, 0], scale: [1, 1.3] }}
+                                    transition={{ duration: 0.8, repeat: Infinity }}
+                                />
+                            </Button>
+                        </div>
                     )}
                 </motion.div>
+            </motion.div>
+
+            {/* Tactical Scroll Indicator */}
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 2, duration: 1 }}
+                className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-4"
+            >
+                <div className="text-[8px] font-cyber font-black text-white/20 uppercase tracking-[0.5em] mb-2">Scroll_to_Analyze</div>
+                <div className="w-px h-16 bg-gradient-to-b from-cyber-cyan to-transparent relative overflow-hidden">
+                    <motion.div
+                        animate={{ y: ["-100%", "100%"] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                        className="absolute top-0 left-0 w-full h-1/2 bg-white"
+                    />
+                </div>
             </motion.div>
 
             {/* Tactical Grid Overlay */}
