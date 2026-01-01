@@ -131,6 +131,20 @@ export default function App() {
         store.updateTask(taskId, updates);
     };
 
+    const handleMoveTask = (taskId: string, sourceWeekIndex: number, targetWeekIndex: number) => {
+        const activeMonth = store.getActiveMonthPlan();
+        if (!activeMonth) return;
+        const month = store.months[activeMonth.id];
+        if (!month) return;
+
+        const sourceWeekId = month.weekIds[sourceWeekIndex];
+        const targetWeekId = month.weekIds[targetWeekIndex];
+
+        if (sourceWeekId && targetWeekId) {
+            store.moveTask(taskId, sourceWeekId, targetWeekId);
+        }
+    };
+
 
     // 5. Global Keyboard Shortcuts
     const [isQuickSearchOpen, setIsQuickSearchOpen] = React.useState(false);
@@ -342,6 +356,7 @@ export default function App() {
                             updateTaskText={handleUpdateTaskText}
                             updateWeekTheme={handleUpdateWeekTheme}
                             updateTaskStatus={handleUpdateTaskStatusWrapper}
+                            moveTask={handleMoveTask}
                         />
                     )}
 

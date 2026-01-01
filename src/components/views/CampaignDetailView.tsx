@@ -16,6 +16,7 @@ interface CampaignDetailViewProps {
     updateTaskText: (weekIndex: number, taskId: string, text: string) => void;
     updateWeekTheme: (weekIndex: number, theme: string) => void;
     updateTaskStatus?: (weekIndex: number, taskId: string, status: TaskStatus) => void;
+    moveTask?: (taskId: string, sourceWeekIndex: number, targetWeekIndex: number) => void;
 }
 
 // 상태별 설정
@@ -63,11 +64,14 @@ const statusConfig: Record<TaskStatus, {
 
 export function CampaignDetailView({
     activeProject, selectedMonthIndex, onBack,
-    toggleTask, addTask, deleteTask, updateTaskText, updateWeekTheme, updateTaskStatus
+    toggleTask, addTask, deleteTask, updateTaskText, updateWeekTheme, updateTaskStatus, moveTask
 }: CampaignDetailViewProps) {
     const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
     const [editingWeekIndex, setEditingWeekIndex] = useState<number | null>(null);
     const [showStatusMenu, setShowStatusMenu] = useState<string | null>(null);
+    // Drag and Drop State
+    const [dragOverWeekIndex, setDragOverWeekIndex] = useState<number | null>(null);
+
     const monthPlan = activeProject.monthlyPlan[selectedMonthIndex];
 
     // Safety check for monthPlan
@@ -286,7 +290,25 @@ export function CampaignDetailView({
                             const loadColor = getLoadColor(loadPercent);
 
                             return (
-                                <div key={idx} className="flex flex-col h-full group">
+                                <div
+                                    key={idx}
+                                    className={`flex flex-col h-full group ${dragOverWeekIndex === idx ? 'ring-2 ring-cyber-cyan ring-opacity-50 bg-cyber-cyan/5' : ''}`}
+                                    onDragOver={(e) => {
+                                        e.preventDefault();
+                                        setDragOverWeekIndex(idx);
+                                    }}
+                                    onDragLeave={() => setDragOverWeekIndex(null)}
+                                    onDrop={(e) => {
+                                        e.preventDefault();
+                                        setDragOverWeekIndex(null);
+                                        const taskId = e.dataTransfer.getData('taskId');
+                                        const sourceWeekIndex = parseInt(e.dataTransfer.getData('sourceWeekIndex'), 10);
+
+                                        if (taskId && !isNaN(sourceWeekIndex) && sourceWeekIndex !== idx && moveTask) {
+                                            moveTask(taskId, sourceWeekIndex, idx);
+                                        }
+                                    }}
+                                >
                                     {/* Loadout Gauge */}
                                     <div className="mb-4 flex items-center justify-between px-2">
                                         <div className="flex items-center gap-2">
@@ -350,17 +372,29 @@ export function CampaignDetailView({
                                                         return (
                                                             <div
                                                                 key={task.id}
+                                                                draggable
+                                                                onDragStart={(e) => {
+                                                                    e.dataTransfer.setData('taskId', task.id);
+                                                                    e.dataTransfer.setData('sourceWeekIndex', idx.toString());
+                                                                }}
+                                                                onClick={() => {
+                                                                    if (editingTaskId !== task.id) {
+                                                                        const nextStatus = getNextStatus(taskStatus);
+                                                                        handleStatusChange(idx, task.id, nextStatus);
+                                                                    }
+                                                                }}
                                                                 className={`
-                                                                    p-4 border text-[11px] font-mono transition-all relative overflow-hidden group/item
+                                                                    p-4 border text-[11px] font-mono transition-all relative overflow-hidden group/item cursor-pointer
                                                                     ${config.bgColor} ${config.borderColor}
-                                                                    ${taskStatus === TaskStatus.DONE ? 'opacity-60' : 'hover:opacity-100'}
+                                                                    ${taskStatus === TaskStatus.DONE ? 'opacity-60' : 'hover:opacity-100 hover:border-cyber-cyan/50 hover:shadow-neon-cyan'}
+                                                                    ${editingTaskId === task.id ? 'ring-2 ring-cyber-pink shadow-neon-pink' : ''}
                                                                 `}
                                                             >
                                                                 {/* Status indicator bar */}
                                                                 <div className={`absolute left-0 top-0 bottom-0 w-1 ${taskStatus === TaskStatus.DONE ? 'bg-green-400' :
-                                                                        taskStatus === TaskStatus.REVIEW ? 'bg-cyber-yellow' :
-                                                                            taskStatus === TaskStatus.IN_PROGRESS ? 'bg-cyber-cyan' :
-                                                                                'bg-zinc-600'
+                                                                    taskStatus === TaskStatus.REVIEW ? 'bg-cyber-yellow' :
+                                                                        taskStatus === TaskStatus.IN_PROGRESS ? 'bg-cyber-cyan' :
+                                                                            'bg-zinc-600'
                                                                     }`}></div>
 
                                                                 {/* Status badge */}
@@ -386,18 +420,6 @@ export function CampaignDetailView({
                                                                                 {task.text}
                                                                             </div>
                                                                             <div className="flex items-center gap-1 opacity-0 group-hover/task:opacity-100 transition-all">
-                                                                                {/* Quick status change button */}
-                                                                                <button
-                                                                                    onClick={(e) => {
-                                                                                        e.stopPropagation();
-                                                                                        const nextStatus = getNextStatus(taskStatus);
-                                                                                        handleStatusChange(idx, task.id, nextStatus);
-                                                                                    }}
-                                                                                    className={`p-1 hover:${config.color} transition-all flex items-center gap-1`}
-                                                                                    title={`진행: ${statusConfig[getNextStatus(taskStatus)].labelKo}`}
-                                                                                >
-                                                                                    <ChevronRight size={12} className={config.color} />
-                                                                                </button>
                                                                                 <button
                                                                                     onClick={(e) => { e.stopPropagation(); setEditingTaskId(task.id); }}
                                                                                     className="p-1 hover:text-cyber-cyan transition-all"
@@ -433,9 +455,9 @@ export function CampaignDetailView({
                                                                 <div
                                                                     key={task.id}
                                                                     className={`w-2 h-3 skew-x-[-20deg] transition-all duration-500 ${taskStatus === TaskStatus.DONE ? 'bg-green-400 shadow-[0_0_5px_#22c55e]' :
-                                                                            taskStatus === TaskStatus.REVIEW ? 'bg-cyber-yellow shadow-neon-yellow' :
-                                                                                taskStatus === TaskStatus.IN_PROGRESS ? 'bg-cyber-cyan shadow-neon-cyan' :
-                                                                                    'bg-zinc-600'
+                                                                        taskStatus === TaskStatus.REVIEW ? 'bg-cyber-yellow shadow-neon-yellow' :
+                                                                            taskStatus === TaskStatus.IN_PROGRESS ? 'bg-cyber-cyan shadow-neon-cyan' :
+                                                                                'bg-zinc-600'
                                                                         }`}
                                                                     title={`${task.text} (${statusConfig[taskStatus].labelKo})`}
                                                                 ></div>

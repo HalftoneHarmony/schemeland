@@ -91,6 +91,7 @@ interface StoreActions
     // Migration & Reset
     migrateFromLegacy: () => void;
     reset: () => void;
+    moveTask: (taskId: string, sourceWeekId: string, targetWeekId: string) => void;
 
     // Computed Helpers (레거시 호환용)
     getActiveProject: () => ProjectScheme | null;
@@ -336,6 +337,37 @@ export const useStore = create<Store>()(
                 set((state) => {
                     const { [weekId]: deleted, ...rest } = state.weeks;
                     return { weeks: rest };
+                });
+            },
+
+            moveTask: (taskId, sourceWeekId, targetWeekId) => {
+                const state = get();
+                const sourceWeek = state.weeks[sourceWeekId];
+                const targetWeek = state.weeks[targetWeekId];
+                const task = state.tasks[taskId];
+
+                if (!sourceWeek || !targetWeek || !task) return;
+
+                // 1. Remove from source
+                const newSourceTaskIds = sourceWeek.taskIds.filter(id => id !== taskId);
+
+                // 2. Add to target
+                const newTargetTaskIds = [...targetWeek.taskIds, taskId];
+
+                set({
+                    weeks: {
+                        ...state.weeks,
+                        [sourceWeekId]: { ...sourceWeek, taskIds: newSourceTaskIds, updatedAt: now() },
+                        [targetWeekId]: { ...targetWeek, taskIds: newTargetTaskIds, updatedAt: now() },
+                    },
+                    tasks: {
+                        ...state.tasks,
+                        [taskId]: {
+                            ...task,
+                            weekNumber: targetWeek.weekNumber, // Update Metadata
+                            updatedAt: now()
+                        }
+                    }
                 });
             },
 
