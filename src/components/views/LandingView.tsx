@@ -30,6 +30,79 @@ const itemVariants = {
     },
 };
 
+const NeuralBackground = () => (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        {/* Animated Lines */}
+        <svg className="absolute inset-0 w-full h-full opacity-20">
+            <defs>
+                <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="var(--cyber-cyan)" stopOpacity="0" />
+                    <stop offset="50%" stopColor="var(--cyber-cyan)" stopOpacity="1" />
+                    <stop offset="100%" stopColor="var(--cyber-cyan)" stopOpacity="0" />
+                </linearGradient>
+            </defs>
+            {[...Array(12)].map((_, i) => (
+                <motion.line
+                    key={i}
+                    x1={Math.random() * 100 + "%"}
+                    y1="-10%"
+                    x2={Math.random() * 100 + "%"}
+                    y2="110%"
+                    stroke="url(#lineGrad)"
+                    strokeWidth="1"
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    animate={{
+                        pathLength: [0, 1, 0],
+                        opacity: [0, 0.5, 0],
+                        y: ["0%", "100%"]
+                    }}
+                    transition={{
+                        duration: 5 + Math.random() * 10,
+                        repeat: Infinity,
+                        ease: "linear",
+                        delay: Math.random() * 10
+                    }}
+                />
+            ))}
+        </svg>
+
+        {/* Floating Hexagons */}
+        {[...Array(8)].map((_, i) => (
+            <motion.div
+                key={i}
+                className="absolute text-cyber-pink/10"
+                style={{
+                    left: Math.random() * 100 + "%",
+                    top: Math.random() * 100 + "%",
+                }}
+                animate={{
+                    y: [0, -40, 0],
+                    rotate: [0, 360],
+                    opacity: [0.05, 0.15, 0.05],
+                    scale: [1, 1.2, 1]
+                }}
+                transition={{
+                    duration: 10 + Math.random() * 20,
+                    repeat: Infinity,
+                    ease: "linear"
+                }}
+            >
+                <div className="w-32 h-32 border border-current rounded-3xl rotate-45" />
+            </motion.div>
+        ))}
+
+        {/* Pulse Orb behind Text */}
+        <motion.div
+            animate={{
+                scale: [1, 1.2, 1],
+                opacity: [0.1, 0.2, 0.1]
+            }}
+            transition={{ duration: 4, repeat: Infinity }}
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-cyber-cyan/10 rounded-full blur-[120px]"
+        />
+    </div>
+);
+
 export function LandingView({ onStart, onLoadSave, hasProjects }: LandingViewProps) {
     const { scrollY } = useScroll();
     const y1 = useTransform(scrollY, [0, 500], [0, 200]);
@@ -39,6 +112,8 @@ export function LandingView({ onStart, onLoadSave, hasProjects }: LandingViewPro
 
     return (
         <div className="flex flex-col items-center min-h-[160vh] text-center px-4 relative overflow-hidden pb-40 bg-black font-sans">
+            <NeuralBackground />
+
             {/* Cyberpunk Grid Background */}
             <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
                 <div className="absolute inset-0 bg-[linear-gradient(rgba(255,0,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,0,255,0.05)_1px,transparent_1px)] bg-[size:50px_50px]" />

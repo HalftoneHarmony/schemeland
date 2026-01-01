@@ -279,9 +279,9 @@ export function DashboardView(props: DashboardViewProps) {
 
                                     <div className="grid gap-6 mb-10">
                                         {[
-                                            { id: 'EASY', label: 'CHILL_MODE', icon: '🧘', desc: 'STABLE VELOCITY. MINIMAL FRICTION.', color: 'text-cyber-yellow', border: 'hover:border-cyber-yellow', bg: 'hover:bg-cyber-yellow/5' },
-                                            { id: 'NORMAL', label: 'STARTUP_MODE', icon: '🏃', desc: 'STANDARD OP-SPEED. BALANCED GRIND.', color: 'text-cyber-cyan', border: 'hover:border-cyber-cyan', bg: 'hover:bg-cyber-cyan/5' },
-                                            { id: 'HARD', label: 'CRUNCH_MODE', icon: '🔥', desc: 'MAXIMUM OVERDRIVE. SYSTEM STRESS HIGH.', color: 'text-red-500', border: 'hover:border-red-500', bg: 'hover:bg-red-500/5' },
+                                            { id: Difficulty.EASY, label: 'CHILL_MODE', icon: '🧘', desc: 'STABLE VELOCITY. MINIMAL FRICTION.', color: 'text-cyber-yellow', border: 'hover:border-cyber-yellow', bg: 'hover:bg-cyber-yellow/5' },
+                                            { id: Difficulty.NORMAL, label: 'STARTUP_MODE', icon: '🏃', desc: 'STANDARD OP-SPEED. BALANCED GRIND.', color: 'text-cyber-cyan', border: 'hover:border-cyber-cyan', bg: 'hover:bg-cyber-cyan/5' },
+                                            { id: Difficulty.HARD, label: 'CRUNCH_MODE', icon: '🔥', desc: 'MAXIMUM OVERDRIVE. SYSTEM STRESS HIGH.', color: 'text-red-500', border: 'hover:border-red-500', bg: 'hover:bg-red-500/5' },
                                         ].map((diff) => (
                                             <motion.button
                                                 key={diff.id}

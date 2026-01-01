@@ -1,19 +1,20 @@
 /**
  * @file types.ts
- * 데이터 엔지니어 관점에서 정의된 엄격한 타입 정의입니다.
- * 모든 데이터 구조는 미래의 서버(API) 연동을 고려하여 설계되었습니다.
+ * 데이터 엔지니어 관점에서 최적화된 엄격한 타입 정의입니다.
  */
 
 /**
- * 모든 데이터 엔티티의 기본 구조입니다.
- * 서버 DB에 저장될 때 필수적인 필드들을 포함합니다.
+ * 모든 데이터 엔티티의 기본 구조 (서버 연동 고려)
  */
 export interface BaseEntity {
   id: string;
-  createdAt: string; // ISO 8601 형식
-  updatedAt: string; // ISO 8601 형식
+  createdAt: string;
+  updatedAt: string;
 }
 
+/**
+ * 앱의 주요 뷰 상태
+ */
 export enum AppView {
   LANDING = 'LANDING',
   BRAIN_DUMP = 'BRAIN_DUMP',
@@ -23,11 +24,54 @@ export enum AppView {
   CAMPAIGN_DETAIL = 'CAMPAIGN_DETAIL',
 }
 
+/**
+ * 아이디어의 진행 상태
+ */
+export enum IdeaStatus {
+  PENDING = 'PENDING',
+  ANALYZED = 'ANALYZED',
+  ACTIVE = 'ACTIVE',
+  ARCHIVED = 'ARCHIVED'
+}
+
+/**
+ * 프로젝트의 전체 생명주기 상태
+ */
+export enum ProjectStatus {
+  DRAFT = 'DRAFT',
+  PLANNED = 'PLANNED',
+  EXECUTING = 'EXECUTING',
+  PAUSED = 'PAUSED',
+  COMPLETED = 'COMPLETED',
+  ABANDONED = 'ABANDONED'
+}
+
+/**
+ * 프로젝트 난이도
+ */
+export enum Difficulty {
+  EASY = 'EASY',
+  NORMAL = 'NORMAL',
+  HARD = 'HARD'
+}
+
+/**
+ * 작업 우선순위
+ */
+export enum Priority {
+  LOW = 'LOW',
+  MEDIUM = 'MEDIUM',
+  HIGH = 'HIGH',
+  CRITICAL = 'CRITICAL'
+}
+
 export interface ProjectIdea extends BaseEntity {
   title: string;
   description: string;
   emoji?: string;
-  status: 'PENDING' | 'ANALYZED' | 'ACTIVE'; // 상태를 엄격하게 제한
+  status: IdeaStatus;
+  tags?: string[];
+  metadata?: Record<string, any>; // 확장성을 위한 메타데이터 필드
 }
 
 export interface AnalysisMetrics {
@@ -47,6 +91,7 @@ export interface IdeaAnalysis extends BaseEntity {
 export interface MilestoneTask extends BaseEntity {
   text: string;
   isCompleted: boolean;
+  priority: Priority;
 }
 
 export interface WeeklyMilestone {
@@ -81,7 +126,7 @@ export interface ThreeYearVision extends BaseEntity {
 }
 
 /**
- * 전체 프로젝트 계획을 총괄하는 스키마입니다.
+ * 전체 프로젝트 계획 스키마 (Snapshot 방식)
  */
 export interface ProjectScheme extends BaseEntity {
   selectedIdea: ProjectIdea;
@@ -90,13 +135,15 @@ export interface ProjectScheme extends BaseEntity {
   monthlyPlan: MonthlyGoal[];
   threeYearVision?: ThreeYearVision;
   startDate: string;
-  status: 'DRAFT' | 'PLANNED' | 'EXECUTING' | 'COMPLETED'; // 프로젝트 진행 상태
+  status: ProjectStatus;
+  settings?: {
+    isHardcoreMode: boolean;
+    notificationsEnabled: boolean;
+  };
 }
 
-export type Difficulty = 'EASY' | 'NORMAL' | 'HARD';
-
 /**
- * API 응답 표준 형식 (미래 서버 연동용)
+ * API 응답 표준 형식
  */
 export interface ApiResponse<T> {
   data: T;
@@ -111,4 +158,15 @@ export interface ValidationResult {
   isValid: boolean;
   message?: string;
   errors?: Record<string, string>;
+}
+
+/**
+ * 전체 앱 상태 (O(1) 접근 최적화)
+ */
+export interface AppState {
+  ideas: Record<string, ProjectIdea>;
+  analyses: Record<string, IdeaAnalysis>;
+  projects: Record<string, ProjectScheme>;
+  activeProjectId: string | null;
+  version: number;
 }

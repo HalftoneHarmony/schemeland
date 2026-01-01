@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AppView, ProjectIdea, IdeaAnalysis, ProjectScheme, Difficulty, WeeklyPlanOption, ThreeYearVision } from './types';
+import { AppView, ProjectIdea, IdeaAnalysis, ProjectScheme, Difficulty, WeeklyPlanOption, ThreeYearVision, IdeaStatus, ProjectStatus } from './types';
 import { Zap, Briefcase } from 'lucide-react';
 import { analyzeIdeas, generateFullPlan, refineIdea, suggestIdeas, adjustWeeklyPlan, expandToThreeYears, generateMonthPlanOptions, extendRoadmap, compressRoadmap, refineThreeYearVision } from './services/geminiService';
 
@@ -12,6 +12,7 @@ import { DashboardView } from './components/views/DashboardView';
 import { CampaignDetailView } from './components/views/CampaignDetailView';
 
 import useLocalStorage from './hooks/useLocalStorage';
+import { useProjectManager } from './hooks/useProjectManager';
 import { validateAllIdeas, validateStartDate, validateVision } from './utils/validation';
 
 const INITIAL_IDEAS: ProjectIdea[] = [
@@ -19,7 +20,7 @@ const INITIAL_IDEAS: ProjectIdea[] = [
         id: crypto.randomUUID(),
         title: '',
         description: '',
-        status: 'PENDING',
+        status: IdeaStatus.PENDING,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
     },
@@ -28,10 +29,11 @@ const INITIAL_IDEAS: ProjectIdea[] = [
 export default function App() {
     const [view, setView] = useState<AppView>(AppView.LANDING);
 
-    // -- Persistence Logic with Custom Hook --
-    const [ideas, setIdeas] = useLocalStorage<ProjectIdea[]>('schemeland_ideas', INITIAL_IDEAS);
-    const [analyses, setAnalyses] = useLocalStorage<IdeaAnalysis[]>('schemeland_analyses', []);
-    const [projects, setProjects] = useLocalStorage<ProjectScheme[]>('schemeland_projects', []);
+    // -- Persistence Logic with Custom Data Hook --
+    const {
+        ideas, setIdeas, analyses, setAnalyses, projects, setProjects,
+        addIdea, updateIdea, deleteIdea, createProject, deleteProject
+    } = useProjectManager(INITIAL_IDEAS);
     // -- End Persistence Logic --
 
     const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
@@ -95,24 +97,16 @@ export default function App() {
     // --- Handlers ---
 
     const handleAddIdea = () => {
-        const now = new Date().toISOString();
-        setIdeas([...ideas, {
-            id: crypto.randomUUID(),
-            title: '',
-            description: '',
-            status: 'PENDING',
-            createdAt: now,
-            updatedAt: now
-        }]);
+        addIdea({ title: '', description: '' });
     };
 
     const handleUpdateIdea = (id: string, field: keyof ProjectIdea, value: string) => {
-        setIdeas(prev => prev.map(i => i.id === id ? { ...i, [field]: value } : i));
+        updateIdea(id, { [field]: value });
     };
 
     const handleDeleteIdea = (id: string) => {
         if (ideas.length <= 1) return;
-        setIdeas(prev => prev.filter(i => i.id !== id));
+        deleteIdea(id);
     };
 
     const handleMagicRefine = async (id: string) => {
@@ -146,7 +140,7 @@ export default function App() {
                 title: s.title,
                 description: s.description,
                 emoji: s.emoji,
-                status: 'PENDING',
+                status: IdeaStatus.PENDING,
                 createdAt: now,
                 updatedAt: now
             }));
@@ -194,26 +188,8 @@ export default function App() {
         try {
             const plan = await generateFullPlan(idea, analysis.reasoning);
 
-            // Inject Week 1 detailed plan into Month 1
-            const monthlyPlan = plan.monthlyPlan;
-            if (monthlyPlan.length > 0) {
-                monthlyPlan[0].detailedPlan = plan.weeklyPlan;
-            }
+            const newProject = createProject(idea, analysis, plan, projectStartDate);
 
-            const now = new Date().toISOString();
-            const newProject: ProjectScheme = {
-                id: crypto.randomUUID(),
-                selectedIdea: { ...idea, status: 'ACTIVE', updatedAt: now },
-                analysis: analysis,
-                yearlyPlan: plan.yearlyPlan,
-                monthlyPlan: monthlyPlan,
-                startDate: projectStartDate,
-                createdAt: now,
-                updatedAt: now,
-                status: 'PLANNED'
-            };
-
-            setProjects(prev => [...prev, newProject]);
             setActiveProjectId(newProject.id);
             setSelectedMonthIndex(0); // Default to Month 1
             setView(AppView.DASHBOARD);
@@ -469,7 +445,7 @@ export default function App() {
 
     const handleAbandonQuest = () => {
         if (!activeProject) return;
-        setProjects(prev => prev.filter(p => p.id !== activeProject.id));
+        deleteProject(activeProject.id);
         setView(AppView.PROJECT_LIST);
         setTimerActive(false);
     };

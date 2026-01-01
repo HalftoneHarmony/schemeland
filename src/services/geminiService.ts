@@ -271,7 +271,7 @@ export const generateFullPlan = async (idea: ProjectIdea, context: string): Prom
   }
 };
 
-export const refineIdea = async (draft: string): Promise<{title: string, description: string, emoji: string}> => {
+export const refineIdea = async (draft: string): Promise<{ title: string, description: string, emoji: string }> => {
   const prompt = `
     사용자가 대략적으로 적은 사이드 프로젝트 아이디어를 구체화(Refine)해주세요.
     입력값: "${draft}"
@@ -294,7 +294,7 @@ export const refineIdea = async (draft: string): Promise<{title: string, descrip
     });
 
     if (response.text) {
-      return JSON.parse(response.text) as {title: string, description: string, emoji: string};
+      return JSON.parse(response.text) as { title: string, description: string, emoji: string };
     }
     throw new Error("No refinement returned");
   } catch (error) {
@@ -303,7 +303,7 @@ export const refineIdea = async (draft: string): Promise<{title: string, descrip
   }
 };
 
-export const suggestIdeas = async (): Promise<{title: string, description: string, emoji: string}[]> => {
+export const suggestIdeas = async (): Promise<{ title: string, description: string, emoji: string }[]> => {
   const prompt = `
     1인 개발자(Indie Hacker)가 지금 당장 시작해볼 만한 트렌디하고 수익성 있는 사이드 프로젝트 아이디어 3개를 제안해주세요.
     분야: SaaS, Micro-SaaS, AI Tools, 생산성 도구 등.
@@ -327,7 +327,7 @@ export const suggestIdeas = async (): Promise<{title: string, description: strin
     });
 
     if (response.text) {
-      return JSON.parse(response.text) as {title: string, description: string, emoji: string}[];
+      return JSON.parse(response.text) as { title: string, description: string, emoji: string }[];
     }
     throw new Error("No suggestions returned");
   } catch (error) {
@@ -341,10 +341,10 @@ export const adjustWeeklyPlan = async (
   newGoal: string,
   difficulty: Difficulty
 ): Promise<WeeklyMilestone[]> => {
-  const difficultyPrompt = 
-    difficulty === 'EASY' ? "여유롭게 진행 (직장인/학생 병행)" :
-    difficulty === 'HARD' ? "하드코어/해커톤 모드 (단기간 집중)" :
-    "일반적인 스타트업 속도";
+  const difficultyPrompt =
+    difficulty === Difficulty.EASY ? "여유롭게 진행 (직장인/학생 병행)" :
+      difficulty === Difficulty.HARD ? "하드코어/해커톤 모드 (단기간 집중)" :
+        "일반적인 스타트업 속도";
 
   const prompt = `
     사용자가 Month 1의 목표를 수정했습니다.
@@ -416,7 +416,7 @@ export const expandToThreeYears = async (idea: ProjectIdea, currentVision: strin
 };
 
 export const refineThreeYearVision = async (idea: ProjectIdea, draft: ThreeYearVision): Promise<ThreeYearVision> => {
-    const prompt = `
+  const prompt = `
       사용자의 프로젝트 "${idea.title}"에 대한 3년 비전 초안을 더 구체적이고 영감을 주는 R=VD(생생하게 꿈꾸면 이루어진다) 버전으로 발전시켜주세요.
       기존 비전보다 더 전략적이고 생생한 그림이 그려지도록 만들어야 합니다.
 
@@ -430,24 +430,24 @@ export const refineThreeYearVision = async (idea: ProjectIdea, draft: ThreeYearV
       한국어로 작성하고 JSON을 반환하세요.
     `;
 
-    try {
-      const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: prompt,
-        config: {
-          responseMimeType: 'application/json',
-          responseSchema: threeYearSchema,
-        },
-      });
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: prompt,
+      config: {
+        responseMimeType: 'application/json',
+        responseSchema: threeYearSchema,
+      },
+    });
 
-      if (response.text) {
-        return JSON.parse(response.text) as ThreeYearVision;
-      }
-      throw new Error("Vision refinement failed");
-    } catch (error) {
-      console.error("Refine vision failed", error);
-      throw error;
+    if (response.text) {
+      return JSON.parse(response.text) as ThreeYearVision;
     }
+    throw new Error("Vision refinement failed");
+  } catch (error) {
+    console.error("Refine vision failed", error);
+    throw error;
+  }
 };
 
 export const generateMonthPlanOptions = async (
@@ -490,12 +490,12 @@ export const generateMonthPlanOptions = async (
 };
 
 export const generateMonthDetails = async (idea: ProjectIdea, monthGoal: MonthlyGoal): Promise<WeeklyMilestone[]> => {
-    const options = await generateMonthPlanOptions(idea, monthGoal);
-    return options[0].plan; // Default to first option
+  const options = await generateMonthPlanOptions(idea, monthGoal);
+  return options[0].plan; // Default to first option
 };
 
 export const extendRoadmap = async (idea: ProjectIdea, lastMonth: number): Promise<MonthlyGoal[]> => {
-    const prompt = `
+  const prompt = `
       현재 프로젝트 "${idea.title}"의 로드맵은 Month ${lastMonth}까지 작성되어 있습니다.
       Month ${lastMonth + 1}부터 Month ${lastMonth + 6}까지의 추가 로드맵(6개월)을 생성해주세요.
       
@@ -504,33 +504,33 @@ export const extendRoadmap = async (idea: ProjectIdea, lastMonth: number): Promi
   
       JSON 배열 포맷을 준수하세요.
     `;
-  
-    try {
-      const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: prompt,
-        config: {
-          responseMimeType: 'application/json',
-          responseSchema: monthlyListSchema,
-        },
-      });
-  
-      if (response.text) {
-        return JSON.parse(response.text) as MonthlyGoal[];
-      }
-      throw new Error("Roadmap extension failed");
-    } catch (error) {
-      console.error("Extend roadmap failed", error);
-      throw error;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: prompt,
+      config: {
+        responseMimeType: 'application/json',
+        responseSchema: monthlyListSchema,
+      },
+    });
+
+    if (response.text) {
+      return JSON.parse(response.text) as MonthlyGoal[];
     }
+    throw new Error("Roadmap extension failed");
+  } catch (error) {
+    console.error("Extend roadmap failed", error);
+    throw error;
+  }
 };
 
 export const compressRoadmap = async (idea: ProjectIdea, currentPlan: MonthlyGoal[], targetMonths: number): Promise<MonthlyGoal[]> => {
-    const prompt = `
+  const prompt = `
       사용자가 프로젝트 "${idea.title}"의 기존 ${currentPlan.length}개월 로드맵을 **${targetMonths}개월**로 압축하여 도전하려고 합니다.
       이것은 'Hardcore' 모드입니다. 난이도를 높이고, 불필요한 과정을 생략하고, 핵심 목표를 빠르게 달성하도록 재설계해주세요.
       
-      기존 로드맵 내용: ${JSON.stringify(currentPlan.map(m => ({m: m.month, t: m.theme})))}
+      기존 로드맵 내용: ${JSON.stringify(currentPlan.map(m => ({ m: m.month, t: m.theme })))}
   
       요구사항:
       1. 총 기간은 정확히 ${targetMonths}개월이어야 합니다 (Month 1 ~ Month ${targetMonths}).
@@ -539,23 +539,23 @@ export const compressRoadmap = async (idea: ProjectIdea, currentPlan: MonthlyGoa
   
       JSON 배열 포맷을 준수하세요.
     `;
-  
-    try {
-      const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: prompt,
-        config: {
-          responseMimeType: 'application/json',
-          responseSchema: monthlyListSchema,
-        },
-      });
-  
-      if (response.text) {
-        return JSON.parse(response.text) as MonthlyGoal[];
-      }
-      throw new Error("Roadmap compression failed");
-    } catch (error) {
-      console.error("Compress roadmap failed", error);
-      throw error;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: prompt,
+      config: {
+        responseMimeType: 'application/json',
+        responseSchema: monthlyListSchema,
+      },
+    });
+
+    if (response.text) {
+      return JSON.parse(response.text) as MonthlyGoal[];
     }
+    throw new Error("Roadmap compression failed");
+  } catch (error) {
+    console.error("Compress roadmap failed", error);
+    throw error;
+  }
 };
