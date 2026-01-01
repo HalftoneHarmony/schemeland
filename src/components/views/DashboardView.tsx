@@ -125,10 +125,62 @@ export function DashboardView(props: DashboardViewProps) {
                 animate="visible"
                 className="max-w-7xl mx-auto px-4 py-8 relative"
             >
-                {/* Cyberpunk Grid Background */}
-                <div className="fixed inset-0 z-0 opacity-40 pointer-events-none">
-                    <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,255,0.05)_1px,transparent_1px)] bg-[size:40px_40px]" />
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,transparent_0%,black_90%)]" />
+                {/* Premium Cyberpunk Background */}
+                <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+                    {/* Deep gradient base */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-[#0a0015] via-[#050510] to-[#000a0f]" />
+
+                    {/* Animated gradient orbs */}
+                    <motion.div
+                        className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-cyber-pink/10 blur-[150px]"
+                        animate={{
+                            x: [0, 100, 0],
+                            y: [0, 50, 0],
+                            scale: [1, 1.2, 1],
+                        }}
+                        transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                    <motion.div
+                        className="absolute top-[40%] right-[-10%] w-[500px] h-[500px] rounded-full bg-cyber-cyan/8 blur-[120px]"
+                        animate={{
+                            x: [0, -80, 0],
+                            y: [0, 100, 0],
+                            scale: [1, 1.3, 1],
+                        }}
+                        transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                    <motion.div
+                        className="absolute bottom-[-10%] left-[30%] w-[400px] h-[400px] rounded-full bg-purple-500/6 blur-[100px]"
+                        animate={{
+                            x: [0, 60, 0],
+                            y: [0, -40, 0],
+                        }}
+                        transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+                    />
+
+                    {/* Grid pattern with fade */}
+                    <div className="absolute inset-0 opacity-30">
+                        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:60px_60px]" />
+                    </div>
+
+                    {/* Subtle diagonal lines */}
+                    <div className="absolute inset-0 opacity-[0.015] bg-[repeating-linear-gradient(45deg,transparent,transparent_100px,rgba(255,255,255,0.5)_100px,rgba(255,255,255,0.5)_101px)]" />
+
+                    {/* Noise texture overlay */}
+                    <div className="absolute inset-0 opacity-[0.03] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIiB4PSIwIiB5PSIwIj48ZmVUdXJidWxlbmNlIGJhc2VGcmVxdWVuY3k9Ii43NSIgc3RpdGNoVGlsZXM9InN0aXRjaCIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNhKSIvPjwvc3ZnPg==')]" />
+
+                    {/* Vignette effect */}
+                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(0,0,0,0.4)_70%,rgba(0,0,0,0.8)_100%)]" />
+
+                    {/* Top light beam */}
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b from-cyber-cyan/5 via-transparent to-transparent blur-[80px]" />
+
+                    {/* Animated scanline */}
+                    <motion.div
+                        className="absolute left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyber-cyan/20 to-transparent"
+                        animate={{ y: ['-100vh', '100vh'] }}
+                        transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                    />
                 </div>
 
                 <motion.div variants={sectionVariants} className="mb-8">

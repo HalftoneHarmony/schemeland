@@ -399,6 +399,26 @@ export default function App() {
         setProjects(updatedProjects);
     };
 
+    const updateTaskStatus = (weekIndex: number, taskId: string, status: TaskStatus) => {
+        if (!activeProject) return;
+        const updatedProjects = projects.map(p => {
+            if (p.id === activeProject.id) {
+                const newMonthly = [...p.monthlyPlan];
+                const newWeekly = [...(newMonthly[selectedMonthIndex].detailedPlan || [])];
+                const task = newWeekly[weekIndex].tasks.find(t => t.id === taskId);
+                if (task) {
+                    task.status = status;
+                    task.isCompleted = status === TaskStatus.DONE;
+                    task.updatedAt = new Date().toISOString();
+                }
+                newMonthly[selectedMonthIndex].detailedPlan = newWeekly;
+                return { ...p, monthlyPlan: newMonthly };
+            }
+            return p;
+        });
+        setProjects(updatedProjects);
+    };
+
     const initManualPlan = () => {
         if (!activeProject) return;
         const newWeekly: WeeklyMilestone[] = [1, 2, 3, 4].map(num => ({
@@ -784,6 +804,7 @@ export default function App() {
                             deleteTask={deleteTask}
                             updateTaskText={updateTaskText}
                             updateWeekTheme={updateWeekTheme}
+                            updateTaskStatus={updateTaskStatus}
                             onBack={() => setView(AppView.DASHBOARD)}
                         />
                     )}
@@ -794,6 +815,7 @@ export default function App() {
                             activeProjectId={activeProjectId}
                             onSelectProject={handleSelectProject}
                             onBack={() => setView(AppView.PROJECT_LIST)}
+                            onUpdateProjects={setProjects}
                         />
                     )}
                 </main>

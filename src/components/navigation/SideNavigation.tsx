@@ -16,7 +16,8 @@ import {
     LogOut,
     Moon,
     Sun,
-    Command
+    Command,
+    Map
 } from 'lucide-react';
 import { AppView, ProjectScheme } from '../../types';
 
@@ -73,6 +74,12 @@ export const SideNavigation: React.FC<SideNavigationProps> = ({
             label: 'TASK::MATRIX',
             icon: <Kanban size={18} />,
             view: AppView.KANBAN
+        },
+        {
+            id: 'campaign-detail',
+            label: 'CAMPAIGN::DETAIL',
+            icon: <Map size={18} />,
+            view: AppView.CAMPAIGN_DETAIL
         },
     ];
 
@@ -218,8 +225,8 @@ export const SideNavigation: React.FC<SideNavigationProps> = ({
                                             key={project.id}
                                             onClick={() => onSelectProject(project.id)}
                                             className={`w-full px-3 py-2 flex items-center gap-3 rounded-sm transition-all group ${activeProjectId === project.id
-                                                    ? 'bg-cyber-pink/10 border-l-2 border-cyber-pink text-white'
-                                                    : 'hover:bg-white/5 text-zinc-400 hover:text-white'
+                                                ? 'bg-cyber-pink/10 border-l-2 border-cyber-pink text-white'
+                                                : 'hover:bg-white/5 text-zinc-400 hover:text-white'
                                                 }`}
                                         >
                                             <span className="text-lg">{project.selectedIdea.emoji || '🎯'}</span>

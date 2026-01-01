@@ -98,94 +98,122 @@ export function DashboardHeader({
 
 
             {/* HUD / Metrics Bar */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* XP Bar */}
                 <motion.div
-                    whileHover={{ y: -5, boxShadow: "0 10px 30px -10px rgba(255,0,255,0.2)" }}
-                    className="glass-panel p-8 relative group border-cyber-pink/30 shadow-neon-pink/5 overflow-hidden"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                    whileHover={{ y: -8, scale: 1.02 }}
+                    className="relative p-6 rounded-2xl overflow-hidden group cursor-default"
                 >
-                    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-20 transition-opacity">
-                        <Swords size={80} />
+                    {/* Card Background with glassmorphism */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-xl border border-white/10 rounded-2xl" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-cyber-pink/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
+
+                    {/* Decorative Icon */}
+                    <div className="absolute top-4 right-4 opacity-10 group-hover:opacity-30 transition-opacity">
+                        <Swords size={48} className="text-cyber-pink" />
                     </div>
-                    <div className="flex justify-between items-end mb-6 relative z-10">
-                        <div className="flex flex-col gap-2">
-                            <span className="text-[10px] font-cyber font-black text-zinc-500 uppercase tracking-[0.2em] flex items-center gap-2">
-                                <span className="w-2 h-2 rounded-full bg-cyber-pink animate-pulse" /> Quest_Progress
-                            </span>
-                            <div className="text-4xl font-black text-white tracking-tighter">
-                                {progress}<span className="text-xl text-cyber-pink ml-1">%</span>
-                            </div>
+
+                    <div className="relative z-10">
+                        <div className="flex items-center gap-2 mb-4">
+                            <div className="w-2 h-2 rounded-full bg-cyber-pink animate-pulse shadow-[0_0_10px_rgba(255,0,255,0.8)]" />
+                            <span className="text-[11px] font-medium text-zinc-400 uppercase tracking-widest">Quest Progress</span>
                         </div>
-                    </div>
-                    <div className="w-full bg-white/5 h-3 rounded-full overflow-hidden relative z-10 backdrop-blur-sm border border-white/5">
-                        <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${progress}%` }}
-                            transition={{ duration: 1.5, ease: "circOut" }}
-                            className="bg-gradient-to-r from-cyber-pink to-purple-500 h-full relative shadow-[0_0_15px_rgba(255,0,255,0.5)]"
-                        >
-                            <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.3)_50%,transparent_75%)] bg-[length:10px_10px]" />
-                        </motion.div>
+                        <div className="flex items-baseline gap-1 mb-4">
+                            <span className="text-5xl font-black text-white tracking-tighter">{progress}</span>
+                            <span className="text-2xl font-bold text-cyber-pink">%</span>
+                        </div>
+                        <div className="h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                            <motion.div
+                                initial={{ width: 0 }}
+                                animate={{ width: `${progress}%` }}
+                                transition={{ duration: 1.5, ease: "circOut" }}
+                                className="h-full bg-gradient-to-r from-cyber-pink via-purple-500 to-cyber-pink rounded-full relative"
+                            >
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-pulse" />
+                            </motion.div>
+                        </div>
                     </div>
                 </motion.div>
 
                 {/* Time Bar */}
                 <motion.div
-                    whileHover={{ y: -5, boxShadow: "0 10px 30px -10px rgba(0,255,255,0.2)" }}
-                    className="glass-panel p-8 relative group border-cyber-cyan/30 shadow-neon-cyan/5 overflow-hidden"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                    whileHover={{ y: -8, scale: 1.02 }}
+                    className="relative p-6 rounded-2xl overflow-hidden group cursor-default"
                 >
-                    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-20 transition-opacity">
-                        <Clock size={80} />
+                    {/* Card Background with glassmorphism */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-xl border border-white/10 rounded-2xl" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-cyber-cyan/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
+
+                    {/* Decorative Icon */}
+                    <div className="absolute top-4 right-4 opacity-10 group-hover:opacity-30 transition-opacity">
+                        <Clock size={48} className="text-cyber-cyan" />
                     </div>
-                    <div className="flex justify-between items-end mb-6 relative z-10">
-                        <div className="flex flex-col gap-2">
-                            <span className="text-[10px] font-cyber font-black text-zinc-500 uppercase tracking-[0.2em] flex items-center gap-2">
-                                <span className="w-2 h-2 rounded-full bg-cyber-cyan animate-pulse" /> Time_Elapsed
-                            </span>
-                            <div className="text-4xl font-black text-white tracking-tighter">
-                                {daysPassed}<span className="text-xl text-zinc-500 ml-1 font-medium">/{30} Days</span>
-                            </div>
+
+                    <div className="relative z-10">
+                        <div className="flex items-center gap-2 mb-4">
+                            <div className="w-2 h-2 rounded-full bg-cyber-cyan animate-pulse shadow-[0_0_10px_rgba(0,255,255,0.8)]" />
+                            <span className="text-[11px] font-medium text-zinc-400 uppercase tracking-widest">Time Elapsed</span>
                         </div>
-                    </div>
-                    <div className="w-full bg-white/5 h-3 rounded-full overflow-hidden relative z-10 backdrop-blur-sm border border-white/5">
-                        <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${timeProgress}%` }}
-                            transition={{ duration: 1.5, ease: "circOut" }}
-                            className={`h-full relative shadow-[0_0_15px_rgba(var(--cyber-cyan),0.5)] ${timeProgress > 80 ? 'bg-gradient-to-r from-red-500 to-orange-500' : 'bg-gradient-to-r from-cyber-cyan to-blue-500'}`}
-                        />
+                        <div className="flex items-baseline gap-1 mb-4">
+                            <span className="text-5xl font-black text-white tracking-tighter">{daysPassed}</span>
+                            <span className="text-xl font-medium text-zinc-500">/30</span>
+                            <span className="text-sm font-medium text-zinc-600 ml-1">days</span>
+                        </div>
+                        <div className="h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                            <motion.div
+                                initial={{ width: 0 }}
+                                animate={{ width: `${timeProgress}%` }}
+                                transition={{ duration: 1.5, ease: "circOut" }}
+                                className={`h-full rounded-full ${timeProgress > 80 ? 'bg-gradient-to-r from-red-500 to-orange-500' : 'bg-gradient-to-r from-cyber-cyan via-blue-500 to-cyber-cyan'}`}
+                            />
+                        </div>
                     </div>
                 </motion.div>
 
                 {/* Status */}
                 <motion.div
-                    whileHover={{ y: -5, boxShadow: isAhead ? "0 10px 30px -10px rgba(0,255,255,0.2)" : "0 10px 30px -10px rgba(239,68,68,0.2)" }}
-                    className={`glass-panel p-8 relative group flex items-start justify-between overflow-hidden
-                        ${isAhead ? 'border-cyber-cyan/30 shadow-neon-cyan/5' : 'border-red-500/30 shadow-[0_0_20px_rgba(239,68,68,0.1)]'}
-                    `}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.6 }}
+                    whileHover={{ y: -8, scale: 1.02 }}
+                    className="relative p-6 rounded-2xl overflow-hidden group cursor-default"
                 >
-                    <div className="absolute -right-6 -bottom-6 opacity-5 group-hover:opacity-10 transition-opacity rotate-12">
-                        {isAhead ? <Crown size={120} /> : <AlertTriangle size={120} />}
+                    {/* Card Background with glassmorphism */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-xl border border-white/10 rounded-2xl" />
+                    <div className={`absolute inset-0 bg-gradient-to-br ${isAhead ? 'from-cyber-cyan/10' : 'from-red-500/10'} via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl`} />
+
+                    {/* Decorative Icon */}
+                    <div className="absolute top-4 right-4 opacity-10 group-hover:opacity-30 transition-opacity">
+                        {isAhead ? <Crown size={48} className="text-cyber-cyan" /> : <AlertTriangle size={48} className="text-red-500" />}
                     </div>
 
-                    <div className="relative z-10">
-                        <span className="text-[10px] font-cyber font-black text-zinc-500 uppercase tracking-[0.2em] flex items-center gap-2 mb-3">
-                            <div className={`w-2 h-2 rounded-full ${isAhead ? 'bg-cyber-cyan' : 'bg-red-500'} animate-pulse`} /> System_Status
-                        </span>
-                        <div className={`text-2xl font-black ${statusColor} italic tracking-wider uppercase leading-tight max-w-[150px]`}>
-                            {statusMessage}
+                    <div className="relative z-10 flex items-start justify-between">
+                        <div>
+                            <div className="flex items-center gap-2 mb-4">
+                                <div className={`w-2 h-2 rounded-full ${isAhead ? 'bg-cyber-cyan' : 'bg-red-500'} animate-pulse shadow-[0_0_10px_${isAhead ? 'rgba(0,255,255,0.8)' : 'rgba(239,68,68,0.8)'}]`} />
+                                <span className="text-[11px] font-medium text-zinc-400 uppercase tracking-widest">System Status</span>
+                            </div>
+                            <div className={`text-3xl font-black ${isAhead ? 'text-cyber-cyan' : 'text-red-500'} tracking-tight uppercase italic`}>
+                                {isAhead ? 'SYNC_OK' : 'DELAYED'}
+                            </div>
+                            <p className="text-xs text-zinc-500 mt-2 font-medium">
+                                {isAhead ? '목표 달성률이 시간보다 앞서고 있습니다' : '일정이 지연되고 있습니다'}
+                            </p>
                         </div>
+                        <motion.div
+                            animate={isAhead ? { rotate: [0, 5, -5, 0] } : { scale: [1, 1.1, 1] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                            className={`p-3 rounded-xl border-2 ${isAhead ? 'border-cyber-cyan/50 bg-cyber-cyan/10 text-cyber-cyan' : 'border-red-500/50 bg-red-500/10 text-red-500'}`}
+                        >
+                            {isAhead ? <Crown size={28} /> : <AlertTriangle size={28} />}
+                        </motion.div>
                     </div>
-                    <motion.div
-                        initial={{ rotate: 10, scale: 0.9 }}
-                        animate={{ rotate: 0, scale: 1 }}
-                        transition={{ type: "spring", stiffness: 200 }}
-                        className={`p-3 bg-black/40 border-2 rounded-xl backdrop-blur-md relative z-10
-                            ${isAhead ? 'border-cyber-cyan text-cyber-cyan shadow-neon-cyan' : 'border-red-500 text-red-500 shadow-[0_0_15px_rgba(239,68,68,0.5)]'}
-                        `}
-                    >
-                        {isAhead ? <Crown size={32} /> : <AlertTriangle size={32} />}
-                    </motion.div>
                 </motion.div>
             </div>
         </header>

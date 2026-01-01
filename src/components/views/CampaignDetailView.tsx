@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
-import { ProjectScheme, MonthlyGoal, Priority } from '../../types';
+import { ProjectScheme, MonthlyGoal, Priority, TaskStatus } from '../../types';
 import { Button } from '../Button';
-import { ArrowLeft, Map, Calendar, Flag, Zap, Plus, Shield, Activity, Terminal, Trash2, Edit3 } from 'lucide-react';
+import {
+    ArrowLeft, Map, Calendar, Flag, Zap, Plus, Shield, Activity, Terminal, Trash2, Edit3,
+    Circle, Loader2, AlertCircle, CheckCircle2, ChevronRight
+} from 'lucide-react';
 
 interface CampaignDetailViewProps {
     activeProject: ProjectScheme;
@@ -12,14 +15,59 @@ interface CampaignDetailViewProps {
     deleteTask: (weekIndex: number, taskId: string) => void;
     updateTaskText: (weekIndex: number, taskId: string, text: string) => void;
     updateWeekTheme: (weekIndex: number, theme: string) => void;
+    updateTaskStatus?: (weekIndex: number, taskId: string, status: TaskStatus) => void;
 }
+
+// 상태별 설정
+const statusConfig: Record<TaskStatus, {
+    label: string;
+    labelKo: string;
+    color: string;
+    bgColor: string;
+    borderColor: string;
+    icon: React.ReactNode;
+}> = {
+    [TaskStatus.TODO]: {
+        label: 'TODO',
+        labelKo: '대기중',
+        color: 'text-zinc-400',
+        bgColor: 'bg-zinc-700/30',
+        borderColor: 'border-zinc-600/30',
+        icon: <Circle size={12} />
+    },
+    [TaskStatus.IN_PROGRESS]: {
+        label: 'ACTIVE',
+        labelKo: '진행중',
+        color: 'text-cyber-cyan',
+        bgColor: 'bg-cyber-cyan/10',
+        borderColor: 'border-cyber-cyan/30',
+        icon: <Loader2 size={12} className="animate-spin" />
+    },
+    [TaskStatus.REVIEW]: {
+        label: 'REVIEW',
+        labelKo: '검토중',
+        color: 'text-cyber-yellow',
+        bgColor: 'bg-cyber-yellow/10',
+        borderColor: 'border-cyber-yellow/30',
+        icon: <AlertCircle size={12} />
+    },
+    [TaskStatus.DONE]: {
+        label: 'DONE',
+        labelKo: '완료됨',
+        color: 'text-green-400',
+        bgColor: 'bg-green-500/10',
+        borderColor: 'border-green-500/30',
+        icon: <CheckCircle2 size={12} />
+    },
+};
 
 export function CampaignDetailView({
     activeProject, selectedMonthIndex, onBack,
-    toggleTask, addTask, deleteTask, updateTaskText, updateWeekTheme
+    toggleTask, addTask, deleteTask, updateTaskText, updateWeekTheme, updateTaskStatus
 }: CampaignDetailViewProps) {
     const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
     const [editingWeekIndex, setEditingWeekIndex] = useState<number | null>(null);
+    const [showStatusMenu, setShowStatusMenu] = useState<string | null>(null);
     const monthPlan = activeProject.monthlyPlan[selectedMonthIndex];
 
     // Safety check for monthPlan
@@ -28,13 +76,56 @@ export function CampaignDetailView({
     const weeks = monthPlan.detailedPlan || [];
     const hasPlan = weeks.length > 0;
 
+    // 상태별 통계
+    const getStatusStats = () => {
+        let todo = 0, inProgress = 0, review = 0, done = 0;
+        weeks.forEach(week => {
+            week.tasks.forEach(task => {
+                const status = task.status || (task.isCompleted ? TaskStatus.DONE : TaskStatus.TODO);
+                switch (status) {
+                    case TaskStatus.TODO: todo++; break;
+                    case TaskStatus.IN_PROGRESS: inProgress++; break;
+                    case TaskStatus.REVIEW: review++; break;
+                    case TaskStatus.DONE: done++; break;
+                }
+            });
+        });
+        return { todo, inProgress, review, done, total: todo + inProgress + review + done };
+    };
+
+    const stats = getStatusStats();
+
     // Helper to calculate load
-    // Assuming 5 tasks is "100%" capacity for visual reference
     const getLoadPercentage = (taskCount: number) => Math.min(100, (taskCount / 5) * 100);
     const getLoadColor = (percent: number) => {
         if (percent >= 80) return 'bg-red-500 shadow-[0_0_15px_#ef4444]';
         if (percent >= 60) return 'bg-cyber-yellow shadow-neon-yellow';
         return 'bg-cyber-cyan shadow-neon-cyan';
+    };
+
+    // 태스크의 실제 상태를 가져옴
+    const getTaskStatus = (task: { status?: TaskStatus; isCompleted: boolean }): TaskStatus => {
+        return task.status || (task.isCompleted ? TaskStatus.DONE : TaskStatus.TODO);
+    };
+
+    // 다음 상태로 이동
+    const getNextStatus = (currentStatus: TaskStatus): TaskStatus => {
+        const statusOrder = [TaskStatus.TODO, TaskStatus.IN_PROGRESS, TaskStatus.REVIEW, TaskStatus.DONE];
+        const currentIndex = statusOrder.indexOf(currentStatus);
+        return statusOrder[(currentIndex + 1) % statusOrder.length];
+    };
+
+    // 상태 변경 핸들러
+    const handleStatusChange = (weekIndex: number, taskId: string, newStatus: TaskStatus) => {
+        if (updateTaskStatus) {
+            updateTaskStatus(weekIndex, taskId, newStatus);
+        } else {
+            // Fallback: toggleTask를 사용하여 완료 상태만 토글
+            if (newStatus === TaskStatus.DONE) {
+                toggleTask(weekIndex, taskId);
+            }
+        }
+        setShowStatusMenu(null);
     };
 
     return (
@@ -51,13 +142,13 @@ export function CampaignDetailView({
                     <div className="flex justify-between items-end mb-2">
                         <span className="text-[10px] font-cyber font-black text-cyber-cyan tracking-[0.3em] uppercase">TACTICAL_MISSION_PROGRESS::전술_미션_진행률</span>
                         <span className="text-xl font-cyber font-black text-white italic">
-                            {Math.round((weeks.reduce((acc, w) => acc + w.tasks.filter(t => t.isCompleted).length, 0) / (weeks.reduce((acc, w) => acc + w.tasks.length, 0) || 1)) * 100)}%
+                            {stats.total > 0 ? Math.round((stats.done / stats.total) * 100) : 0}%
                         </span>
                     </div>
                     <div className="h-4 bg-white/5 border border-white/10 p-1 skew-x-[-15deg]">
                         <div
                             className="h-full bg-gradient-to-r from-cyber-cyan via-cyber-blue to-cyber-pink shadow-neon-cyan transition-all duration-1000 ease-out relative overflow-hidden"
-                            style={{ width: `${(weeks.reduce((acc, w) => acc + w.tasks.filter(t => t.isCompleted).length, 0) / (weeks.reduce((acc, w) => acc + w.tasks.length, 0) || 1)) * 100}%` }}
+                            style={{ width: `${stats.total > 0 ? (stats.done / stats.total) * 100 : 0}%` }}
                         >
                             <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.3)_50%,transparent_100%)] animate-[scanline_2s_linear_infinite] w-24"></div>
                         </div>
@@ -119,26 +210,27 @@ export function CampaignDetailView({
                         </div>
                     </div>
 
-                    {/* Sector Stats Dashboard */}
+                    {/* Sector Stats Dashboard - 상태별로 표시 */}
                     <div className="flex justify-center flex-wrap gap-8 my-10 px-8">
                         <div className="flex flex-col items-center gap-2">
-                            <span className="text-[9px] font-cyber font-black text-white/30 uppercase tracking-[0.2em]">Weeks_Active::활성_주차</span>
-                            <div className="text-3xl font-cyber font-black text-cyber-cyan italic">{weeks.length}</div>
+                            <span className="text-[9px] font-cyber font-black text-white/30 uppercase tracking-[0.2em]">TODO::대기중</span>
+                            <div className="text-3xl font-cyber font-black text-zinc-400 italic">{stats.todo}</div>
+                            <div className="w-12 h-0.5 bg-zinc-500"></div>
+                        </div>
+                        <div className="flex flex-col items-center gap-2">
+                            <span className="text-[9px] font-cyber font-black text-white/30 uppercase tracking-[0.2em]">ACTIVE::진행중</span>
+                            <div className="text-3xl font-cyber font-black text-cyber-cyan italic">{stats.inProgress}</div>
                             <div className="w-12 h-0.5 bg-cyber-cyan shadow-neon-cyan"></div>
                         </div>
                         <div className="flex flex-col items-center gap-2">
-                            <span className="text-[9px] font-cyber font-black text-white/30 uppercase tracking-[0.2em]">Tactical_Goals::전술_목표</span>
-                            <div className="text-3xl font-cyber font-black text-white italic">
-                                {weeks.reduce((acc, w) => acc + w.tasks.length, 0)}
-                            </div>
-                            <div className="w-12 h-0.5 bg-white/20"></div>
+                            <span className="text-[9px] font-cyber font-black text-white/30 uppercase tracking-[0.2em]">REVIEW::검토중</span>
+                            <div className="text-3xl font-cyber font-black text-cyber-yellow italic">{stats.review}</div>
+                            <div className="w-12 h-0.5 bg-cyber-yellow shadow-neon-yellow"></div>
                         </div>
                         <div className="flex flex-col items-center gap-2">
-                            <span className="text-[9px] font-cyber font-black text-white/30 uppercase tracking-[0.2em]">Sync_Status::동기화_학습</span>
-                            <div className="text-3xl font-cyber font-black text-cyber-pink italic">
-                                {weeks.reduce((acc, w) => acc + w.tasks.filter(t => t.isCompleted).length, 0)}
-                            </div>
-                            <div className="w-12 h-0.5 bg-cyber-pink shadow-neon-pink"></div>
+                            <span className="text-[9px] font-cyber font-black text-white/30 uppercase tracking-[0.2em]">DONE::완료됨</span>
+                            <div className="text-3xl font-cyber font-black text-green-400 italic">{stats.done}</div>
+                            <div className="w-12 h-0.5 bg-green-400 shadow-[0_0_10px_#22c55e]"></div>
                         </div>
                     </div>
 
@@ -185,7 +277,10 @@ export function CampaignDetailView({
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                         {weeks.map((week, idx) => {
                             const totalTasks = week.tasks.length;
-                            const completedTasks = week.tasks.filter(t => t.isCompleted).length;
+                            const completedTasks = week.tasks.filter(t => {
+                                const status = getTaskStatus(t);
+                                return status === TaskStatus.DONE;
+                            }).length;
                             const progressPercent = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
                             const loadPercent = getLoadPercentage(totalTasks);
                             const loadColor = getLoadColor(loadPercent);
@@ -248,58 +343,80 @@ export function CampaignDetailView({
                                                         <Flag size={10} className="text-cyber-cyan" />
                                                         <span className="text-[8px] font-cyber font-black text-white/30 uppercase tracking-widest">목표_체크리스트</span>
                                                     </div>
-                                                    {week.tasks.map((task, tIdx) => (
-                                                        <div
-                                                            key={task.id}
-                                                            onClick={() => toggleTask(idx, task.id)}
-                                                            className={`
-                                                            p-4 border text-[11px] font-mono transition-all relative overflow-hidden group/item cursor-pointer
-                                                            ${task.isCompleted
-                                                                    ? 'bg-cyber-cyan/5 border-cyber-cyan/20 text-white/20 italic'
-                                                                    : 'bg-white/5 border-white/5 text-white/80 hover:bg-white/10 hover:border-cyber-cyan/30'
-                                                                }
-                                                        `}
-                                                        >
-                                                            <div className={`absolute left-0 top-0 bottom-0 w-1 ${task.isCompleted ? 'bg-cyber-cyan shadow-neon-cyan' : 'bg-white/10'}`}></div>
-                                                            {task.isCompleted && (
-                                                                <div className="absolute top-0 right-0 px-2 py-0.5 bg-cyber-cyan text-black text-[8px] font-cyber font-black uppercase">동기화됨</div>
-                                                            )}
-                                                            <div className="pl-2 flex justify-between items-center group/task">
-                                                                {editingTaskId === task.id ? (
-                                                                    <input
-                                                                        className="bg-black/50 border-b border-cyber-cyan w-full text-white focus:outline-none"
-                                                                        value={task.text}
-                                                                        autoFocus
-                                                                        onClick={(e) => e.stopPropagation()}
-                                                                        onBlur={() => setEditingTaskId(null)}
-                                                                        onChange={(e) => updateTaskText(idx, task.id, e.target.value)}
-                                                                        onKeyDown={(e) => e.key === 'Enter' && setEditingTaskId(null)}
-                                                                    />
-                                                                ) : (
-                                                                    <>
-                                                                        <div className="flex items-center">
-                                                                            {task.isCompleted && <span className="mr-2 text-cyber-cyan opacity-40">✓</span>}
-                                                                            {task.text}
-                                                                        </div>
-                                                                        <div className="flex items-center gap-1 opacity-0 group-hover/task:opacity-100 transition-all">
-                                                                            <button
-                                                                                onClick={(e) => { e.stopPropagation(); setEditingTaskId(task.id); }}
-                                                                                className="p-1 hover:text-cyber-cyan transition-all"
-                                                                            >
-                                                                                <Edit3 size={12} />
-                                                                            </button>
-                                                                            <button
-                                                                                onClick={(e) => { e.stopPropagation(); deleteTask(idx, task.id); }}
-                                                                                className="p-1 hover:text-red-500 transition-all"
-                                                                            >
-                                                                                <Trash2 size={12} />
-                                                                            </button>
-                                                                        </div>
-                                                                    </>
-                                                                )}
+                                                    {week.tasks.map((task, tIdx) => {
+                                                        const taskStatus = getTaskStatus(task);
+                                                        const config = statusConfig[taskStatus];
+
+                                                        return (
+                                                            <div
+                                                                key={task.id}
+                                                                className={`
+                                                                    p-4 border text-[11px] font-mono transition-all relative overflow-hidden group/item
+                                                                    ${config.bgColor} ${config.borderColor}
+                                                                    ${taskStatus === TaskStatus.DONE ? 'opacity-60' : 'hover:opacity-100'}
+                                                                `}
+                                                            >
+                                                                {/* Status indicator bar */}
+                                                                <div className={`absolute left-0 top-0 bottom-0 w-1 ${taskStatus === TaskStatus.DONE ? 'bg-green-400' :
+                                                                        taskStatus === TaskStatus.REVIEW ? 'bg-cyber-yellow' :
+                                                                            taskStatus === TaskStatus.IN_PROGRESS ? 'bg-cyber-cyan' :
+                                                                                'bg-zinc-600'
+                                                                    }`}></div>
+
+                                                                {/* Status badge */}
+                                                                <div className={`absolute top-0 right-0 px-2 py-0.5 ${config.bgColor} ${config.color} text-[8px] font-cyber font-black uppercase flex items-center gap-1`}>
+                                                                    {config.icon}
+                                                                    {config.labelKo}
+                                                                </div>
+
+                                                                <div className="pl-2 flex justify-between items-center group/task">
+                                                                    {editingTaskId === task.id ? (
+                                                                        <input
+                                                                            className="bg-black/50 border-b border-cyber-cyan w-full text-white focus:outline-none"
+                                                                            value={task.text}
+                                                                            autoFocus
+                                                                            onClick={(e) => e.stopPropagation()}
+                                                                            onBlur={() => setEditingTaskId(null)}
+                                                                            onChange={(e) => updateTaskText(idx, task.id, e.target.value)}
+                                                                            onKeyDown={(e) => e.key === 'Enter' && setEditingTaskId(null)}
+                                                                        />
+                                                                    ) : (
+                                                                        <>
+                                                                            <div className={`flex items-center pr-16 ${taskStatus === TaskStatus.DONE ? 'line-through text-white/40' : 'text-white/80'}`}>
+                                                                                {task.text}
+                                                                            </div>
+                                                                            <div className="flex items-center gap-1 opacity-0 group-hover/task:opacity-100 transition-all">
+                                                                                {/* Quick status change button */}
+                                                                                <button
+                                                                                    onClick={(e) => {
+                                                                                        e.stopPropagation();
+                                                                                        const nextStatus = getNextStatus(taskStatus);
+                                                                                        handleStatusChange(idx, task.id, nextStatus);
+                                                                                    }}
+                                                                                    className={`p-1 hover:${config.color} transition-all flex items-center gap-1`}
+                                                                                    title={`진행: ${statusConfig[getNextStatus(taskStatus)].labelKo}`}
+                                                                                >
+                                                                                    <ChevronRight size={12} className={config.color} />
+                                                                                </button>
+                                                                                <button
+                                                                                    onClick={(e) => { e.stopPropagation(); setEditingTaskId(task.id); }}
+                                                                                    className="p-1 hover:text-cyber-cyan transition-all"
+                                                                                >
+                                                                                    <Edit3 size={12} />
+                                                                                </button>
+                                                                                <button
+                                                                                    onClick={(e) => { e.stopPropagation(); deleteTask(idx, task.id); }}
+                                                                                    className="p-1 hover:text-red-500 transition-all"
+                                                                                >
+                                                                                    <Trash2 size={12} />
+                                                                                </button>
+                                                                            </div>
+                                                                        </>
+                                                                    )}
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                    ))}
+                                                        );
+                                                    })}
                                                     {week.tasks.length === 0 && (
                                                         <div className="text-center py-12 border border-dashed border-white/5 bg-white/[0.02]">
                                                             <span className="text-white/10 text-[10px] uppercase font-cyber font-black tracking-widest">할당된_작전_없음</span>
@@ -307,16 +424,23 @@ export function CampaignDetailView({
                                                     )}
                                                 </div>
 
-                                                {/* Visual Footer for each week */}
+                                                {/* Visual Footer for each week - 상태별로 색상 표시 */}
                                                 <div className="mt-auto pt-4 border-t border-white/5 flex items-center justify-between">
                                                     <div className="flex gap-1">
-                                                        {week.tasks.map((task, i) => (
-                                                            <div
-                                                                key={task.id}
-                                                                className={`w-2 h-3 skew-x-[-20deg] transition-all duration-500 ${task.isCompleted ? 'bg-cyber-cyan shadow-neon-cyan' : 'bg-white/10'}`}
-                                                                title={task.text}
-                                                            ></div>
-                                                        ))}
+                                                        {week.tasks.map((task, i) => {
+                                                            const taskStatus = getTaskStatus(task);
+                                                            return (
+                                                                <div
+                                                                    key={task.id}
+                                                                    className={`w-2 h-3 skew-x-[-20deg] transition-all duration-500 ${taskStatus === TaskStatus.DONE ? 'bg-green-400 shadow-[0_0_5px_#22c55e]' :
+                                                                            taskStatus === TaskStatus.REVIEW ? 'bg-cyber-yellow shadow-neon-yellow' :
+                                                                                taskStatus === TaskStatus.IN_PROGRESS ? 'bg-cyber-cyan shadow-neon-cyan' :
+                                                                                    'bg-zinc-600'
+                                                                        }`}
+                                                                    title={`${task.text} (${statusConfig[taskStatus].labelKo})`}
+                                                                ></div>
+                                                            );
+                                                        })}
                                                         {week.tasks.length === 0 && (
                                                             <div className="w-4 h-1 bg-white/5"></div>
                                                         )}
