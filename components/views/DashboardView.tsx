@@ -57,6 +57,7 @@ interface DashboardViewProps {
     toggleTask: (weekIndex: number, taskId: string) => void;
     updateTaskText: (weekIndex: number, taskId: string, text: string) => void;
     onAbandonQuest: () => void;
+    onOpenCampaignDetail: () => void;
 }
 
 export function DashboardView(props: DashboardViewProps) {
@@ -89,8 +90,7 @@ export function DashboardView(props: DashboardViewProps) {
 
 
     return (
-        <div className="max-w-7xl mx-auto px-4 py-8 relative animate-slide-up">
-
+        <>
             <FloatingControls
                 timerActive={props.timerActive}
                 timeLeft={props.timeLeft}
@@ -102,123 +102,128 @@ export function DashboardView(props: DashboardViewProps) {
                 setIsEditingMode={props.setIsEditingMode}
             />
 
-            <DashboardHeader
-                activeProject={activeProject}
-                progress={progress}
-                daysPassed={daysPassed}
-                timeProgress={timeProgress}
-                isAhead={isAhead}
-                statusColor={statusColor}
-                statusMessage={statusMessage}
-                isEditingMode={props.isEditingMode}
-                setIsEditingMode={props.setIsEditingMode}
-                isPreviewMode={isPreviewMode}
-            />
+            <div className="max-w-7xl mx-auto px-4 py-8 relative animate-slide-up">
+                {/* FloatingControls was here */}
 
-            <VisionSection
-                activeProject={activeProject}
-                isEditingMode={props.isEditingMode}
-                isEditingVision={props.isEditingVision}
-                visionDraft={props.visionDraft}
-                isExpandingVision={props.isExpandingVision}
-                handleEditVision={props.handleEditVision}
-                handleCancelEditVision={props.handleCancelEditVision}
-                handleSaveVision={props.handleSaveVision}
-                handleExpandVision={props.handleExpandVision}
-                setVisionDraft={props.setVisionDraft}
-            />
+                <DashboardHeader
+                    activeProject={activeProject}
+                    progress={progress}
+                    daysPassed={daysPassed}
+                    timeProgress={timeProgress}
+                    isAhead={isAhead}
+                    statusColor={statusColor}
+                    statusMessage={statusMessage}
+                    isEditingMode={props.isEditingMode}
+                    setIsEditingMode={props.setIsEditingMode}
+                    isPreviewMode={isPreviewMode}
+                />
 
-            <CampaignSection
-                activeProject={activeProject}
-                selectedMonthIndex={props.selectedMonthIndex}
-                isEditingMode={props.isEditingMode}
-                isCompressing={props.isCompressing}
-                isExtending={props.isExtending}
-                isAdjustingPlan={props.isAdjustingPlan}
-                setCompressModalOpen={props.setCompressModalOpen}
-                handleMonthClick={props.handleMonthClick}
-                handleExtendRoadmap={props.handleExtendRoadmap}
-                handleUpdateMonthGoal={props.handleUpdateMonthGoal}
-                triggerSmartAdjustment={props.triggerSmartAdjustment}
-            />
+                <VisionSection
+                    activeProject={activeProject}
+                    isEditingMode={props.isEditingMode}
+                    isEditingVision={props.isEditingVision}
+                    visionDraft={props.visionDraft}
+                    isExpandingVision={props.isExpandingVision}
+                    handleEditVision={props.handleEditVision}
+                    handleCancelEditVision={props.handleCancelEditVision}
+                    handleSaveVision={props.handleSaveVision}
+                    handleExpandVision={props.handleExpandVision}
+                    setVisionDraft={props.setVisionDraft}
+                />
 
-            <MissionSection
-                activeProject={activeProject}
-                activeMonthlyPlan={activeMonthlyPlan}
-                weeklyPlan={weeklyPlan}
-                isPreviewMode={isPreviewMode}
-                previewOptions={props.previewOptions}
-                previewIndex={props.previewIndex}
-                isGeneratingMonthDetail={props.isGeneratingMonthDetail}
-                isEditingMode={props.isEditingMode}
-                selectedMonthIndex={props.selectedMonthIndex}
-                setPreviewIndex={props.setPreviewIndex}
-                handleGeneratePlanOptions={props.handleGeneratePlanOptions}
-                cancelPreview={props.cancelPreview}
-                confirmPreviewPlan={props.confirmPreviewPlan}
-                toggleTask={props.toggleTask}
-                updateTaskText={props.updateTaskText}
-                onAbandonQuest={props.onAbandonQuest}
-            />
+                <CampaignSection
+                    activeProject={activeProject}
+                    selectedMonthIndex={props.selectedMonthIndex}
+                    isEditingMode={props.isEditingMode}
+                    isCompressing={props.isCompressing}
+                    isExtending={props.isExtending}
+                    isAdjustingPlan={props.isAdjustingPlan}
+                    setCompressModalOpen={props.setCompressModalOpen}
+                    handleMonthClick={props.handleMonthClick}
+                    handleExtendRoadmap={props.handleExtendRoadmap}
+                    handleUpdateMonthGoal={props.handleUpdateMonthGoal}
+                    triggerSmartAdjustment={props.triggerSmartAdjustment}
+                    onOpenCampaignDetail={props.onOpenCampaignDetail}
+                />
 
-            {/* Modals - Keeping them here or moving them out? User didn't ask, but they are relatively small. */}
-            {/* Compress Timeline Modal */}
-            {props.compressModalOpen && (
-                <div className="fixed inset-0 bg-black/80 z-[60] flex items-center justify-center p-4 backdrop-blur-sm animate-scale-in">
-                    <div className="glass-panel rounded-2xl p-8 max-w-md w-full shadow-2xl relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-orange-500"></div>
-                        <h3 className="text-2xl font-black mb-4 flex items-center gap-3 text-white">
-                            <Flame className="text-red-500 animate-pulse" fill="currentColor" size={28} /> HARDCORE MODE
-                        </h3>
-                        <p className="text-zinc-400 mb-8 leading-relaxed">
-                            Condense your timeline. Increase difficulty. <br />
-                            Warning: This action cannot be undone.
-                        </p>
-                        <div className="grid grid-cols-3 gap-4 mb-8">
-                            {[2, 3, 4].map(months => (
-                                <button
-                                    key={months}
-                                    onClick={() => props.onCompressRoadmap(months)}
-                                    className="group p-4 rounded-xl bg-zinc-900 border border-zinc-700 hover:border-red-500 hover:bg-red-500/10 transition-all"
-                                >
-                                    <span className="block text-3xl font-black text-white group-hover:text-red-500 transition-colors">{months}</span>
-                                    <span className="text-xs text-zinc-500 font-bold uppercase">Months</span>
+                <MissionSection
+                    activeProject={activeProject}
+                    activeMonthlyPlan={activeMonthlyPlan}
+                    weeklyPlan={weeklyPlan}
+                    isPreviewMode={isPreviewMode}
+                    previewOptions={props.previewOptions}
+                    previewIndex={props.previewIndex}
+                    isGeneratingMonthDetail={props.isGeneratingMonthDetail}
+                    isEditingMode={props.isEditingMode}
+                    selectedMonthIndex={props.selectedMonthIndex}
+                    setPreviewIndex={props.setPreviewIndex}
+                    handleGeneratePlanOptions={props.handleGeneratePlanOptions}
+                    cancelPreview={props.cancelPreview}
+                    confirmPreviewPlan={props.confirmPreviewPlan}
+                    toggleTask={props.toggleTask}
+                    updateTaskText={props.updateTaskText}
+                    onAbandonQuest={props.onAbandonQuest}
+                />
+
+                {/* Modals - Keeping them here or moving them out? User didn't ask, but they are relatively small. */}
+                {/* Compress Timeline Modal */}
+                {props.compressModalOpen && (
+                    <div className="fixed inset-0 bg-black/80 z-[60] flex items-center justify-center p-4 backdrop-blur-sm animate-scale-in">
+                        <div className="glass-panel rounded-2xl p-8 max-w-md w-full shadow-2xl relative overflow-hidden">
+                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-orange-500"></div>
+                            <h3 className="text-2xl font-black mb-4 flex items-center gap-3 text-white">
+                                <Flame className="text-red-500 animate-pulse" fill="currentColor" size={28} /> HARDCORE MODE
+                            </h3>
+                            <p className="text-zinc-400 mb-8 leading-relaxed">
+                                Condense your timeline. Increase difficulty. <br />
+                                Warning: This action cannot be undone.
+                            </p>
+                            <div className="grid grid-cols-3 gap-4 mb-8">
+                                {[2, 3, 4].map(months => (
+                                    <button
+                                        key={months}
+                                        onClick={() => props.onCompressRoadmap(months)}
+                                        className="group p-4 rounded-xl bg-zinc-900 border border-zinc-700 hover:border-red-500 hover:bg-red-500/10 transition-all"
+                                    >
+                                        <span className="block text-3xl font-black text-white group-hover:text-red-500 transition-colors">{months}</span>
+                                        <span className="text-xs text-zinc-500 font-bold uppercase">Months</span>
+                                    </button>
+                                ))}
+                            </div>
+                            <button onClick={() => props.setCompressModalOpen(false)} className="w-full py-4 text-sm font-bold text-zinc-500 hover:text-white transition-colors">CANCEL</button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Adjustment Modal */}
+                {props.adjustmentModalOpen && (
+                    <div className="fixed inset-0 bg-black/80 z-[60] flex items-center justify-center p-4 backdrop-blur-sm animate-scale-in">
+                        <div className="glass-panel rounded-2xl p-8 max-w-md w-full shadow-2xl">
+                            <h3 className="text-2xl font-black mb-4 flex items-center gap-3 text-white">
+                                <BrainCircuit className="text-primary" /> ADJUST DIFFICULTY
+                            </h3>
+                            <p className="text-zinc-400 mb-8">
+                                The AI Game Master will recalibrate your weekly quests based on your new goal.
+                            </p>
+                            <div className="grid gap-4 mb-8">
+                                <button onClick={() => props.onConfirmAdjustment('EASY')} className="p-5 rounded-xl bg-zinc-900/80 border border-zinc-700 hover:border-accent hover:bg-accent/10 text-left transition-all group">
+                                    <div className="font-bold text-accent mb-1 group-hover:text-glow-accent">🧘 Chill Mode</div>
+                                    <div className="text-xs text-zinc-500">Steady pace. Low stress. High quality.</div>
                                 </button>
-                            ))}
+                                <button onClick={() => props.onConfirmAdjustment('NORMAL')} className="p-5 rounded-xl bg-zinc-900/80 border border-zinc-700 hover:border-primary hover:bg-primary/10 text-left transition-all group">
+                                    <div className="font-bold text-primary mb-1 group-hover:text-glow">🏃 Startup Mode</div>
+                                    <div className="text-xs text-zinc-500">Standard velocity. Balanced grind.</div>
+                                </button>
+                                <button onClick={() => props.onConfirmAdjustment('HARD')} className="p-5 rounded-xl bg-zinc-900/80 border border-zinc-700 hover:border-red-500 hover:bg-red-500/10 text-left transition-all group">
+                                    <div className="font-bold text-red-500 mb-1 group-hover:text-glow">🔥 Hardcore Mode</div>
+                                    <div className="text-xs text-zinc-500">Maximum effort. Sleep is optional.</div>
+                                </button>
+                            </div>
+                            <button onClick={() => props.setAdjustmentModalOpen(false)} className="w-full py-4 text-sm font-bold text-zinc-500 hover:text-white transition-colors">CANCEL</button>
                         </div>
-                        <button onClick={() => props.setCompressModalOpen(false)} className="w-full py-4 text-sm font-bold text-zinc-500 hover:text-white transition-colors">CANCEL</button>
                     </div>
-                </div>
-            )}
-
-            {/* Adjustment Modal */}
-            {props.adjustmentModalOpen && (
-                <div className="fixed inset-0 bg-black/80 z-[60] flex items-center justify-center p-4 backdrop-blur-sm animate-scale-in">
-                    <div className="glass-panel rounded-2xl p-8 max-w-md w-full shadow-2xl">
-                        <h3 className="text-2xl font-black mb-4 flex items-center gap-3 text-white">
-                            <BrainCircuit className="text-primary" /> ADJUST DIFFICULTY
-                        </h3>
-                        <p className="text-zinc-400 mb-8">
-                            The AI Game Master will recalibrate your weekly quests based on your new goal.
-                        </p>
-                        <div className="grid gap-4 mb-8">
-                            <button onClick={() => props.onConfirmAdjustment('EASY')} className="p-5 rounded-xl bg-zinc-900/80 border border-zinc-700 hover:border-accent hover:bg-accent/10 text-left transition-all group">
-                                <div className="font-bold text-accent mb-1 group-hover:text-glow-accent">🧘 Chill Mode</div>
-                                <div className="text-xs text-zinc-500">Steady pace. Low stress. High quality.</div>
-                            </button>
-                            <button onClick={() => props.onConfirmAdjustment('NORMAL')} className="p-5 rounded-xl bg-zinc-900/80 border border-zinc-700 hover:border-primary hover:bg-primary/10 text-left transition-all group">
-                                <div className="font-bold text-primary mb-1 group-hover:text-glow">🏃 Startup Mode</div>
-                                <div className="text-xs text-zinc-500">Standard velocity. Balanced grind.</div>
-                            </button>
-                            <button onClick={() => props.onConfirmAdjustment('HARD')} className="p-5 rounded-xl bg-zinc-900/80 border border-zinc-700 hover:border-red-500 hover:bg-red-500/10 text-left transition-all group">
-                                <div className="font-bold text-red-500 mb-1 group-hover:text-glow">🔥 Hardcore Mode</div>
-                                <div className="text-xs text-zinc-500">Maximum effort. Sleep is optional.</div>
-                            </button>
-                        </div>
-                        <button onClick={() => props.setAdjustmentModalOpen(false)} className="w-full py-4 text-sm font-bold text-zinc-500 hover:text-white transition-colors">CANCEL</button>
-                    </div>
-                </div>
-            )}
-        </div>
+                )}
+            </div>
+        </>
     );
 }

@@ -9,6 +9,7 @@ import { BrainDumpView } from './components/views/BrainDumpView';
 import { AnalysisView } from './components/views/AnalysisView';
 import { ProjectListView } from './components/views/ProjectListView';
 import { DashboardView } from './components/views/DashboardView';
+import { CampaignDetailView } from './components/views/CampaignDetailView';
 
 const INITIAL_IDEAS: ProjectIdea[] = [
     { id: '1', title: '', description: '' },
@@ -330,13 +331,6 @@ export default function App() {
         }
 
         setSelectedMonthIndex(index);
-
-        // Check if detailed plan exists for this month
-        const targetMonth = activeProject.monthlyPlan[index];
-        if (!targetMonth.detailedPlan) {
-            // Trigger generation if plan is missing
-            handleGeneratePlanOptions(index);
-        }
     };
 
     const handleGeneratePlanOptions = async (monthIndex: number) => {
@@ -585,6 +579,15 @@ export default function App() {
                         toggleTask={toggleTask}
                         updateTaskText={updateTaskText}
                         onAbandonQuest={handleAbandonQuest}
+                        onOpenCampaignDetail={() => setView(AppView.CAMPAIGN_DETAIL)}
+                    />
+                )}
+
+                {view === AppView.CAMPAIGN_DETAIL && activeProject && (
+                    <CampaignDetailView
+                        activeProject={activeProject}
+                        selectedMonthIndex={selectedMonthIndex}
+                        onBack={() => setView(AppView.DASHBOARD)}
                     />
                 )}
             </main>

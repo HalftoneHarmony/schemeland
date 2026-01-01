@@ -4,6 +4,7 @@ export enum AppView {
   ANALYSIS = 'ANALYSIS',
   DASHBOARD = 'DASHBOARD',
   PROJECT_LIST = 'PROJECT_LIST',
+  CAMPAIGN_DETAIL = 'CAMPAIGN_DETAIL',
 }
 
 export interface ProjectIdea {
