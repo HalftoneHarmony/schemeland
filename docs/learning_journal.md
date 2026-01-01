@@ -25,8 +25,26 @@
 6.  **[버전 컨트롤 (Git & GitHub)](./learning/05_version_control.md)**
     *   Git과 GitHub의 차이, 그리고 프로젝트 업로드 방법
 
+7.  **[협업 워크플로우 (Multi-Agent Workflow)](./learning/06_multi_agent_workflow.md)**
+    *   AI 에이전트들이 협업하여 코드를 짜는 방식 이해하기
+
+8.  **[분업 시스템 (Squad of 8 Workflow)](./learning/07_squad_of_8_workflow.md)**
+    *   기획, 개발, 디자인 등 각기 다른 역할을 가진 AI 팀과 일하는 법
+
+9.  **[AI 코딩 용어 사전 (AI Tools Glossary)](./learning/08_ai_coding_tools_glossary.md)**
+    *   에디터, 터미널, 에이전트 등 코딩 도구들의 이름과 역할
+
+10. **[살아있는 화면: 애니메이션 (Scroll Animations)](./learning/09_scroll_animations.md)**
+    *   스크롤에 따라 움직이는 화려한 UI와 버튼 효과 만드는 법
+
+11. **[미래형 디자인: 사이버펑크 UI (Cyberpunk UI/UX)](./learning/10_cyberpunk_ui_ux.md)**
+    *   네온 컬러, 미래형 폰트, 그리드 배경 등 앱의 테마를 사이버펑크로 바꾸는 디자인 시스템 이해하기
+
+12. **[데이터 엔지니어링: 뼈대 잡기 (Data Engineering)](./learning/11_data_engineering_standard.md)**
+    *   프로젝트 구조 정리(src), 엄격한 데이터 규칙(BaseEntity), 안전한 자동 저장 시스템 구축하기
+
 ---
 
 ### 🚀 앞으로의 여정 (Next Steps)
-- **Linting (코드 청소)**: 코드가 작동은 하지만, 문법적으로 더 깔끔하게 다듬는 법.
-- **Customization (리모델링)**: 내 입맛대로 디자인과 기능을 바꾸는 법.
+- **Deployment (세상에 공개하기)**: 내가 만든 앱을 인터넷에 올려서 친구들에게 공유하는 법.
+- **Data Persistence (기억력 강화)**: 데이터베이스를 연결해서 더 강력한 저장소 만들기.

@@ -11,43 +11,27 @@ import { ProjectListView } from './components/views/ProjectListView';
 import { DashboardView } from './components/views/DashboardView';
 import { CampaignDetailView } from './components/views/CampaignDetailView';
 
+import useLocalStorage from './hooks/useLocalStorage';
+import { validateAllIdeas, validateStartDate, validateVision } from './utils/validation';
+
 const INITIAL_IDEAS: ProjectIdea[] = [
-    { id: '1', title: '', description: '' },
+    {
+        id: crypto.randomUUID(),
+        title: '',
+        description: '',
+        status: 'PENDING',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+    },
 ];
 
 export default function App() {
     const [view, setView] = useState<AppView>(AppView.LANDING);
 
-    // -- Persistence Logic --
-    // Lazy initialization for state to read from localStorage just once on mount
-    const [ideas, setIdeas] = useState<ProjectIdea[]>(() => {
-        const saved = localStorage.getItem('schemeland_ideas');
-        return saved ? JSON.parse(saved) : INITIAL_IDEAS;
-    });
-
-    const [analyses, setAnalyses] = useState<IdeaAnalysis[]>(() => {
-        const saved = localStorage.getItem('schemeland_analyses');
-        return saved ? JSON.parse(saved) : [];
-    });
-
-    // Data State
-    const [projects, setProjects] = useState<ProjectScheme[]>(() => {
-        const saved = localStorage.getItem('schemeland_projects');
-        return saved ? JSON.parse(saved) : [];
-    });
-
-    // Save to localStorage whenever state changes
-    useEffect(() => {
-        localStorage.setItem('schemeland_ideas', JSON.stringify(ideas));
-    }, [ideas]);
-
-    useEffect(() => {
-        localStorage.setItem('schemeland_analyses', JSON.stringify(analyses));
-    }, [analyses]);
-
-    useEffect(() => {
-        localStorage.setItem('schemeland_projects', JSON.stringify(projects));
-    }, [projects]);
+    // -- Persistence Logic with Custom Hook --
+    const [ideas, setIdeas] = useLocalStorage<ProjectIdea[]>('schemeland_ideas', INITIAL_IDEAS);
+    const [analyses, setAnalyses] = useLocalStorage<IdeaAnalysis[]>('schemeland_analyses', []);
+    const [projects, setProjects] = useLocalStorage<ProjectScheme[]>('schemeland_projects', []);
     // -- End Persistence Logic --
 
     const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
@@ -65,7 +49,7 @@ export default function App() {
     const [isCompressing, setIsCompressing] = useState(false);
 
     // Dashboard Interactive States
-    const [isEditingMode, setIsEditingMode] = useState(false);
+
     const [isAdjustingPlan, setIsAdjustingPlan] = useState(false);
     const [adjustmentModalOpen, setAdjustmentModalOpen] = useState(false);
     const [compressModalOpen, setCompressModalOpen] = useState(false);
@@ -74,6 +58,7 @@ export default function App() {
     const [isEditingVision, setIsEditingVision] = useState(false);
     const [isRefiningVision, setIsRefiningVision] = useState(false);
     const [visionDraft, setVisionDraft] = useState<ThreeYearVision | null>(null);
+    const [projectStartDate, setProjectStartDate] = useState<string>(new Date().toISOString().split('T')[0]);
 
 
     // Preview Mode State
@@ -110,7 +95,15 @@ export default function App() {
     // --- Handlers ---
 
     const handleAddIdea = () => {
-        setIdeas([...ideas, { id: crypto.randomUUID(), title: '', description: '' }]);
+        const now = new Date().toISOString();
+        setIdeas([...ideas, {
+            id: crypto.randomUUID(),
+            title: '',
+            description: '',
+            status: 'PENDING',
+            createdAt: now,
+            updatedAt: now
+        }]);
     };
 
     const handleUpdateIdea = (id: string, field: keyof ProjectIdea, value: string) => {
@@ -147,11 +140,15 @@ export default function App() {
         setIsSuggesting(true);
         try {
             const suggestions = await suggestIdeas();
-            const newIdeas = suggestions.map(s => ({
+            const now = new Date().toISOString();
+            const newIdeas: ProjectIdea[] = suggestions.map(s => ({
                 id: crypto.randomUUID(),
                 title: s.title,
                 description: s.description,
-                emoji: s.emoji
+                emoji: s.emoji,
+                status: 'PENDING',
+                createdAt: now,
+                updatedAt: now
             }));
             const cleanIdeas = ideas.filter(i => i.title.trim() !== '' || i.description.trim() !== '');
             setIdeas([...cleanIdeas, ...newIdeas]);
@@ -163,11 +160,15 @@ export default function App() {
     };
 
     const handleAnalyze = async () => {
-        const validIdeas = ideas.filter(i => i.title.trim() && i.description.trim());
-        if (validIdeas.length === 0) return alert("최소한 하나의 구체적인 아이디어를 입력해주세요.");
+        const validation = validateAllIdeas(ideas);
+        if (!validation.isValid) {
+            alert(validation.message);
+            return;
+        }
 
         setIsAnalyzing(true);
         try {
+            const validIdeas = ideas.filter(i => i.title.trim() && i.description.trim());
             const results = await analyzeIdeas(validIdeas);
             setAnalyses(results);
             setView(AppView.ANALYSIS);
@@ -183,6 +184,12 @@ export default function App() {
         const analysis = analyses.find(a => a.ideaId === ideaId);
         if (!idea || !analysis) return;
 
+        const dateValidation = validateStartDate(projectStartDate);
+        if (!dateValidation.isValid) {
+            alert(dateValidation.message);
+            return;
+        }
+
         setIsGeneratingPlan(true);
         try {
             const plan = await generateFullPlan(idea, analysis.reasoning);
@@ -193,14 +200,17 @@ export default function App() {
                 monthlyPlan[0].detailedPlan = plan.weeklyPlan;
             }
 
+            const now = new Date().toISOString();
             const newProject: ProjectScheme = {
                 id: crypto.randomUUID(),
-                selectedIdea: idea,
+                selectedIdea: { ...idea, status: 'ACTIVE', updatedAt: now },
                 analysis: analysis,
                 yearlyPlan: plan.yearlyPlan,
                 monthlyPlan: monthlyPlan,
-                startDate: new Date().toISOString(),
-                lastUpdated: new Date().toISOString(),
+                startDate: projectStartDate,
+                createdAt: now,
+                updatedAt: now,
+                status: 'PLANNED'
             };
 
             setProjects(prev => [...prev, newProject]);
@@ -295,7 +305,6 @@ export default function App() {
                 return p;
             });
             setProjects(updatedProjects);
-            setIsEditingMode(false);
         } catch (e) {
             alert("AI 조정에 실패했습니다.");
         } finally {
@@ -427,6 +436,13 @@ export default function App() {
 
     const handleSaveVision = () => {
         if (!activeProject || !visionDraft) return;
+
+        const validation = validateVision(visionDraft);
+        if (!validation.isValid) {
+            alert(validation.message);
+            return;
+        }
+
         const updatedProjects = projects.map(p => {
             if (p.id === activeProject.id) {
                 return { ...p, threeYearVision: visionDraft };
@@ -459,9 +475,9 @@ export default function App() {
     };
 
     return (
-        <div className="min-h-screen text-textMain font-sans selection:bg-primary/30">
+        <div className="min-h-screen bg-background text-textMain font-sans selection:bg-cyber-pink/30">
             {/* Header */}
-            <nav className="border-b border-white/5 bg-black/50 backdrop-blur-xl sticky top-0 z-40 transition-all">
+            <nav className="border-b border-cyber-pink/20 bg-background/80 backdrop-blur-xl sticky top-0 z-40 transition-all">
                 <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
                     <div
                         className="flex items-center gap-3 cursor-pointer group"
@@ -470,15 +486,15 @@ export default function App() {
                             else setView(AppView.LANDING);
                         }}
                     >
-                        <div className="w-10 h-10 bg-gradient-to-tr from-primary to-blue-600 rounded-xl flex items-center justify-center text-white shadow-[0_0_20px_-5px_rgba(139,92,246,0.6)] group-hover:scale-110 transition-transform">
-                            <Zap size={20} fill="currentColor" />
+                        <div className="w-10 h-10 bg-cyber-pink flex items-center justify-center text-white shadow-neon-pink group-hover:scale-110 transition-transform skew-x-[-10deg]">
+                            <Zap size={20} fill="currentColor" className="skew-x-[10deg]" />
                         </div>
-                        <span className="font-black text-xl tracking-tighter text-white">SchemeLand</span>
+                        <span className="font-cyber font-black text-2xl tracking-tighter text-white uppercase italic">SchemeLand</span>
                     </div>
                     {view === AppView.DASHBOARD && (
-                        <div className="text-[10px] font-black tracking-widest text-emerald-500 flex items-center gap-2 bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-500/20 shadow-[0_0_10px_-3px_rgba(16,185,129,0.3)]">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                            SYSTEM ONLINE
+                        <div className="text-[10px] font-cyber font-black tracking-widest text-cyber-cyan flex items-center gap-2 bg-cyber-cyan/10 px-4 py-2 border border-cyber-cyan/30 shadow-neon-cyan skew-x-[-15deg]">
+                            <span className="w-2 h-2 rounded-full bg-cyber-cyan animate-pulse skew-x-[15deg]"></span>
+                            <span className="skew-x-[15deg]">SYSTEM_LINK_STABLE</span>
                         </div>
                     )}
                 </div>
@@ -529,6 +545,8 @@ export default function App() {
                         onBack={() => setView(AppView.BRAIN_DUMP)}
                         onCommit={handleCommit}
                         isGeneratingPlan={isGeneratingPlan}
+                        startDate={projectStartDate}
+                        onStartDateChange={setProjectStartDate}
                     />
                 )}
 
@@ -541,7 +559,7 @@ export default function App() {
                         timerActive={timerActive}
                         timeLeft={timeLeft}
                         timerMode={timerMode}
-                        isEditingMode={isEditingMode}
+
                         compressModalOpen={compressModalOpen}
                         adjustmentModalOpen={adjustmentModalOpen}
                         isCompressing={isCompressing}
@@ -558,7 +576,7 @@ export default function App() {
                         setTimeLeft={setTimeLeft}
                         setCompressModalOpen={setCompressModalOpen}
                         setAdjustmentModalOpen={setAdjustmentModalOpen}
-                        setIsEditingMode={setIsEditingMode}
+
                         setPreviewIndex={setPreviewIndex}
                         setVisionDraft={setVisionDraft}
 

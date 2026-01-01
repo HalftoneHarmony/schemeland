@@ -1,0 +1,146 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --primary: 255, 0, 255;
+    --accent: 0, 255, 255;
+}
+
+@layer base {
+    :root {
+        --cyber-pink: 255, 0, 255;
+        --cyber-cyan: 0, 255, 255;
+        --cyber-yellow: 252, 238, 10;
+        --cyber-purple: 188, 19, 254;
+        --cyber-blue: 0, 102, 255;
+    }
+
+    body {
+        @apply bg-[#050505] text-white selection:bg-cyber-pink/30 font-sans;
+        background-color: #050505;
+        background-image:
+            linear-gradient(rgba(255, 0, 255, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 0, 255, 0.03) 1px, transparent 1px);
+        background-size: 30px 30px;
+        background-attachment: fixed;
+    }
+}
+
+/* Animations */
+@keyframes glitch-text {
+    0% {
+        transform: translate(0);
+    }
+
+    20% {
+        transform: translate(-2px, 2px);
+    }
+
+    40% {
+        transform: translate(-2px, -2px);
+    }
+
+    60% {
+        transform: translate(2px, 2px);
+    }
+
+    80% {
+        transform: translate(2px, -2px);
+    }
+
+    100% {
+        transform: translate(0);
+    }
+}
+
+.animate-glitch {
+    animation: glitch-text 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
+}
+
+@keyframes scanline {
+    0% {
+        transform: translateY(-100%);
+    }
+
+    100% {
+        transform: translateY(100%);
+    }
+}
+
+.scanline::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: rgba(var(--cyber-cyan), 0.1);
+    opacity: 0.1;
+    z-index: 9999;
+    pointer-events: none;
+    animation: scanline 8s linear infinite;
+}
+
+/* Utilities */
+.text-neon-pink {
+    color: rgb(var(--cyber-pink));
+    text-shadow: 0 0 5px rgba(var(--cyber-pink), 1), 0 0 10px rgba(var(--cyber-pink), 0.4);
+}
+
+.text-neon-cyan {
+    color: rgb(var(--cyber-cyan));
+    text-shadow: 0 0 5px rgba(var(--cyber-cyan), 1), 0 0 10px rgba(var(--cyber-cyan), 0.4);
+}
+
+.glass-panel {
+    @apply bg-zinc-950/40 backdrop-blur-xl border border-white/5 shadow-2xl relative overflow-hidden;
+}
+
+.glass-panel::before {
+    content: "";
+    @apply absolute top-0 left-0 w-1 h-1 bg-white/20;
+}
+
+.shadow-neon-pink {
+    box-shadow: 0 0 10px rgba(var(--cyber-pink), 0.3), 0 0 20px rgba(var(--cyber-pink), 0.1);
+}
+
+.shadow-neon-cyan {
+    box-shadow: 0 0 10px rgba(var(--cyber-cyan), 0.3), 0 0 20px rgba(var(--cyber-cyan), 0.1);
+}
+
+.shadow-neon-yellow {
+    box-shadow: 0 0 10px rgba(var(--cyber-yellow), 0.3), 0 0 20px rgba(var(--cyber-yellow), 0.1);
+}
+
+.shadow-neon-purple {
+    box-shadow: 0 0 10px rgba(var(--cyber-purple), 0.3), 0 0 20px rgba(var(--cyber-purple), 0.1);
+}
+
+.cyber-button-skew {
+    @apply skew-x-[-10deg] transition-all duration-200 active:scale-95;
+}
+
+.cyber-button-skew>* {
+    @apply skew-x-[10deg];
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #050505;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #27272a;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgb(var(--cyber-pink));
+}

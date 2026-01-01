@@ -1,103 +1,173 @@
 <!DOCTYPE html>
 <html lang="ko">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SchemeLand - 생각은 그만, 이제는 실행할 때</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              background: '#09090b', // Zinc 950
-              surface: '#18181b',    // Zinc 900
-              surfaceHighlight: '#27272a', // Zinc 800
-              primary: '#8b5cf6',    // Violet 500
-              primaryHover: '#7c3aed',
-              accent: '#10b981',     // Emerald 500
-              textMain: '#f4f4f5',
-              textMuted: '#a1a1aa',
-              glass: 'rgba(24, 24, 27, 0.6)',
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SchemeLand - Cyberpunk Edition</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            background: '#050505',
+            surface: '#0d0d0d',
+            surfaceHighlight: '#1a1a1a',
+            primary: '#ff00ff',    // Neon Pink
+            secondary: '#00ffff',  // Neon Cyan
+            accent: '#fcee0a',     // Cyberpunk Yellow
+            cyber: {
+              pink: '#ff00ff',
+              cyan: '#00ffff',
+              yellow: '#fcee0a',
+              purple: '#bc13fe',
+              blue: '#0066ff',
             },
-            fontFamily: {
-              sans: ['Pretendard', 'Inter', 'sans-serif'],
-              mono: ['Fira Code', 'monospace'],
-            },
-            animation: {
-              'float': 'float 6s ease-in-out infinite',
-              'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-              'slide-up': 'slideUp 0.5s ease-out forwards',
-              'scale-in': 'scaleIn 0.3s ease-out forwards',
-            },
-            keyframes: {
-              float: {
-                '0%, 100%': { transform: 'translateY(0)' },
-                '50%': { transform: 'translateY(-20px)' },
-              },
-              slideUp: {
-                '0%': { opacity: '0', transform: 'translateY(20px)' },
-                '100%': { opacity: '1', transform: 'translateY(0)' },
-              },
-              scaleIn: {
-                '0%': { opacity: '0', transform: 'scale(0.9)' },
-                '100%': { opacity: '1', transform: 'scale(1)' },
-              }
-            }
+            textMain: '#ffffff',
+            textMuted: '#a0a0a0',
+            glass: 'rgba(10, 10, 10, 0.7)',
           },
+          fontFamily: {
+            sans: ['Inter', 'Pretendard', 'sans-serif'],
+            cyber: ['Orbitron', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+          boxShadow: {
+            'neon-pink': '0 0 5px #ff00ff, 0 0 20px #ff00ff88',
+            'neon-cyan': '0 0 5px #00ffff, 0 0 20px #00ffff88',
+            'neon-yellow': '0 0 5px #fcee0a, 0 0 20px #fcee0a88',
+          },
+          animation: {
+            'float': 'float 6s ease-in-out infinite',
+            'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'glitch': 'glitch 1s linear infinite',
+            'scanline': 'scanline 8s linear infinite',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-20px)' },
+            },
+            glitch: {
+              '0%, 100%': { transform: 'translate(0)' },
+              '20%': { transform: 'translate(-2px, 2px)' },
+              '40%': { transform: 'translate(-2px, -2px)' },
+              '60%': { transform: 'translate(2px, 2px)' },
+              '80%': { transform: 'translate(2px, -2px)' },
+            },
+            scanline: {
+              '0%': { transform: 'translateY(-100%)' },
+              '100%': { transform: 'translateY(100%)' },
+            }
+          }
         },
-      };
-    </script>
-    <style>
-      @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
-      
-      body {
-        background-color: #09090b;
-        color: #f4f4f5;
-        font-family: 'Pretendard', 'Inter', sans-serif;
-        background-image: 
-          radial-gradient(circle at 15% 50%, rgba(139, 92, 246, 0.08), transparent 25%), 
-          radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.08), transparent 25%);
-        background-attachment: fixed;
-      }
+      },
+    };
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap');
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
 
-      /* Glassmorphism Utilities */
-      .glass-panel {
-        background: rgba(24, 24, 27, 0.7);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-      }
-      
-      .glass-panel-hover:hover {
-        background: rgba(39, 39, 42, 0.8);
-        border-color: rgba(139, 92, 246, 0.3);
-      }
+    body {
+      background-color: #050505;
+      color: #ffffff;
+      font-family: 'Rajdhani', 'Pretendard', sans-serif;
+      background-image:
+        linear-gradient(rgba(255, 0, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 0, 255, 0.03) 1px, transparent 1px);
+      background-size: 30px 30px;
+      background-attachment: fixed;
+      overflow-x: hidden;
+    }
 
-      /* Custom Scrollbar */
-      ::-webkit-scrollbar {
-        width: 6px;
-        height: 6px;
-      }
-      ::-webkit-scrollbar-track {
-        background: transparent;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #3f3f46;
-        border-radius: 10px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #52525b;
-      }
+    body::after {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: rgba(0, 255, 255, 0.1);
+      opacity: 0.1;
+      z-index: 9999;
+      pointer-events: none;
+      animation: scanline 8s linear infinite;
+    }
 
-      /* Neon Text Effect */
-      .text-glow {
-        text-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
-      }
-      .text-glow-accent {
-        text-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
-      }
-    </style>
+    /* Glassmorphism & Cyber Borders */
+    .glass-panel {
+      background: rgba(10, 10, 10, 0.8);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 0, 255, 0.2);
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .glass-panel::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 4px;
+      background: #ff00ff;
+      box-shadow: 0 0 5px #ff00ff;
+    }
+
+    .glass-panel-hover:hover {
+      border-color: rgba(0, 255, 255, 0.5);
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
+    }
+
+    /* Neon Text & Backgrounds */
+    .text-neon-pink {
+      color: #ff00ff;
+      text-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff44;
+    }
+
+    .text-neon-cyan {
+      color: #00ffff;
+      text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff44;
+    }
+
+    .bg-neon-pink {
+      background-color: #ff00ff;
+      box-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff88;
+    }
+
+    .bg-neon-cyan {
+      background-color: #00ffff;
+      box-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff88;
+    }
+
+    /* Custom Scrollbar - Cyber Style */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #050505;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #ff00ff;
+      box-shadow: 0 0 5px #ff00ff;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #00ffff;
+      box-shadow: 0 0 5px #00ffff;
+    }
+
+    .cyber-heading {
+      font-family: 'Orbitron', sans-serif;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+  </style>
   <script type="importmap">
 {
   "imports": {
@@ -111,10 +181,12 @@
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
+  <link rel="stylesheet" href="/src/index.css">
 </head>
-  <body>
-    <div id="root"></div>
-  <script type="module" src="/index.tsx"></script>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/index.tsx"></script>
 </body>
+
 </html>
