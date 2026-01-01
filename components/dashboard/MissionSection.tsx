@@ -1,12 +1,12 @@
 import React from 'react';
-import { Rocket, Layers, CheckCircle2, Scroll, Sparkles, Circle } from 'lucide-react';
+import { Rocket, Layers, CheckCircle2, Scroll, Sparkles, Circle, Check } from 'lucide-react';
 import { Button } from '../Button';
-import { ProjectScheme, WeeklyPlanOption, WeeklyPlan } from '../../types';
+import { ProjectScheme, WeeklyPlanOption, WeeklyMilestone } from '../../types';
 
 interface MissionSectionProps {
     activeProject: ProjectScheme;
     activeMonthlyPlan: any;
-    weeklyPlan: WeeklyPlan[];
+    weeklyPlan: WeeklyMilestone[];
     isPreviewMode: boolean;
     previewOptions: WeeklyPlanOption[] | null;
     previewIndex: number;
