@@ -26,7 +26,11 @@ interface KanbanViewProps {
     activeProjectId: string | null;
     onSelectProject: (projectId: string) => void;
     onBack: () => void;
-    onUpdateProjects: (updatedProjects: ProjectScheme[]) => void;
+    // New handlers
+    onTaskStatusChange: (taskId: string, newStatus: TaskStatus) => void;
+    onAddTask: (monthIndex: number, weekNumber: number, status: TaskStatus, text: string, priority: Priority) => void;
+    onDeleteTask: (taskId: string) => void;
+    onUpdateTask: (taskId: string, updates: Partial<KanbanTask>) => void;
 }
 
 const months = [
@@ -63,7 +67,10 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
     activeProjectId,
     onSelectProject,
     onBack,
-    onUpdateProjects,
+    onTaskStatusChange,
+    onAddTask,
+    onDeleteTask,
+    onUpdateTask,
 }) => {
     const [selectedMonthIndex, setSelectedMonthIndex] = useState(0);
     const [selectedWeek, setSelectedWeek] = useState<number | null>(null);
@@ -117,127 +124,23 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
 
     // Task 상태 변경 핸들러
     const handleTaskStatusChange = useCallback((taskId: string, newStatus: TaskStatus) => {
-        if (!activeProject) return;
-
-        const updatedProjects = projects.map(project => {
-            if (project.id !== activeProject.id) return project;
-
-            const newMonthlyPlan = project.monthlyPlan.map((month, monthIdx) => {
-                if (monthIdx !== selectedMonthIndex) return month;
-
-                const newDetailedPlan = month.detailedPlan?.map(week => ({
-                    ...week,
-                    tasks: week.tasks.map(task => {
-                        if (task.id !== taskId) return task;
-                        return {
-                            ...task,
-                            status: newStatus,
-                            isCompleted: newStatus === TaskStatus.DONE,
-                            updatedAt: new Date().toISOString()
-                        };
-                    })
-                }));
-
-                return { ...month, detailedPlan: newDetailedPlan };
-            });
-
-            return { ...project, monthlyPlan: newMonthlyPlan };
-        });
-
-        onUpdateProjects(updatedProjects);
-    }, [activeProject, projects, selectedMonthIndex, onUpdateProjects]);
+        onTaskStatusChange(taskId, newStatus);
+    }, [onTaskStatusChange]);
 
     // Task 추가 핸들러
     const handleAddTask = useCallback((weekNumber: number, status: TaskStatus, text: string, priority: Priority) => {
-        if (!activeProject) return;
-
-        const newTask: MilestoneTask = {
-            id: crypto.randomUUID(),
-            text: text,
-            isCompleted: status === TaskStatus.DONE,
-            priority: priority,
-            status: status,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-        };
-
-        const updatedProjects = projects.map(project => {
-            if (project.id !== activeProject.id) return project;
-
-            const newMonthlyPlan = project.monthlyPlan.map((month, monthIdx) => {
-                if (monthIdx !== selectedMonthIndex) return month;
-
-                const newDetailedPlan = month.detailedPlan?.map(week => {
-                    if (week.weekNumber !== weekNumber) return week;
-                    return {
-                        ...week,
-                        tasks: [...week.tasks, newTask]
-                    };
-                });
-
-                return { ...month, detailedPlan: newDetailedPlan };
-            });
-
-            return { ...project, monthlyPlan: newMonthlyPlan };
-        });
-
-        onUpdateProjects(updatedProjects);
-    }, [activeProject, projects, selectedMonthIndex, onUpdateProjects]);
+        onAddTask(selectedMonthIndex, weekNumber, status, text, priority);
+    }, [selectedMonthIndex, onAddTask]);
 
     // Task 삭제 핸들러
     const handleDeleteTask = useCallback((taskId: string) => {
-        if (!activeProject) return;
-
-        const updatedProjects = projects.map(project => {
-            if (project.id !== activeProject.id) return project;
-
-            const newMonthlyPlan = project.monthlyPlan.map((month, monthIdx) => {
-                if (monthIdx !== selectedMonthIndex) return month;
-
-                const newDetailedPlan = month.detailedPlan?.map(week => ({
-                    ...week,
-                    tasks: week.tasks.filter(task => task.id !== taskId)
-                }));
-
-                return { ...month, detailedPlan: newDetailedPlan };
-            });
-
-            return { ...project, monthlyPlan: newMonthlyPlan };
-        });
-
-        onUpdateProjects(updatedProjects);
-    }, [activeProject, projects, selectedMonthIndex, onUpdateProjects]);
+        onDeleteTask(taskId);
+    }, [onDeleteTask]);
 
     // Task 업데이트 핸들러
     const handleUpdateTask = useCallback((taskId: string, updates: Partial<KanbanTask>) => {
-        if (!activeProject) return;
-
-        const updatedProjects = projects.map(project => {
-            if (project.id !== activeProject.id) return project;
-
-            const newMonthlyPlan = project.monthlyPlan.map((month, monthIdx) => {
-                if (monthIdx !== selectedMonthIndex) return month;
-
-                const newDetailedPlan = month.detailedPlan?.map(week => ({
-                    ...week,
-                    tasks: week.tasks.map(task => {
-                        if (task.id !== taskId) return task;
-                        return {
-                            ...task,
-                            ...updates,
-                            updatedAt: new Date().toISOString()
-                        };
-                    })
-                }));
-
-                return { ...month, detailedPlan: newDetailedPlan };
-            });
-
-            return { ...project, monthlyPlan: newMonthlyPlan };
-        });
-
-        onUpdateProjects(updatedProjects);
-    }, [activeProject, projects, selectedMonthIndex, onUpdateProjects]);
+        onUpdateTask(taskId, updates);
+    }, [onUpdateTask]);
 
     // 주차 선택 핸들러
     const handleWeekSelect = (week: number | null) => {

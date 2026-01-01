@@ -2,18 +2,18 @@
  * @file App.tsx
  * 애플리케이션 메인 진입점
  * 
- * 주요 변경사항 (v2.0):
- * - Zustand Store 기반 상태 관리
- * - Feature Hook 패턴 적용 (로직 분리)
- * - God Component 해소
+ * 주요 변경사항 (v2.1):
+ * - DashboardView Props 연결 수정 (onMonthClick -> handleMonthClick)
+ * - CampaignDetailView, KanbanView 복구 및 연결
+ * - KanbanView 상태 관리 로직 개선 (App 레벨 핸들러 연결)
  */
 
 import React, { useEffect } from 'react';
 import { Zap } from 'lucide-react';
 
 // Types & Constants
-import { AppView, Priority, TaskStatus } from './types';
-import { INITIAL_IDEAS, APP_NAME } from './constants';
+import { AppView, Priority, TaskStatus, KanbanTask } from './types';
+import { APP_NAME } from './constants';
 
 // Hooks & Store
 import { useStore } from './store';
@@ -26,6 +26,8 @@ import { BrainDumpView } from './components/views/BrainDumpView';
 import { AnalysisView } from './components/views/AnalysisView';
 import { ProjectListView } from './components/views/ProjectListView';
 import { DashboardView } from './components/views/DashboardView';
+import { CampaignDetailView } from './components/views/CampaignDetailView';
+import { KanbanView } from './components/views/KanbanView';
 
 // Navigation Components
 import { SideNavigation } from './components/navigation/SideNavigation';
@@ -54,11 +56,9 @@ export default function App() {
     };
 
     const handleAddTask = (weekIndex: number) => {
-        // 현재 선택된 월의 weekId를 찾아야 함
         const activeMonth = store.getActiveMonthPlan();
         if (!activeMonth) return;
 
-        // Month의 weekIds 중 weekIndex에 해당하는 ID 찾기
         const month = store.months[activeMonth.id];
         if (!month || !month.weekIds[weekIndex]) return;
 
@@ -66,9 +66,11 @@ export default function App() {
         store.addTask(weekId);
     };
 
-    const handleDeleteTask = (weekIndex: number, taskId: string) => {
+    const handleDeleteTask = (taskId: string) => {
         store.deleteTask(taskId);
     };
+    // App.tsx 내부 래퍼 (weekIndex 무시, taskId만 사용)
+    const handleDeleteTaskWrapper = (weekIndex: number, taskId: string) => handleDeleteTask(taskId);
 
     const handleUpdateWeekTheme = (weekIndex: number, theme: string) => {
         const activeMonth = store.getActiveMonthPlan();
@@ -79,16 +81,56 @@ export default function App() {
         store.updateWeekTheme(month.weekIds[weekIndex], theme);
     };
 
-    const handleUpdateTaskStatus = (weekIndex: number, taskId: string, status: TaskStatus) => {
+    const handleUpdateTaskStatus = (taskId: string, status: TaskStatus) => {
         store.updateTaskStatus(taskId, status);
     };
+    // CampaignDetailView용 래퍼
+    const handleUpdateTaskStatusWrapper = (weekIndex: number, taskId: string, status: TaskStatus) => handleUpdateTaskStatus(taskId, status);
+
 
     const handleInitManualPlan = () => {
-        // 현재 월에 주간 계획이 없으면 생성
         const activeMonth = store.getActiveMonthPlan();
         if (!activeMonth) return;
         store.initializeMonthWeeks(activeMonth.id);
     };
+
+    // Kanban Specific Handlers
+    const handleKanbanAddTask = (monthIndex: number, weekNumber: number, status: TaskStatus, text: string, priority: Priority) => {
+        if (!activeProjectId) return;
+        const project = store.projects[activeProjectId];
+        if (!project) return;
+
+        const monthId = project.monthIds[monthIndex];
+        const month = store.months[monthId];
+        if (!month) return;
+
+        // weekNumber is 1-based, array is 0-based
+        const weekId = month.weekIds[weekNumber - 1];
+        if (!weekId) return;
+
+        // 1. Add Placehoder Task
+        store.addTask(weekId);
+
+        // 2. Find the newly added task (Assuming last one)
+        // We need to re-fetch the week from store to get updated taskIds
+        const updatedWeek = useStore.getState().weeks[weekId];
+        if (!updatedWeek || updatedWeek.taskIds.length === 0) return;
+
+        const newTaskId = updatedWeek.taskIds[updatedWeek.taskIds.length - 1]; // Last added
+
+        // 3. Update Content
+        store.updateTask(newTaskId, {
+            text,
+            status,
+            priority,
+            isCompleted: status === TaskStatus.DONE
+        });
+    };
+
+    const handleKanbanUpdateTask = (taskId: string, updates: Partial<KanbanTask>) => {
+        store.updateTask(taskId, updates);
+    };
+
 
     // 5. Global Keyboard Shortcuts
     const [isQuickSearchOpen, setIsQuickSearchOpen] = React.useState(false);
@@ -188,7 +230,6 @@ export default function App() {
                             projects={projectFeature.projects}
                             onSelectProject={projectFeature.handleSelectProject}
                             onNewAdventure={() => {
-                                // Reset ideas/analyses logic needs to be in store if we want to "clear" state
                                 handleNavigate(AppView.BRAIN_DUMP);
                             }}
                         />
@@ -265,32 +306,57 @@ export default function App() {
                             // Setters (Bridge)
                             setCompressModalOpen={projectFeature.setCompressModalOpen}
                             setAdjustmentModalOpen={projectFeature.setAdjustmentModalOpen}
+                            setVisionDraft={projectFeature.setVisionDraft}
+                            setPreviewIndex={projectFeature.setPreviewIndex}
 
                             // Handlers - Project Feature
-                            onMonthClick={projectFeature.handleMonthClick}
+                            handleMonthClick={projectFeature.handleMonthClick} // Fixed Prop Name
                             triggerSmartAdjustment={projectFeature.triggerSmartAdjustment}
-                            confirmAdjustment={projectFeature.confirmAdjustment}
+                            onConfirmAdjustment={projectFeature.confirmAdjustment}
                             handleExpandVision={projectFeature.handleExpandVision}
-                            handleGeneratePlanOptions={projectFeature.handleGeneratePlanOptions}
-                            confirmPreviewPlan={projectFeature.confirmPreviewPlan}
-                            cancelPreview={projectFeature.cancelPreview}
+                            // handleGeneratePlanOptions={projectFeature.handleGeneratePlanOptions} // DashboardView doesn't use this directly
+                            // confirmPreviewPlan={projectFeature.confirmPreviewPlan}
+                            // cancelPreview={projectFeature.cancelPreview}
                             handleExtendRoadmap={projectFeature.handleExtendRoadmap}
-                            handleCompressRoadmap={projectFeature.handleCompressRoadmap}
+                            onCompressRoadmap={projectFeature.handleCompressRoadmap}
                             handleEditVision={projectFeature.handleEditVision}
                             handleCancelEditVision={projectFeature.handleCancelEditVision}
                             handleSaveVision={projectFeature.handleSaveVision}
                             handleRefineVision={projectFeature.handleRefineVision}
-                            handleAbandonQuest={projectFeature.handleAbandonQuest}
+                            onAbandonQuest={projectFeature.handleAbandonQuest}
                             handleUpdateMonthGoal={projectFeature.handleUpdateMonthGoal}
 
-                            // Handlers - Tasks (App Bridge)
+                            onOpenCampaignDetail={() => handleNavigate(AppView.CAMPAIGN_DETAIL)}
+                        />
+                    )}
+
+                    {currentView === AppView.CAMPAIGN_DETAIL && projectFeature.activeProject && (
+                        <CampaignDetailView
+                            activeProject={projectFeature.activeProject}
+                            selectedMonthIndex={selectedMonthIndex}
+                            onBack={() => handleNavigate(AppView.DASHBOARD)}
+
                             toggleTask={handleToggleTask}
-                            updateTaskText={handleUpdateTaskText}
                             addTask={handleAddTask}
-                            deleteTask={handleDeleteTask}
+                            deleteTask={handleDeleteTaskWrapper}
+                            updateTaskText={handleUpdateTaskText}
                             updateWeekTheme={handleUpdateWeekTheme}
-                            updateTaskStatus={handleUpdateTaskStatus}
-                            initManualPlan={handleInitManualPlan}
+                            updateTaskStatus={handleUpdateTaskStatusWrapper}
+                        />
+                    )}
+
+                    {currentView === AppView.KANBAN && projectFeature.activeProject && (
+                        <KanbanView
+                            projects={projectFeature.projects}
+                            activeProjectId={activeProjectId}
+                            onSelectProject={projectFeature.handleSelectProject}
+                            onBack={() => handleNavigate(AppView.DASHBOARD)}
+
+                            // New Handlers
+                            onTaskStatusChange={handleUpdateTaskStatus}
+                            onAddTask={handleKanbanAddTask}
+                            onDeleteTask={handleDeleteTask}
+                            onUpdateTask={handleKanbanUpdateTask}
                         />
                     )}
                 </main>
