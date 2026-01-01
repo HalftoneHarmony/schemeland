@@ -17,7 +17,9 @@ interface DashboardViewProps {
     previewIndex: number;
     timerActive: boolean;
     timeLeft: number;
-    timerMode: 'FOCUS' | 'BREAK';
+    timerMode: 'FOCUS' | 'SHORT_BREAK' | 'LONG_BREAK';
+    pomodoroCount: number;
+
 
     compressModalOpen: boolean;
     adjustmentModalOpen: boolean;
@@ -32,8 +34,9 @@ interface DashboardViewProps {
 
     // Actions
     setTimerActive: (active: boolean) => void;
-    setTimerMode: (mode: 'FOCUS' | 'BREAK') => void;
+    setTimerMode: (mode: 'FOCUS' | 'SHORT_BREAK' | 'LONG_BREAK') => void;
     setTimeLeft: (time: number) => void;
+
     setCompressModalOpen: (open: boolean) => void;
     setAdjustmentModalOpen: (open: boolean) => void;
 
@@ -57,6 +60,10 @@ interface DashboardViewProps {
     confirmPreviewPlan: () => void;
     toggleTask: (weekIndex: number, taskId: string) => void;
     updateTaskText: (weekIndex: number, taskId: string, text: string) => void;
+    addTask: (weekIndex: number) => void;
+    deleteTask: (weekIndex: number, taskId: string) => void;
+    updateWeekTheme: (weekIndex: number, theme: string) => void;
+    initManualPlan: () => void;
     onAbandonQuest: () => void;
     onOpenCampaignDetail: () => void;
 }
@@ -107,7 +114,7 @@ export function DashboardView(props: DashboardViewProps) {
 
     const isAhead = progress >= timeProgress;
     const statusColor = isAhead ? 'text-cyber-cyan shadow-neon-cyan' : 'text-red-500 shadow-neon-pink';
-    const statusMessage = isAhead ? 'SYNC_STABLE' : 'SYNC_LAGGING';
+    const statusMessage = isAhead ? '동기화_안정' : '동기화_지연';
 
     return (
         <>
@@ -115,10 +122,12 @@ export function DashboardView(props: DashboardViewProps) {
                 timerActive={props.timerActive}
                 timeLeft={props.timeLeft}
                 timerMode={props.timerMode}
+                pomodoroCount={props.pomodoroCount}
                 setTimerActive={props.setTimerActive}
                 setTimerMode={props.setTimerMode}
                 setTimeLeft={props.setTimeLeft}
             />
+
 
             <motion.div
                 variants={containerVariants}
@@ -190,6 +199,10 @@ export function DashboardView(props: DashboardViewProps) {
                         confirmPreviewPlan={props.confirmPreviewPlan}
                         toggleTask={props.toggleTask}
                         updateTaskText={props.updateTaskText}
+                        addTask={props.addTask}
+                        deleteTask={props.deleteTask}
+                        updateWeekTheme={props.updateWeekTheme}
+                        initManualPlan={props.initManualPlan}
                         onAbandonQuest={props.onAbandonQuest}
                     />
                 </motion.div>
@@ -213,16 +226,16 @@ export function DashboardView(props: DashboardViewProps) {
                                 <div className="skew-x-[2deg]">
                                     <div className="flex items-center justify-between mb-8 border-b border-red-500/20 pb-6">
                                         <h3 className="text-3xl font-cyber font-black flex items-center gap-4 text-red-400 tracking-tighter italic drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]">
-                                            <Flame className="animate-pulse text-red-500" fill="currentColor" size={32} /> HARDCORE_MODE
+                                            <Flame className="animate-pulse text-red-500" fill="currentColor" size={32} /> 하드코어_모드
                                         </h3>
                                         <div className="px-3 py-1 bg-red-500 text-black font-cyber font-black text-[10px] uppercase tracking-widest shadow-red-500 shadow-sm">
-                                            DANGER
+                                            위험
                                         </div>
                                     </div>
 
                                     <p className="text-white/60 mb-10 font-mono text-sm leading-relaxed uppercase tracking-tight">
-                                        PROTOCOL_INITIALIZATION: Condense timeline. Force-multiplier applied. <br />
-                                        WARNING: STRUCTURAL STABILITY MAY BE COMPROMISED. CANNOT BE UNDONE.
+                                        프로토콜_초기화: 타임라인 압축. 효율 승수 적용됨. <br />
+                                        경고: 구조적 안정성이 훼손될 수 있습니다. 취소 불가능.
                                     </p>
 
                                     <div className="grid grid-cols-3 gap-6 mb-10">
@@ -235,7 +248,7 @@ export function DashboardView(props: DashboardViewProps) {
                                                 className="group p-6 border-2 border-white/5 bg-black hover:border-red-500 transition-all flex flex-col items-center gap-2"
                                             >
                                                 <span className="text-4xl font-cyber font-black text-white group-hover:text-red-500 transition-colors">{months}</span>
-                                                <span className="text-[10px] font-cyber font-black text-white/20 uppercase tracking-widest">MONTHS</span>
+                                                <span className="text-[10px] font-cyber font-black text-white/20 uppercase tracking-widest">개월</span>
                                             </motion.button>
                                         ))}
                                     </div>
@@ -243,7 +256,7 @@ export function DashboardView(props: DashboardViewProps) {
                                         onClick={() => props.setCompressModalOpen(false)}
                                         className="w-full py-4 text-[10px] font-cyber font-black text-white/20 hover:text-white transition-colors uppercase tracking-[0.4em]"
                                     >
-                                        ABORT_SEQUENCE
+                                        중단_시퀀스
                                     </button>
                                 </div>
                             </motion.div>
@@ -266,22 +279,22 @@ export function DashboardView(props: DashboardViewProps) {
                                 <div className="skew-x-[2deg]">
                                     <div className="flex items-center justify-between mb-8 border-b border-cyber-cyan/20 pb-6">
                                         <h3 className="text-3xl font-cyber font-black flex items-center gap-4 text-cyber-cyan uppercase tracking-tighter italic">
-                                            <Cpu className="animate-pulse" size={32} /> RECALIBRATE
+                                            <Cpu className="animate-pulse" size={32} /> 시스템_재보정
                                         </h3>
                                         <div className="px-3 py-1 bg-cyber-cyan text-black font-cyber font-black text-[10px] uppercase tracking-widest shadow-neon-cyan shadow-sm">
-                                            SYSTEM
+                                            시스템
                                         </div>
                                     </div>
 
                                     <p className="text-white/60 mb-10 font-mono text-sm leading-relaxed uppercase tracking-tight">
-                                        The AI Core is ready to adjust neural quest parameters. Re-calculating weekly difficulty factors...
+                                        AI 코어가 뉴럴 퀘스트 파라미터를 조정할 준비가 되었습니다. 주간 난이도 요소 재계산 중...
                                     </p>
 
                                     <div className="grid gap-6 mb-10">
                                         {[
-                                            { id: Difficulty.EASY, label: 'CHILL_MODE', icon: '🧘', desc: 'STABLE VELOCITY. MINIMAL FRICTION.', color: 'text-cyber-yellow', border: 'hover:border-cyber-yellow', bg: 'hover:bg-cyber-yellow/5' },
-                                            { id: Difficulty.NORMAL, label: 'STARTUP_MODE', icon: '🏃', desc: 'STANDARD OP-SPEED. BALANCED GRIND.', color: 'text-cyber-cyan', border: 'hover:border-cyber-cyan', bg: 'hover:bg-cyber-cyan/5' },
-                                            { id: Difficulty.HARD, label: 'CRUNCH_MODE', icon: '🔥', desc: 'MAXIMUM OVERDRIVE. SYSTEM STRESS HIGH.', color: 'text-red-500', border: 'hover:border-red-500', bg: 'hover:bg-red-500/5' },
+                                            { id: Difficulty.EASY, label: '휴식_모드', icon: '🧘', desc: '안정적인 속도. 최소한의 마찰.', color: 'text-cyber-yellow', border: 'hover:border-cyber-yellow', bg: 'hover:bg-cyber-yellow/5' },
+                                            { id: Difficulty.NORMAL, label: '스타트업_모드', icon: '🏃', desc: '표준 운영 속도. 균형 잡힌 몰입.', color: 'text-cyber-cyan', border: 'hover:border-cyber-cyan', bg: 'hover:bg-cyber-cyan/5' },
+                                            { id: Difficulty.HARD, label: '크런치_모드', icon: '🔥', desc: '최대 오버드라이브. 시스템 부하 매우 높음.', color: 'text-red-500', border: 'hover:border-red-500', bg: 'hover:bg-red-500/5' },
                                         ].map((diff) => (
                                             <motion.button
                                                 key={diff.id}
@@ -308,7 +321,7 @@ export function DashboardView(props: DashboardViewProps) {
                                         onClick={() => props.setAdjustmentModalOpen(false)}
                                         className="w-full py-4 text-[10px] font-cyber font-black text-white/20 hover:text-white transition-colors uppercase tracking-[0.4em]"
                                     >
-                                        CANCEL_RECALIBRATION
+                                        재보정_취소
                                     </button>
                                 </div>
                             </motion.div>

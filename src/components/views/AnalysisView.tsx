@@ -23,23 +23,23 @@ export function AnalysisView({ analyses, ideas, onBack, onCommit, isGeneratingPl
                     className="text-white/20 hover:text-cyber-pink mb-10 inline-flex items-center text-[10px] font-cyber font-black uppercase tracking-[0.3em] transition-all group"
                 >
                     <ArrowLeft size={16} className="mr-3 group-hover:-translate-x-1 transition-transform" />
-                    BACK_TO_ARCHIVE
+                    BACK_TO_ARCHIVE::아카이브로_귀환
                 </button>
 
                 <div className="flex flex-col items-center mb-12">
                     <div className="flex items-center gap-3 mb-4">
                         <BarChart3 className="text-cyber-cyan" size={24} />
-                        <span className="text-xs font-cyber font-black text-cyber-cyan uppercase tracking-[0.2em]">Diagnostic_Report</span>
+                        <span className="text-xs font-cyber font-black text-cyber-cyan uppercase tracking-[0.2em]">Diagnostic_Report::진단_보고서</span>
                     </div>
-                    <h2 className="text-6xl font-cyber font-black mb-6 text-white uppercase tracking-tighter italic scale-x-105">Analysis_Terminal</h2>
-                    <p className="text-lg font-mono text-white/40 mb-10 uppercase tracking-widest">Cross-referencing neural fragments for optimal execution path.</p>
+                    <h2 className="text-6xl font-cyber font-black mb-6 text-white uppercase tracking-tighter italic scale-x-105">Analysis_Terminal::분석_터미널</h2>
+                    <p className="text-lg font-mono text-white/40 mb-10 uppercase tracking-widest">최적의 실행 경로를 위해 뉴럴 파편을 교차 참조합니다.</p>
                 </div>
 
                 <div className="inline-flex flex-col items-center gap-4 p-8 bg-black border-2 border-white/5 relative group overflow-hidden skew-x-[-10deg]">
                     <div className="absolute inset-0 bg-cyber-pink/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                     <div className="skew-x-[10deg] flex flex-col items-center gap-4">
                         <label className="text-[10px] font-cyber font-black text-white/40 uppercase tracking-[0.4em] flex items-center gap-3">
-                            <Calendar size={16} className="text-cyber-pink" /> Sequence_Start_Time
+                            <Calendar size={16} className="text-cyber-pink" /> 퀘스트_시퀀스_시작_날짜
                         </label>
                         <input
                             type="date"
@@ -57,10 +57,10 @@ export function AnalysisView({ analyses, ideas, onBack, onCommit, isGeneratingPl
                     if (!idea) return null;
                     const score = Math.round((analysis.metrics.feasibility + analysis.metrics.marketPotential + analysis.metrics.excitement + analysis.metrics.speedToMVP) / 4);
                     const chartData = [
-                        { subject: 'FEAS', A: analysis.metrics.feasibility, fullMark: 100 },
-                        { subject: 'MRKT', A: analysis.metrics.marketPotential, fullMark: 100 },
-                        { subject: 'FUN', A: analysis.metrics.excitement, fullMark: 100 },
-                        { subject: 'SPD', A: analysis.metrics.speedToMVP, fullMark: 100 },
+                        { subject: '실행성', A: analysis.metrics.feasibility, fullMark: 100 },
+                        { subject: '시장성', A: analysis.metrics.marketPotential, fullMark: 100 },
+                        { subject: '흥미도', A: analysis.metrics.excitement, fullMark: 100 },
+                        { subject: '신속성', A: analysis.metrics.speedToMVP, fullMark: 100 },
                     ];
 
                     const isHighRisk = score < 60;
@@ -81,7 +81,7 @@ export function AnalysisView({ analyses, ideas, onBack, onCommit, isGeneratingPl
                                                 {score}
                                             </div>
                                             <div className="flex flex-col">
-                                                <span className="text-[10px] font-cyber font-black text-white/20 uppercase tracking-widest">Score_Index</span>
+                                                <span className="text-[10px] font-cyber font-black text-white/20 uppercase tracking-widest">Score_Index::점수_지표</span>
                                                 <span className="text-[8px] font-mono text-white/40">/ 100</span>
                                             </div>
                                         </div>
@@ -118,16 +118,16 @@ export function AnalysisView({ analyses, ideas, onBack, onCommit, isGeneratingPl
                                     <div className="flex-1 mb-8">
                                         <div className="flex items-center justify-between mb-4">
                                             <h4 className="text-[10px] font-cyber font-black text-white/40 uppercase tracking-[0.3em] flex items-center gap-2">
-                                                <Zap size={14} className="text-cyber-yellow" /> System_Verdict
+                                                <Zap size={14} className="text-cyber-yellow" /> System_Verdict::시스템_판결
                                             </h4>
                                             {isLegendary && (
                                                 <div className="px-2 py-0.5 bg-cyber-yellow text-black font-cyber font-black text-[8px] tracking-widest uppercase shadow-neon-yellow">
-                                                    LEGENDARY_SPEC
+                                                    LEGENDARY_SPEC::최정예_사양
                                                 </div>
                                             )}
                                         </div>
                                         <div className="bg-white/5 border-l-2 border-cyber-pink p-5 transition-all group-hover:bg-white/10">
-                                            <p className="text-xs text-white/70 font-mono leading-relaxed lowercase">
+                                            <p className="text-xs text-white/70 font-mono leading-relaxed">
                                                 {analysis.reasoning}
                                             </p>
                                         </div>
@@ -142,7 +142,7 @@ export function AnalysisView({ analyses, ideas, onBack, onCommit, isGeneratingPl
                                         disabled={isGeneratingPlan}
                                     >
                                         <span className="skew-x-[10deg] flex items-center gap-3 justify-center">
-                                            INITIALIZE_QUEST
+                                            INITIALIZE_QUEST::퀘스트_시작
                                         </span>
                                     </Button>
                                 </div>

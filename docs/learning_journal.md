@@ -46,6 +46,12 @@
 13. **[유효성 검사: 사용자 실수 방지 (Validation & Error Handling)](./learning/12_validation_and_error_handling.md)**
     *   "입구 컷"으로 잘못된 데이터 막기, 친절한 에러 메시지로 안내하기
 
+14. **[협업의 정석: 주방 시나리오 (Developer Collaboration)](./learning/13_developer_collaboration_workflow.md)**
+    *   브랜치, 푸쉬, 풀 리퀘스트... 실제 개발팀이 함께 일하는 과정 이해하기
+
+15. **[시간 공학: 포모도로 몰입 프로토콜 (Pomodoro Focus Protocol)](./learning/15_pomodoro_focus_protocol.md)**
+    *   25분 집중, 5분 휴식. 시스템 부하를 관리하는 고효율 시간 관리법
+
 ---
 
 ### 🚀 앞으로의 여정 (Next Steps)

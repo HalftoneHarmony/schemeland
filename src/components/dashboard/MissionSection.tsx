@@ -19,6 +19,10 @@ interface MissionSectionProps {
     confirmPreviewPlan: () => void;
     toggleTask: (weekIndex: number, taskId: string) => void;
     updateTaskText: (weekIndex: number, taskId: string, text: string) => void;
+    addTask: (weekIndex: number) => void;
+    deleteTask: (weekIndex: number, taskId: string) => void;
+    updateWeekTheme: (weekIndex: number, theme: string) => void;
+    initManualPlan: () => void;
     onAbandonQuest: () => void;
 }
 
@@ -39,10 +43,11 @@ const itemVariants = {
 
 export function MissionSection({
     activeProject, activeMonthlyPlan, weeklyPlan, isPreviewMode, previewOptions, previewIndex, isGeneratingMonthDetail, selectedMonthIndex,
-    setPreviewIndex, handleGeneratePlanOptions, cancelPreview, confirmPreviewPlan, toggleTask, updateTaskText, onAbandonQuest
+    setPreviewIndex, handleGeneratePlanOptions, cancelPreview, confirmPreviewPlan, toggleTask, updateTaskText, addTask, deleteTask, updateWeekTheme, initManualPlan, onAbandonQuest
 }: MissionSectionProps) {
 
     const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+    const [editingWeekIndex, setEditingWeekIndex] = useState<number | null>(null);
 
     return (
         <section className="mt-12">
@@ -51,15 +56,15 @@ export function MissionSection({
                     <div>
                         <h2 className="text-3xl font-cyber font-black flex items-center gap-4 text-white mb-2 uppercase tracking-[0.1em]">
                             <Rocket className="text-cyber-pink shadow-neon-pink" />
-                            Mission_Log
+                            MISSION_LOG::미션_로그
                         </h2>
                         <div className="flex items-center gap-4 ml-10">
                             <div className="flex items-center gap-1.5 px-2 py-0.5 bg-cyber-pink/10 border border-cyber-pink/20 rounded">
                                 <Activity size={12} className="text-cyber-pink animate-pulse" />
-                                <span className="text-[10px] font-cyber font-black text-cyber-pink uppercase tracking-widest">Active_Quest</span>
+                                <span className="text-[10px] font-cyber font-black text-cyber-pink uppercase tracking-widest">활성_퀘스트</span>
                             </div>
                             <span className="text-white/20">/</span>
-                            <span className="text-xs font-mono text-white/40 uppercase tracking-tighter">Month {activeMonthlyPlan.month}: {activeMonthlyPlan.theme}</span>
+                            <span className="text-xs font-mono text-white/40 uppercase tracking-tighter">{selectedMonthIndex + 1}월차: {activeMonthlyPlan.theme}</span>
                         </div>
                     </div>
 
@@ -72,7 +77,7 @@ export function MissionSection({
                                 isLoading={isGeneratingMonthDetail}
                                 className="text-[10px] font-cyber font-black border-white/10 hover:border-cyber-cyan hover:text-cyber-cyan tracking-[0.2em]"
                             >
-                                <Layers size={14} className="mr-2" /> CALIBRATE_STRATEGY
+                                <Layers size={14} className="mr-2" /> 전략_재보정
                             </Button>
                         )}
 
@@ -81,12 +86,12 @@ export function MissionSection({
                             size="sm"
                             className="text-[10px] font-cyber font-black text-white/20 hover:text-red-500 tracking-[0.2em]"
                             onClick={() => {
-                                if (confirm("DANGER: TERMINATING MISSION LOG WILL DELETE ALL PROGRESS. CONFIRM ABANDON?")) {
+                                if (confirm("위험: 미션 로그를 종료하면 모든 진행 상황이 삭제됩니다. 프로젝트를 포기하시겠습니까?")) {
                                     onAbandonQuest();
                                 }
                             }}
                         >
-                            TERMINATE
+                            종료
                         </Button>
 
                         {isPreviewMode && (
@@ -95,7 +100,7 @@ export function MissionSection({
                                 animate={{ x: 0, opacity: 1 }}
                                 className="flex items-center gap-2 px-4 py-2 bg-cyber-yellow text-black font-cyber font-black text-[10px] uppercase tracking-[0.2em] shadow-neon-yellow"
                             >
-                                <Wifi size={14} className="animate-pulse" /> PREVIEW_ONLY
+                                <Wifi size={14} className="animate-pulse" /> 미리보기_전용
                             </motion.div>
                         )}
                     </div>
@@ -122,7 +127,7 @@ export function MissionSection({
                                 `}
                             >
                                 <div className={`text-[10px] font-cyber font-black mb-3 px-2 py-0.5 ${previewIndex === idx ? 'bg-cyber-pink text-black' : 'bg-white/10 text-white/40'}`}>
-                                    STRATEGY_0{idx + 1}
+                                    전략_0{idx + 1}
                                 </div>
                                 <div className="font-cyber font-black text-white mb-2 uppercase tracking-tight">{option.strategyName}</div>
                                 <div className="text-xs text-white/40 leading-relaxed font-mono">{option.description}</div>
@@ -148,17 +153,28 @@ export function MissionSection({
                     >
                         <div className="skew-x-[1deg]">
                             <Scroll size={64} className="mx-auto text-white/10 mb-8" />
-                            <h3 className="text-2xl font-cyber font-black text-white/40 mb-4 uppercase tracking-[0.2em]">Data_Corrupted: No_Quests_Found</h3>
-                            <p className="text-white/20 mb-10 max-w-md mx-auto font-mono text-sm leading-relaxed">Initialize a new strategy to populate the mission log for the current sector.</p>
-                            <Button
-                                onClick={() => handleGeneratePlanOptions(selectedMonthIndex)}
-                                isLoading={isGeneratingMonthDetail}
-                                className="h-14 px-10 text-xs bg-cyber-pink text-white hover:bg-transparent hover:text-cyber-pink border-2 border-cyber-pink shadow-neon-pink skew-x-[-10deg]"
-                            >
-                                <span className="skew-x-[10deg] flex items-center font-cyber font-black tracking-widest gap-3">
-                                    <Sparkles size={18} /> INITIALIZE_QUEST_CHAIN
-                                </span>
-                            </Button>
+                            <h3 className="text-2xl font-cyber font-black text-white/40 mb-4 uppercase tracking-[0.2em]">Data_Corrupted: 퀘스트를_찾을_수_없음</h3>
+                            <p className="text-white/20 mb-10 max-w-md mx-auto font-mono text-sm leading-relaxed">현재 섹터의 미션 로그를 생성하기 위해 새로운 전략을 초기화하십시오.</p>
+                            <div className="flex flex-col md:flex-row gap-4 justify-center">
+                                <Button
+                                    onClick={() => handleGeneratePlanOptions(selectedMonthIndex)}
+                                    isLoading={isGeneratingMonthDetail}
+                                    className="h-14 px-10 text-xs bg-cyber-pink text-white hover:bg-transparent hover:text-cyber-pink border-2 border-cyber-pink shadow-neon-pink skew-x-[-10deg]"
+                                >
+                                    <span className="skew-x-[10deg] flex items-center font-cyber font-black tracking-widest gap-3">
+                                        <Sparkles size={18} /> 퀘스트_체인_초기화
+                                    </span>
+                                </Button>
+                                <Button
+                                    onClick={initManualPlan}
+                                    variant="ghost"
+                                    className="h-14 px-10 text-xs border-2 border-white/10 text-white/40 hover:text-white hover:border-white skew-x-[-10deg]"
+                                >
+                                    <span className="skew-x-[10deg] flex items-center font-cyber font-black tracking-widest gap-3">
+                                        <Edit3 size={18} /> 수동_퀘스트_설계
+                                    </span>
+                                </Button>
+                            </div>
                         </div>
                     </motion.div>
                 ) : (
@@ -183,8 +199,28 @@ export function MissionSection({
                                                 <span className="text-2xl font-cyber font-black text-white">0{week.weekNumber}</span>
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <div className="text-cyber-cyan font-cyber font-black text-[10px] uppercase tracking-[0.2em] mb-1">Focus_Area</div>
-                                                <h3 className="font-cyber font-black text-lg text-white uppercase tracking-tight truncate" title={week.theme}>{week.theme}</h3>
+                                                <div className="flex justify-between items-start">
+                                                    <div className="text-cyber-cyan font-cyber font-black text-[10px] uppercase tracking-[0.2em] mb-1">중점_분야</div>
+                                                    {!isPreviewMode && (
+                                                        <button
+                                                            onClick={() => setEditingWeekIndex(editingWeekIndex === wIndex ? null : wIndex)}
+                                                            className="text-[10px] text-white/20 hover:text-cyber-cyan font-cyber"
+                                                        >
+                                                            {editingWeekIndex === wIndex ? '확인' : '편집'}
+                                                        </button>
+                                                    )}
+                                                </div>
+                                                {editingWeekIndex === wIndex ? (
+                                                    <input
+                                                        className="bg-black/50 border-b-2 border-cyber-cyan w-full text-base font-cyber font-black text-white uppercase tracking-tight focus:outline-none"
+                                                        value={week.theme}
+                                                        autoFocus
+                                                        onChange={(e) => updateWeekTheme(wIndex, e.target.value)}
+                                                        onKeyDown={(e) => e.key === 'Enter' && setEditingWeekIndex(null)}
+                                                    />
+                                                ) : (
+                                                    <h3 className="font-cyber font-black text-lg text-white uppercase tracking-tight truncate" title={week.theme}>{week.theme}</h3>
+                                                )}
                                             </div>
                                         </div>
 
@@ -204,7 +240,7 @@ export function MissionSection({
                                                         onClick={() => !isPreviewMode && editingTaskId !== task.id && toggleTask(wIndex, task.id)}
                                                     >
                                                         {task.isCompleted && (
-                                                            <div className="absolute top-0 right-0 px-2 py-0.5 bg-cyber-cyan text-black font-cyber font-black text-[8px] uppercase tracking-widest">CLEARED</div>
+                                                            <div className="absolute top-0 right-0 px-2 py-0.5 bg-cyber-cyan text-black font-cyber font-black text-[8px] uppercase tracking-widest">완료됨</div>
                                                         )}
 
                                                         <motion.div
@@ -238,19 +274,34 @@ export function MissionSection({
                                                                 >
                                                                     {task.text}
                                                                 </span>
-                                                                {!isPreviewMode && !task.isCompleted && (
+                                                                <div className="flex items-center gap-1 opacity-0 group-hover/task:opacity-100 transition-all shrink-0">
                                                                     <button
                                                                         onClick={(e) => { e.stopPropagation(); setEditingTaskId(task.id); }}
-                                                                        className="p-1 px-2 border border-white/10 text-white/20 opacity-0 group-hover/task:opacity-100 hover:text-white hover:border-white transition-all shrink-0 text-[10px] font-cyber"
+                                                                        className="p-1 px-2 border border-white/10 text-white/20 hover:text-white hover:border-white transition-all text-[10px] font-cyber"
                                                                     >
-                                                                        EDIT
+                                                                        편집
                                                                     </button>
-                                                                )}
+                                                                    <button
+                                                                        onClick={(e) => { e.stopPropagation(); deleteTask(wIndex, task.id); }}
+                                                                        className="p-1 px-2 border border-white/10 text-white/20 hover:text-red-500 hover:border-red-500 transition-all text-[10px] font-cyber"
+                                                                    >
+                                                                        삭제
+                                                                    </button>
+                                                                </div>
                                                             </div>
                                                         )}
                                                     </motion.li>
                                                 ))}
                                             </AnimatePresence>
+                                            {!isPreviewMode && (
+                                                <motion.button
+                                                    whileHover={{ x: 5 }}
+                                                    onClick={() => addTask(wIndex)}
+                                                    className="w-full mt-4 p-3 border border-dashed border-white/10 text-white/20 hover:text-cyber-cyan hover:border-cyber-cyan hover:bg-cyber-cyan/5 transition-all flex items-center justify-center gap-2 text-[10px] font-cyber font-black uppercase tracking-widest"
+                                                >
+                                                    <Sparkles size={12} /> 미션_추가
+                                                </motion.button>
+                                            )}
                                         </ul>
                                     </div>
                                 </div>
@@ -269,14 +320,14 @@ export function MissionSection({
                 >
                     <div className="skew-x-[5deg] flex gap-6">
                         <Button variant="ghost" onClick={cancelPreview} className="text-[10px] font-cyber font-black text-white/40 hover:text-white tracking-[0.2em]">
-                            ABORT_CHANGES
+                            변경_취소
                         </Button>
                         <Button
                             onClick={confirmPreviewPlan}
                             className="bg-cyber-cyan text-black font-cyber font-black text-xs px-10 shadow-neon-cyan hover:bg-white border-none tracking-[0.2em] skew-x-[-10deg]"
                         >
                             <span className="skew-x-[10deg] flex items-center gap-2">
-                                <Check size={18} /> COMMIT_STRATEGY
+                                <Check size={18} /> 전략_확정
                             </span>
                         </Button>
                     </div>

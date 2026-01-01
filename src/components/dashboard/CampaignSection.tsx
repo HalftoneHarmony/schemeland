@@ -54,7 +54,7 @@ export function CampaignSection({
             <div className="flex items-center justify-between mb-10 px-4">
                 <h2 className="text-3xl font-cyber font-black text-white flex items-center gap-4">
                     <Calendar className="text-cyber-cyan shadow-neon-cyan" />
-                    <span className="tracking-[0.1em] uppercase">Campaign Log</span>
+                    <span className="tracking-[0.1em] uppercase">CAMPAIGN_LOG::캠페인_로그</span>
                 </h2>
                 <Button
                     onClick={() => setCompressModalOpen(true)}
@@ -65,7 +65,7 @@ export function CampaignSection({
                     isLoading={isCompressing}
                 >
                     <span className="skew-x-[10deg] flex items-center gap-2 font-cyber font-black text-xs tracking-[0.2em]">
-                        <FastForward size={14} className="animate-pulse" /> HARDCORE_MODE
+                        <FastForward size={14} className="animate-pulse" /> 하드코어_모드
                     </span>
                 </Button>
             </div>
@@ -102,9 +102,9 @@ export function CampaignSection({
                                         <div className="flex justify-between items-center mb-8">
                                             <motion.div
                                                 animate={isSelected ? { rotate: [0, 90, 0] } : {}}
-                                                className={`w-14 h-14 flex items-center justify-center font-cyber font-black text-2xl border-2 z-10 ${isSelected ? 'bg-cyber-cyan border-white text-black shadow-neon-cyan' : 'bg-black border-white/20 text-white/40'}`}
+                                                className={`w-14 h-14 flex items-center justify-center font-cyber font-black text-xl border-2 z-10 ${isSelected ? 'bg-cyber-cyan border-white text-black shadow-neon-cyan' : 'bg-black border-white/20 text-white/40'}`}
                                             >
-                                                {month.month}
+                                                {idx + 1}월
                                             </motion.div>
                                             <div className="flex gap-2 items-center">
                                                 {isSelected && !isEditingMonthTheme && (
@@ -112,7 +112,7 @@ export function CampaignSection({
                                                         onClick={(e) => { e.stopPropagation(); setIsEditingMonthTheme(true); }}
                                                         className="px-3 py-1 bg-white/5 border border-white/10 text-white/60 hover:text-cyber-pink hover:border-cyber-pink transition-all text-[10px] font-cyber font-bold uppercase tracking-widest"
                                                     >
-                                                        Edit
+                                                        편집
                                                     </button>
                                                 )}
                                                 {isSelected && (
@@ -142,10 +142,10 @@ export function CampaignSection({
                                                         />
                                                         <div className="flex gap-2 mt-4">
                                                             <Button onClick={triggerSmartAdjustment} size="sm" variant="ghost" className="flex-1 text-[10px] font-cyber font-black border-cyber-pink/40 text-cyber-pink hover:bg-cyber-pink hover:text-white" isLoading={isAdjustingPlan}>
-                                                                AI_ADJUST
+                                                                AI_조정
                                                             </Button>
                                                             <Button onClick={() => setIsEditingMonthTheme(false)} size="sm" className="bg-cyber-cyan text-black font-cyber font-black text-[10px] border-none px-6 shadow-neon-cyan">
-                                                                SAVE_CONFIG
+                                                                설정_저장
                                                             </Button>
                                                         </div>
                                                     </motion.div>
@@ -194,7 +194,7 @@ export function CampaignSection({
                                         <div className="bg-black/40 p-6 border-2 border-white/10 group-hover:border-cyber-pink group-hover:shadow-neon-pink group-hover:scale-110 transition-all mb-6">
                                             <Plus className="text-white/20 group-hover:text-cyber-pink" size={32} />
                                         </div>
-                                        <span className="text-[10px] font-cyber font-black text-white/20 group-hover:text-cyber-pink uppercase tracking-[0.3em]">Unlock_Region_Next</span>
+                                        <span className="text-[10px] font-cyber font-black text-white/20 group-hover:text-cyber-pink uppercase tracking-[0.3em]">다음_지역_해제</span>
                                     </>
                                 )}
                             </div>

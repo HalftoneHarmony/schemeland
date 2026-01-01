@@ -41,7 +41,7 @@ export function DashboardHeader({
                                 transition={{ duration: 2, repeat: Infinity }}
                                 className="px-3 py-1 rounded bg-accent/10 border border-accent/20 text-accent text-xs font-bold uppercase tracking-wider"
                             >
-                                Active Quest
+                                활성 퀘스트
                             </motion.span>
                         </div>
                         <p className="text-xl text-zinc-400 font-medium max-w-3xl leading-relaxed">
@@ -62,7 +62,7 @@ export function DashboardHeader({
                     <div className="flex justify-between items-end mb-3 relative z-10">
                         <div className="flex items-center gap-2">
                             <Swords className="text-cyber-pink" size={18} />
-                            <span className="text-[10px] font-cyber font-black text-zinc-500 uppercase tracking-[0.2em]">Quest Progress</span>
+                            <span className="text-[10px] font-cyber font-black text-zinc-500 uppercase tracking-[0.2em]">퀘스트 진행률</span>
                         </div>
                         <span className="text-3xl font-cyber font-black text-cyber-pink">{progress}%</span>
                     </div>
@@ -86,9 +86,9 @@ export function DashboardHeader({
                     <div className="flex justify-between items-end mb-3 relative z-10">
                         <div className="flex items-center gap-2">
                             <Clock className="text-cyber-cyan" size={18} />
-                            <span className="text-[10px] font-cyber font-black text-zinc-500 uppercase tracking-[0.2em]">Time Elapsed</span>
+                            <span className="text-[10px] font-cyber font-black text-zinc-500 uppercase tracking-[0.2em]">시간 경과</span>
                         </div>
-                        <span className="text-3xl font-cyber font-black text-cyber-cyan">{daysPassed}<span className="text-xs text-zinc-600 font-normal ml-1">/30d</span></span>
+                        <span className="text-3xl font-cyber font-black text-cyber-cyan">{daysPassed}<span className="text-xs text-zinc-600 font-normal ml-1">/30일</span></span>
                     </div>
                     <div className="w-full bg-black/50 h-2 border border-cyber-cyan/20 relative z-10 overflow-hidden">
                         <motion.div
@@ -106,7 +106,7 @@ export function DashboardHeader({
                     className="glass-panel p-6 relative group border-cyber-yellow/20 flex items-center justify-between"
                 >
                     <div className="relative z-10">
-                        <div className="text-[10px] font-cyber font-black text-zinc-500 uppercase tracking-[0.2em] mb-1">System State</div>
+                        <div className="text-[10px] font-cyber font-black text-zinc-500 uppercase tracking-[0.2em] mb-1">시스템 상태</div>
                         <div className={`text-2xl font-cyber font-black ${statusColor} italic tracking-widest uppercase`}>{statusMessage}</div>
                     </div>
                     <motion.div

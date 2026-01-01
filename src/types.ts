@@ -118,10 +118,15 @@ export interface MonthlyGoal extends BaseEntity {
   detailedPlan?: WeeklyMilestone[];
 }
 
+export interface YearPlan {
+  vision: string;
+  keyResults: string[];
+}
+
 export interface ThreeYearVision extends BaseEntity {
-  year1: string;
-  year2: string;
-  year3: string;
+  year1: YearPlan;
+  year2: YearPlan;
+  year3: YearPlan;
   ultimateGoal: string;
 }
 

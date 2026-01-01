@@ -24,6 +24,12 @@ export function VisionSection({
     const [activeYearIndex, setActiveYearIndex] = useState(0);
     const [direction, setDirection] = useState(0);
 
+    const getYearValue = (yearData: any): { vision: string, keyResults: string[] } => {
+        if (!yearData) return { vision: '', keyResults: [] };
+        if (typeof yearData === 'string') return { vision: yearData, keyResults: [] };
+        return { vision: yearData.vision || '', keyResults: yearData.keyResults || [] };
+    };
+
     const VisionTextarea = ({ value, onChange, label, rows = 2 }: { value: string, onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void, label: string, rows?: number }) => (
         <div className="mb-6">
             <label className="text-cyber-cyan font-cyber font-black text-[10px] uppercase tracking-[0.2em] mb-3 block">{label}</label>
@@ -47,9 +53,9 @@ export function VisionSection({
     };
 
     const themeColors = [
-        { border: 'border-cyber-yellow', text: 'text-cyber-yellow', bg: 'bg-cyber-yellow/10', shadow: 'shadow-neon-yellow', icon: <Flag size={20} />, label: 'Phase_Foundation' },
-        { border: 'border-cyber-cyan', text: 'text-cyber-cyan', bg: 'bg-cyber-cyan/10', shadow: 'shadow-neon-cyan', icon: <Rocket size={20} />, label: 'Phase_Expansion' },
-        { border: 'border-cyber-pink', text: 'text-cyber-pink', bg: 'bg-cyber-pink/10', shadow: 'shadow-neon-pink', icon: <Crown size={20} />, label: 'Phase_Dominance' },
+        { border: 'border-cyber-yellow', text: 'text-cyber-yellow', bg: 'bg-cyber-yellow/10', shadow: 'shadow-neon-yellow', icon: <Flag size={20} />, label: '기반_구축_단계' },
+        { border: 'border-cyber-cyan', text: 'text-cyber-cyan', bg: 'bg-cyber-cyan/10', shadow: 'shadow-neon-cyan', icon: <Rocket size={20} />, label: '시장_확장_단계' },
+        { border: 'border-cyber-pink', text: 'text-cyber-pink', bg: 'bg-cyber-pink/10', shadow: 'shadow-neon-pink', icon: <Crown size={20} />, label: '지배_및_정점_단계' },
     ];
 
     const currentTheme = themeColors[activeYearIndex];
@@ -78,7 +84,7 @@ export function VisionSection({
         <section className="mb-20">
             <div className="flex justify-between items-center mb-8 px-4">
                 <h2 className="text-3xl font-cyber font-black text-white flex items-center gap-4 uppercase tracking-[0.1em]">
-                    <Target className="text-white/20" /> Strategic_Vision
+                    <Target className="text-white/20" /> STRATEGIC_VISION::전략적_비전
                 </h2>
             </div>
 
@@ -122,7 +128,7 @@ export function VisionSection({
                     <div className="px-10 py-6 flex justify-between items-center border-b border-white/5 relative z-10 bg-white/5 backdrop-blur-md">
                         <div className={`flex items-center gap-4 ${currentTheme.text}`}>
                             <div className="font-cyber font-black text-xs uppercase tracking-[0.3em]">
-                                Vision_Sequence::{activeYearIndex + 1}
+                                VISION_SEQUENCE::{activeYearIndex + 1}년차
                             </div>
                             <div className={`w-2 h-2 rounded-full ${currentTheme.text.replace('text-', 'bg-')} animate-pulse`} />
                             <div className="text-[10px] font-mono text-white/40 font-bold uppercase tracking-widest">{currentTheme.label}</div>
@@ -131,9 +137,9 @@ export function VisionSection({
                         <div className="flex items-center gap-4">
                             {isEditingVision ? (
                                 <>
-                                    <Button variant="ghost" size="sm" onClick={handleCancelEditVision} className="text-[10px] font-cyber font-black text-white/20 hover:text-white uppercase tracking-widest">Abort</Button>
+                                    <Button variant="ghost" size="sm" onClick={handleCancelEditVision} className="text-[10px] font-cyber font-black text-white/20 hover:text-white uppercase tracking-widest">중단</Button>
                                     <Button size="sm" onClick={handleSaveVision} className="bg-cyber-cyan text-black font-cyber font-black text-[10px] uppercase tracking-widest px-6 shadow-neon-cyan border-none">
-                                        <Save size={14} className="mr-2" /> Sync_Data
+                                        <Save size={14} className="mr-2" /> 데이터_동기화
                                     </Button>
                                 </>
                             ) : hasVision ? (
@@ -141,14 +147,14 @@ export function VisionSection({
                                     onClick={handleEditVision}
                                     className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 text-white/40 hover:text-white hover:border-white transition-all text-[10px] font-cyber font-black uppercase tracking-widest"
                                 >
-                                    <Edit3 size={12} /> Reconfigure
+                                    <Edit3 size={12} /> 재보정
                                 </button>
                             ) : null}
                         </div>
                     </div>
 
                     {/* Content Area */}
-                    <div className="px-12 py-12 flex-1 relative z-10 flex flex-col justify-center skew-x-[1deg]">
+                    <div className="px-12 py-10 flex-1 relative z-10 flex flex-col justify-center skew-x-[1deg]">
                         <AnimatePresence initial={false} custom={direction} mode="wait">
                             <motion.div
                                 key={activeYearIndex}
@@ -160,167 +166,141 @@ export function VisionSection({
                                 transition={{ type: "spring", stiffness: 200, damping: 25 }}
                                 className="w-full h-full flex flex-col justify-center"
                             >
-                                {/* YEAR 1 */}
-                                {activeYearIndex === 0 && (
+                                {((activeYearIndex === 0) || (activeYearIndex > 0 && hasVision)) ? (
                                     <div className="w-full">
                                         {isEditingVision && visionDraft ? (
-                                            <VisionTextarea
-                                                label="Foundation_Objective"
-                                                value={visionDraft.year1 || activeProject.yearlyPlan.vision}
-                                                onChange={(e) => setVisionDraft({ ...visionDraft, year1: e.target.value })}
-                                                rows={5}
-                                            />
-                                        ) : (
-                                            <div className="flex flex-col md:flex-row gap-12 items-start">
-                                                <div className="flex-1">
-                                                    <div className="text-cyber-yellow font-cyber font-black text-[10px] uppercase tracking-[0.3em] mb-4">Core_Directive</div>
-                                                    <motion.h3
-                                                        initial={{ opacity: 0, x: -20 }}
-                                                        animate={{ opacity: 1, x: 0 }}
-                                                        className="text-3xl md:text-4xl font-cyber font-black text-white leading-tight uppercase tracking-tight skew-x-[-5deg]"
-                                                    >
-                                                        "{activeProject.yearlyPlan.vision}"
-                                                    </motion.h3>
-                                                </div>
-
-                                                <div className="w-full md:w-5/12 flex flex-col gap-4">
-                                                    <div className="text-[9px] font-cyber font-black text-white/20 uppercase tracking-[0.4em] mb-2">Milestone_Checkpoints</div>
-                                                    {activeProject.yearlyPlan.keyResults.map((kr, idx) => (
-                                                        <motion.div
-                                                            key={idx}
-                                                            initial={{ opacity: 0, y: 10 }}
-                                                            animate={{ opacity: 1, y: 0 }}
-                                                            transition={{ delay: 0.1 * idx }}
-                                                            className="flex items-start gap-4 p-4 border border-white/5 bg-white/5 hover:border-cyber-yellow/40 transition-all cursor-default relative overflow-hidden group"
-                                                        >
-                                                            <div className="absolute top-0 left-0 w-[2px] h-full bg-cyber-yellow/20 group-hover:bg-cyber-yellow group-hover:shadow-neon-yellow transition-all" />
-                                                            <div className="mt-1 flex items-center justify-center w-5 h-5 bg-cyber-yellow text-black shrink-0">
-                                                                <Star size={12} fill="currentColor" />
-                                                            </div>
-                                                            <span className="text-white/80 text-xs font-mono font-bold leading-relaxed">{kr}</span>
-                                                        </motion.div>
+                                            <div className="space-y-6">
+                                                <VisionTextarea
+                                                    label={`${activeYearIndex + 1}년차_핵심_지침 (Core Directive)`}
+                                                    value={getYearValue(activeYearIndex === 0 ? visionDraft.year1 : activeYearIndex === 1 ? visionDraft.year2 : visionDraft.year3).vision}
+                                                    onChange={(e) => {
+                                                        const key = activeYearIndex === 0 ? 'year1' : activeYearIndex === 1 ? 'year2' : 'year3';
+                                                        const current = getYearValue(visionDraft[key]);
+                                                        setVisionDraft({ ...visionDraft, [key]: { ...current, vision: e.target.value } });
+                                                    }}
+                                                    rows={3}
+                                                />
+                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                    {[0, 1, 2].map((idx) => (
+                                                        <div key={idx} className="flex flex-col gap-2">
+                                                            <label className="text-white/20 font-cyber font-black text-[8px] uppercase tracking-widest">Milestone_0{idx + 1}</label>
+                                                            <textarea
+                                                                className="w-full bg-black border border-white/10 p-3 text-xs text-white/80 focus:outline-none focus:border-cyber-cyan font-mono resize-none h-24"
+                                                                value={getYearValue(activeYearIndex === 0 ? visionDraft.year1 : activeYearIndex === 1 ? visionDraft.year2 : visionDraft.year3).keyResults[idx] || ''}
+                                                                onChange={(e) => {
+                                                                    const key = activeYearIndex === 0 ? 'year1' : activeYearIndex === 1 ? 'year2' : 'year3';
+                                                                    const current = getYearValue(visionDraft[key]);
+                                                                    const krs = [...current.keyResults];
+                                                                    while (krs.length <= idx) krs.push('');
+                                                                    krs[idx] = e.target.value;
+                                                                    setVisionDraft({ ...visionDraft, [key]: { ...current, keyResults: krs } });
+                                                                }}
+                                                            />
+                                                        </div>
                                                     ))}
                                                 </div>
+                                                {activeYearIndex === 2 && (
+                                                    <VisionTextarea
+                                                        label="궁극적_상태 (Ultimate Goal)"
+                                                        value={visionDraft.ultimateGoal}
+                                                        onChange={(e) => setVisionDraft({ ...visionDraft, ultimateGoal: e.target.value })}
+                                                        rows={2}
+                                                    />
+                                                )}
                                             </div>
-                                        )}
-                                    </div>
-                                )}
-
-                                {/* YEAR 2 */}
-                                {activeYearIndex === 1 && (
-                                    <div className="w-full h-full flex flex-col justify-center">
-                                        {hasVision ? (
-                                            isEditingVision && visionDraft ? (
-                                                <VisionTextarea
-                                                    label="Expansion_Strategic_Path"
-                                                    value={visionDraft.year2}
-                                                    onChange={(e) => setVisionDraft({ ...visionDraft, year2: e.target.value })}
-                                                    rows={8}
-                                                />
-                                            ) : (
-                                                <>
-                                                    <div className="text-cyber-cyan font-cyber font-black text-[10px] uppercase tracking-[0.3em] mb-4">Vertical_Scaling</div>
-                                                    <p className="text-3xl font-cyber font-black text-white leading-tight uppercase tracking-tight skew-x-[-5deg] mb-8">{activeProject.threeYearVision!.year2}</p>
-                                                    <div className="grid grid-cols-2 gap-4">
-                                                        <div className="p-4 border border-cyber-cyan/20 bg-cyber-cyan/5">
-                                                            <div className="flex items-center gap-2 mb-2 text-cyber-cyan">
-                                                                <Activity size={14} />
-                                                                <span className="font-cyber font-black text-[8px] uppercase tracking-widest">Growth_Rate</span>
-                                                            </div>
-                                                            <div className="text-xl font-mono text-white font-bold">2.4x_EXP</div>
-                                                        </div>
-                                                        <div className="p-4 border border-white/10 bg-white/5 opacity-50">
-                                                            <div className="flex items-center gap-2 mb-2 text-white/40">
-                                                                <Wifi size={14} />
-                                                                <span className="font-cyber font-black text-[8px] uppercase tracking-widest">Network_Sync</span>
-                                                            </div>
-                                                            <div className="text-xl font-mono text-white/40 font-bold">STABLE</div>
-                                                        </div>
-                                                    </div>
-                                                </>
-                                            )
                                         ) : (
-                                            <div className="flex-1 flex flex-col items-center justify-center text-center py-4">
-                                                <motion.div
-                                                    animate={{ rotate: [0, 5, -5, 0], scale: [1, 1.05, 1] }}
-                                                    transition={{ duration: 4, repeat: Infinity }}
-                                                    className="w-20 h-20 bg-black border-2 border-white/5 flex items-center justify-center mb-8 relative group"
-                                                >
-                                                    <div className="absolute inset-0 bg-cyber-cyan/10 blur-[20px] opacity-0 group-hover:opacity-100 transition-opacity" />
-                                                    <Lock size={32} className="text-white/10" />
-                                                </motion.div>
-                                                <h4 className="text-3xl font-cyber font-black text-white mb-3 uppercase tracking-widest">Sector_Locked</h4>
-                                                <p className="text-white/30 mb-10 max-w-sm font-mono text-xs uppercase tracking-tighter">Reach foundation protocol milestones to decrypt future trajectory paths.</p>
-                                                {!isExpandingVision ? (
-                                                    <Button
-                                                        onClick={handleExpandVision}
-                                                        className="h-14 bg-white text-black hover:bg-cyber-cyan hover:text-black border-none px-10 text-xs font-cyber font-black shadow-neon-cyan skew-x-[-10deg]"
-                                                    >
-                                                        <span className="skew-x-[10deg] flex items-center gap-3">
-                                                            <Sparkles size={16} /> DECRYPT_VISION_ROADMAP
-                                                        </span>
-                                                    </Button>
-                                                ) : (
-                                                    <div className="px-8 py-4 border-2 border-cyber-cyan text-cyber-cyan font-cyber font-black text-xs flex items-center gap-4 bg-cyber-cyan/5 shadow-neon-cyan">
-                                                        <motion.div
-                                                            animate={{ rotate: 360 }}
-                                                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                                            <div className="flex flex-col gap-8">
+                                                <div className="flex flex-col md:flex-row gap-12 items-start">
+                                                    <div className="flex-1">
+                                                        <div className={`font-cyber font-black text-[10px] uppercase tracking-[0.3em] mb-4 ${currentTheme.text}`}>Core_Directive::핵심_지침</div>
+                                                        <motion.h3
+                                                            initial={{ opacity: 0, x: -20 }}
+                                                            animate={{ opacity: 1, x: 0 }}
+                                                            className="text-3xl md:text-4xl font-cyber font-black text-white leading-tight uppercase tracking-tight skew-x-[-5deg]"
                                                         >
-                                                            <Zap size={16} />
-                                                        </motion.div>
-                                                        SYNCING_NEURAL_NETWORK...
+                                                            "{getYearValue(activeYearIndex === 0
+                                                                ? (activeProject.threeYearVision?.year1 || activeProject.yearlyPlan)
+                                                                : activeYearIndex === 1
+                                                                    ? activeProject.threeYearVision?.year2
+                                                                    : activeProject.threeYearVision?.year3).vision}"
+                                                        </motion.h3>
                                                     </div>
+
+                                                    <div className="w-full md:w-5/12 flex flex-col gap-3">
+                                                        <div className="text-[9px] font-cyber font-black text-white/20 uppercase tracking-[0.4em] mb-2">Milestone_Checkpoints::마일스톤</div>
+                                                        {getYearValue(activeYearIndex === 0
+                                                            ? (activeProject.threeYearVision?.year1 || activeProject.yearlyPlan)
+                                                            : activeYearIndex === 1
+                                                                ? activeProject.threeYearVision?.year2
+                                                                : activeProject.threeYearVision?.year3
+                                                        ).keyResults.map((kr, idx) => (
+                                                            <motion.div
+                                                                key={idx}
+                                                                initial={{ opacity: 0, y: 10 }}
+                                                                animate={{ opacity: 1, y: 0 }}
+                                                                transition={{ delay: 0.1 * idx }}
+                                                                className={`flex items-start gap-4 p-4 border border-white/5 bg-white/5 hover:border-white/20 transition-all cursor-default relative overflow-hidden group`}
+                                                            >
+                                                                <div className={`absolute top-0 left-0 w-[2px] h-full ${currentTheme.bg.replace('/10', '')} opacity-20 group-hover:opacity-100 transition-all`} />
+                                                                <div className={`mt-1 flex items-center justify-center w-5 h-5 ${currentTheme.text.replace('text-', 'bg-')} text-black shrink-0`}>
+                                                                    <Star size={12} fill="currentColor" />
+                                                                </div>
+                                                                <span className="text-white/80 text-xs font-mono font-bold leading-relaxed">{kr}</span>
+                                                            </motion.div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+
+                                                {/* Ultimate Goal Footer for Year 3 */}
+                                                {activeYearIndex === 2 && activeProject.threeYearVision?.ultimateGoal && (
+                                                    <motion.div
+                                                        initial={{ opacity: 0, y: 20 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        className="mt-6 p-6 border-2 border-cyber-pink bg-cyber-pink/5 relative overflow-hidden shadow-neon-pink"
+                                                    >
+                                                        <div className="absolute top-0 right-0 p-2 bg-cyber-pink text-black font-cyber font-black text-[8px] uppercase tracking-widest shadow-neon-pink">
+                                                            FINAL_PROTOCOL
+                                                        </div>
+                                                        <div className="text-cyber-pink font-cyber font-black text-[10px] uppercase tracking-[0.4em] block mb-2 flex items-center gap-2">
+                                                            <Crown size={14} className="animate-pulse" /> Ultimate_Goal::궁극적_목표
+                                                        </div>
+                                                        <p className="text-xl text-white font-cyber font-black leading-tight uppercase tracking-tight">{activeProject.threeYearVision.ultimateGoal}</p>
+                                                    </motion.div>
                                                 )}
                                             </div>
                                         )}
                                     </div>
-                                )}
-
-                                {/* YEAR 3 */}
-                                {activeYearIndex === 2 && (
-                                    <div className="w-full h-full flex flex-col">
-                                        {isEditingVision && visionDraft ? (
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                                <VisionTextarea
-                                                    label="Domination_Strategy"
-                                                    value={visionDraft.year3}
-                                                    onChange={(e) => setVisionDraft({ ...visionDraft, year3: e.target.value })}
-                                                    rows={8}
-                                                />
-                                                <VisionTextarea
-                                                    label="Ultimate_End_State"
-                                                    value={visionDraft.ultimateGoal}
-                                                    onChange={(e) => setVisionDraft({ ...visionDraft, ultimateGoal: e.target.value })}
-                                                    rows={8}
-                                                />
-                                            </div>
+                                ) : (
+                                    <div className="flex-1 flex flex-col items-center justify-center text-center py-4">
+                                        <motion.div
+                                            animate={{ rotate: [0, 5, -5, 0], scale: [1, 1.05, 1] }}
+                                            transition={{ duration: 4, repeat: Infinity }}
+                                            className="w-20 h-20 bg-black border-2 border-white/5 flex items-center justify-center mb-8 relative group"
+                                        >
+                                            <div className="absolute inset-0 bg-cyber-cyan/10 blur-[20px] opacity-0 group-hover:opacity-100 transition-opacity" />
+                                            <Lock size={32} className="text-white/10" />
+                                        </motion.div>
+                                        <h4 className="text-3xl font-cyber font-black text-white mb-3 uppercase tracking-widest">Sector_Locked::섹터_잠김</h4>
+                                        <p className="text-white/30 mb-10 max-w-sm font-mono text-xs uppercase tracking-tighter">미래 궤적 경로를 해독하기 위해 기반 프로토콜 마일스톤을 달성하세요.</p>
+                                        {!isExpandingVision ? (
+                                            <Button
+                                                onClick={handleExpandVision}
+                                                className="h-14 bg-white text-black hover:bg-cyber-cyan hover:text-black border-none px-10 text-xs font-cyber font-black shadow-neon-cyan skew-x-[-10deg]"
+                                            >
+                                                <span className="skew-x-[10deg] flex items-center gap-3">
+                                                    <Sparkles size={16} /> 비전_로드맵_해독_시작
+                                                </span>
+                                            </Button>
                                         ) : (
-                                            <>
-                                                <div className="text-cyber-pink font-cyber font-black text-[10px] uppercase tracking-[0.3em] mb-4">Total_Dominance</div>
-                                                <p className="text-3xl font-cyber font-black text-white leading-tight uppercase tracking-tight italic skew-x-[-5deg] mb-12">
-                                                    "{activeProject.threeYearVision!.year3}"
-                                                </p>
+                                            <div className="px-8 py-4 border-2 border-cyber-cyan text-cyber-cyan font-cyber font-black text-xs flex items-center gap-4 bg-cyber-cyan/5 shadow-neon-cyan">
                                                 <motion.div
-                                                    initial={{ opacity: 0, y: 30 }}
-                                                    animate={{ opacity: 1, y: 0 }}
-                                                    className="mt-auto p-10 border-2 border-cyber-pink bg-cyber-pink/5 relative overflow-hidden shadow-neon-pink"
+                                                    animate={{ rotate: 360 }}
+                                                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                                                 >
-                                                    <div className="absolute top-0 right-0 p-3 bg-cyber-pink text-black font-cyber font-black text-[10px] uppercase tracking-widest shadow-neon-pink">
-                                                        FINAL_PROTOCOL
-                                                    </div>
-                                                    <div className="text-cyber-pink font-cyber font-black text-[10px] uppercase tracking-[0.4em] block mb-4 flex items-center gap-2">
-                                                        <Crown size={16} className="animate-pulse" /> End_Goal_Config
-                                                    </div>
-                                                    <p className="text-2xl text-white font-cyber font-black leading-tight uppercase tracking-tight">{activeProject.threeYearVision!.ultimateGoal}</p>
-                                                    <div className="mt-8 flex gap-4 h-1 w-full bg-white/10 overflow-hidden">
-                                                        <motion.div
-                                                            animate={{ x: ["-100%", "100%"] }}
-                                                            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                                                            className="w-1/3 h-full bg-cyber-pink shadow-neon-pink"
-                                                        />
-                                                    </div>
+                                                    <Zap size={16} />
                                                 </motion.div>
-                                            </>
+                                                뉴럴_네트워크_동기화_중...
+                                            </div>
                                         )}
                                     </div>
                                 )}
@@ -347,7 +327,7 @@ export function VisionSection({
                                 `} />
                                 <span className={`text-[8px] font-cyber font-black uppercase tracking-tighter transition-all 
                                     ${activeYearIndex === idx ? themeColors[idx].text : 'text-white/20'}`}>
-                                    Year_0{idx + 1}
+                                    {idx + 1}년차
                                 </span>
                             </button>
                         ))}

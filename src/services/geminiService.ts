@@ -126,12 +126,21 @@ const weeklyAdjustSchema: Schema = {
   }
 };
 
+const yearPlanSchema: Schema = {
+  type: Type.OBJECT,
+  properties: {
+    vision: { type: Type.STRING, description: "Vivid vision statement for the year in Korean" },
+    keyResults: { type: Type.ARRAY, items: { type: Type.STRING }, description: "3 SMART milestones for this year" }
+  },
+  required: ["vision", "keyResults"]
+};
+
 const threeYearSchema: Schema = {
   type: Type.OBJECT,
   properties: {
-    year1: { type: Type.STRING, description: "Review of the 1st year foundation" },
-    year2: { type: Type.STRING, description: "Growth and scaling phase description" },
-    year3: { type: Type.STRING, description: "Establishment and dominance phase description" },
+    year1: yearPlanSchema,
+    year2: yearPlanSchema,
+    year3: yearPlanSchema,
     ultimateGoal: { type: Type.STRING, description: "The ultimate R=VD north star" }
   },
   required: ["year1", "year2", "year3", "ultimateGoal"]
@@ -387,12 +396,17 @@ export const expandToThreeYears = async (idea: ProjectIdea, currentVision: strin
     사용자의 프로젝트 "${idea.title}"에 대해 더 장기적인 3년 비전을 수립해주세요.
     현재 1년 비전: ${currentVision}
 
-    1. Year 1: 기반 다지기 및 생존
-    2. Year 2: 성장 및 스케일업
-    3. Year 3: 시장 지배 및 완성
-    4. Ultimate Goal: 최종적인 북극성(North Star)
+    각 연도(Year 1, 2, 3)마다 다음을 포함해야 합니다:
+    1. Vision: 해당 연도의 생생한 R=VD 비전 문장 (한국어)
+    2. Key Results: 해당 연도에 달성할 SMART 마일스톤 3가지 (한국어 배열)
 
-    한국어로 작성하고 JSON을 반환하세요.
+    비전 체계:
+    - Year 1: 기반 다지기 및 생존
+    - Year 2: 성장 및 스케일업
+    - Year 3: 시장 지배 및 완성
+    - Ultimate Goal: 최종적인 북극성(North Star)
+
+    JSON을 반환하세요.
   `;
 
   try {
@@ -420,15 +434,19 @@ export const refineThreeYearVision = async (idea: ProjectIdea, draft: ThreeYearV
       사용자의 프로젝트 "${idea.title}"에 대한 3년 비전 초안을 더 구체적이고 영감을 주는 R=VD(생생하게 꿈꾸면 이루어진다) 버전으로 발전시켜주세요.
       기존 비전보다 더 전략적이고 생생한 그림이 그려지도록 만들어야 합니다.
 
+      각 연도별로 'vision' 문장은 더 가슴 벅차게, 'keyResults'는 더 구체적인 숫자가 들어간 SMART 목표로 다듬어주세요.
+
       사용자의 초안:
-      - Year 1: ${draft.year1}
-      - Year 2: ${draft.year2}
-      - Year 3: ${draft.year3}
+      - Year 1 Vision: ${draft.year1.vision}
+      - Year 1 Milestones: ${draft.year1.keyResults.join(', ')}
+      - Year 2 Vision: ${draft.year2.vision}
+      - Year 2 Milestones: ${draft.year2.keyResults.join(', ')}
+      - Year 3 Vision: ${draft.year3.vision}
+      - Year 3 Milestones: ${draft.year3.keyResults.join(', ')}
       - Ultimate Goal: ${draft.ultimateGoal}
 
-      각 항목을 더 매력적이고 구체적인 문장으로 다듬어주세요.
       한국어로 작성하고 JSON을 반환하세요.
-    `;
+`;
 
   try {
     const response = await ai.models.generateContent({

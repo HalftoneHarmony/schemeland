@@ -32,7 +32,7 @@ export function CampaignDetailView({ activeProject, selectedMonthIndex, onBack }
             {/* Tactical Progress Bar */}
             <div className="mb-8 max-w-5xl mx-auto px-4">
                 <div className="flex justify-between items-end mb-2">
-                    <span className="text-[10px] font-cyber font-black text-cyber-cyan tracking-[0.3em] uppercase">Tactical_Mission_Progress</span>
+                    <span className="text-[10px] font-cyber font-black text-cyber-cyan tracking-[0.3em] uppercase">TACTICAL_MISSION_PROGRESS::전술_미션_진행률</span>
                     <span className="text-xl font-cyber font-black text-white italic">
                         {Math.round((weeks.reduce((acc, w) => acc + w.tasks.filter(t => t.isCompleted).length, 0) / (weeks.reduce((acc, w) => acc + w.tasks.length, 0) || 1)) * 100)}%
                     </span>
@@ -54,11 +54,11 @@ export function CampaignDetailView({ activeProject, selectedMonthIndex, onBack }
                     className="text-white/20 hover:text-cyber-pink flex items-center text-[10px] font-cyber font-black tracking-[0.3em] uppercase transition-all group"
                 >
                     <ArrowLeft size={18} className="mr-3 group-hover:-translate-x-2 transition-transform" />
-                    BACK_TO_OPS_CENTER
+                    BACK_TO_OPS_CENTER::작전_본부로_귀환
                 </button>
                 <div className="flex items-center gap-4 px-6 py-2 bg-black border-2 border-cyber-cyan/30 text-cyber-cyan shadow-neon-cyan skew-x-[-15deg]">
                     <Activity size={16} className="animate-pulse skew-x-[15deg]" />
-                    <span className="text-[10px] font-cyber font-black uppercase tracking-widest skew-x-[15deg]">Tactical_Mode_Active</span>
+                    <span className="text-[10px] font-cyber font-black uppercase tracking-widest skew-x-[15deg]">전술_모드_활성화됨</span>
                 </div>
             </div>
 
@@ -83,13 +83,13 @@ export function CampaignDetailView({ activeProject, selectedMonthIndex, onBack }
                 <div className="inline-block mb-3 animate-pulse">
                     <div className="flex items-center gap-2 px-4 py-1 border border-cyber-cyan/30 bg-cyber-cyan/5 skew-x-[-15deg]">
                         <Activity size={12} className="text-cyber-cyan skew-x-[15deg]" />
-                        <span className="text-[8px] font-cyber font-black text-cyber-cyan uppercase tracking-[0.3em] skew-x-[15deg]">Data_Streaming_Active</span>
+                        <span className="text-[8px] font-cyber font-black text-cyber-cyan uppercase tracking-[0.3em] skew-x-[15deg]">DATA_STREAMING_ACTIVE::데이터_활성</span>
                     </div>
                 </div>
 
                 <div className="inline-block mb-6 skew-x-[-10deg]">
                     <span className="bg-cyber-pink text-white font-cyber font-black text-[10px] px-6 py-2 uppercase tracking-[0.4em] shadow-neon-pink">
-                        Sector_0{monthPlan.month}_Protocol
+                        Sector_0{monthPlan.month}_Protocol::섹터_{monthPlan.month}_프로토콜
                     </span>
                 </div>
 
@@ -105,19 +105,19 @@ export function CampaignDetailView({ activeProject, selectedMonthIndex, onBack }
                 {/* Sector Stats Dashboard */}
                 <div className="flex justify-center flex-wrap gap-8 my-10 px-8">
                     <div className="flex flex-col items-center gap-2">
-                        <span className="text-[9px] font-cyber font-black text-white/30 uppercase tracking-[0.2em]">Weeks_Active</span>
+                        <span className="text-[9px] font-cyber font-black text-white/30 uppercase tracking-[0.2em]">Weeks_Active::활성_주차</span>
                         <div className="text-3xl font-cyber font-black text-cyber-cyan italic">{weeks.length}</div>
                         <div className="w-12 h-0.5 bg-cyber-cyan shadow-neon-cyan"></div>
                     </div>
                     <div className="flex flex-col items-center gap-2">
-                        <span className="text-[9px] font-cyber font-black text-white/30 uppercase tracking-[0.2em]">Tactical_Goals</span>
+                        <span className="text-[9px] font-cyber font-black text-white/30 uppercase tracking-[0.2em]">Tactical_Goals::전술_목표</span>
                         <div className="text-3xl font-cyber font-black text-white italic">
                             {weeks.reduce((acc, w) => acc + w.tasks.length, 0)}
                         </div>
                         <div className="w-12 h-0.5 bg-white/20"></div>
                     </div>
                     <div className="flex flex-col items-center gap-2">
-                        <span className="text-[9px] font-cyber font-black text-white/30 uppercase tracking-[0.2em]">Excl_Sync</span>
+                        <span className="text-[9px] font-cyber font-black text-white/30 uppercase tracking-[0.2em]">Sync_Status::동기화_학습</span>
                         <div className="text-3xl font-cyber font-black text-cyber-pink italic">
                             {weeks.reduce((acc, w) => acc + w.tasks.filter(t => t.isCompleted).length, 0)}
                         </div>
@@ -127,7 +127,7 @@ export function CampaignDetailView({ activeProject, selectedMonthIndex, onBack }
 
                 <div className="flex justify-center items-center gap-4 text-white/20 font-mono text-xs uppercase tracking-[0.2em]">
                     <span className="w-12 h-[1px] bg-white/10" />
-                    Strategic_Drill_Down
+                    Strategic_Drill_Down::전략적_상세_분석
                     <span className="w-12 h-[1px] bg-white/10" />
                 </div>
             </div>
@@ -177,7 +177,7 @@ export function CampaignDetailView({ activeProject, selectedMonthIndex, onBack }
                                     <div className="flex items-center gap-2">
                                         <Shield size={12} className={loadPercent > 80 ? 'text-red-500 animate-pulse' : 'text-white/20'} />
                                         <span className={`text-[10px] font-cyber font-black tracking-widest ${loadPercent > 80 ? 'text-red-500' : 'text-white/40'}`}>
-                                            LOAD_CAPACITY
+                                            LOAD::부하_용량
                                         </span>
                                     </div>
                                     <span className={`text-[10px] font-mono font-bold ${loadPercent > 80 ? 'text-red-500 animate-pulse' : 'text-white/60'}`}>
@@ -199,8 +199,8 @@ export function CampaignDetailView({ activeProject, selectedMonthIndex, onBack }
                                             </div>
                                             <div className="flex items-center gap-2 mb-3">
                                                 <div className={`w-1.5 h-1.5 rounded-full ${idx === 0 ? 'bg-cyber-cyan animate-pulse shadow-neon-cyan' : 'bg-white/10'}`}></div>
-                                                <span className="text-[9px] font-cyber font-black text-white/20 uppercase tracking-[0.3em]">Sector_Update</span>
-                                                <span className="ml-auto text-[8px] font-mono text-cyber-yellow/40 uppercase">Threat: Normal</span>
+                                                <span className="text-[9px] font-cyber font-black text-white/20 uppercase tracking-[0.3em]">섹터_업데이트</span>
+                                                <span className="ml-auto text-[8px] font-mono text-cyber-yellow/40 uppercase">위협_수준: 정상</span>
                                             </div>
                                             <h3 className="font-cyber font-black text-lg text-white leading-tight uppercase tracking-tight group-hover:text-cyber-cyan transition-colors h-14 line-clamp-2">
                                                 {week.theme}
@@ -211,7 +211,7 @@ export function CampaignDetailView({ activeProject, selectedMonthIndex, onBack }
                                             <div className="space-y-3 mb-6">
                                                 <div className="flex items-center gap-2 mb-2">
                                                     <Flag size={10} className="text-cyber-cyan" />
-                                                    <span className="text-[8px] font-cyber font-black text-white/30 uppercase tracking-widest">Target_Checklist</span>
+                                                    <span className="text-[8px] font-cyber font-black text-white/30 uppercase tracking-widest">목표_체크리스트</span>
                                                 </div>
                                                 {week.tasks.map((task, tIdx) => (
                                                     <div
@@ -226,7 +226,7 @@ export function CampaignDetailView({ activeProject, selectedMonthIndex, onBack }
                                                     >
                                                         <div className={`absolute left-0 top-0 bottom-0 w-1 ${task.isCompleted ? 'bg-cyber-cyan shadow-neon-cyan' : 'bg-white/10'}`}></div>
                                                         {task.isCompleted && (
-                                                            <div className="absolute top-0 right-0 px-2 py-0.5 bg-cyber-cyan text-black text-[8px] font-cyber font-black uppercase">SYNCED</div>
+                                                            <div className="absolute top-0 right-0 px-2 py-0.5 bg-cyber-cyan text-black text-[8px] font-cyber font-black uppercase">동기화됨</div>
                                                         )}
                                                         <div className="pl-2">
                                                             {task.isCompleted && <span className="mr-2 text-cyber-cyan opacity-40">✓</span>}
@@ -236,7 +236,7 @@ export function CampaignDetailView({ activeProject, selectedMonthIndex, onBack }
                                                 ))}
                                                 {week.tasks.length === 0 && (
                                                     <div className="text-center py-12 border border-dashed border-white/5 bg-white/[0.02]">
-                                                        <span className="text-white/10 text-[10px] uppercase font-cyber font-black tracking-widest">No_Op_Assigned</span>
+                                                        <span className="text-white/10 text-[10px] uppercase font-cyber font-black tracking-widest">할당된_작전_없음</span>
                                                     </div>
                                                 )}
                                             </div>
@@ -248,13 +248,13 @@ export function CampaignDetailView({ activeProject, selectedMonthIndex, onBack }
                                                         <div key={i} className={`w-1 h-3 skew-x-[-20deg] ${i < Math.floor(loadPercent / 33) ? 'bg-cyber-cyan shadow-neon-cyan' : 'bg-white/5'}`}></div>
                                                     ))}
                                                 </div>
-                                                <span className="text-[8px] font-cyber text-white/10 uppercase tracking-tighter italic">Status_Nominal</span>
+                                                <span className="text-[8px] font-cyber text-white/10 uppercase tracking-tighter italic">시스템_정상</span>
                                             </div>
                                         </div>
 
                                         <div className="p-4 border-t border-white/5 bg-white/[0.02] flex justify-center opacity-0 group-hover:opacity-100 transition-all">
                                             <button className="text-[10px] font-cyber font-black text-white/20 hover:text-cyber-pink hover:tracking-widest transition-all uppercase flex items-center gap-2">
-                                                <Plus size={12} /> ADD_SUB_TASK
+                                                <Plus size={12} /> 서브_태스크_추가
                                             </button>
                                         </div>
                                     </div>
@@ -268,13 +268,13 @@ export function CampaignDetailView({ activeProject, selectedMonthIndex, onBack }
                 <div className="text-center py-32 border-2 border-dashed border-white/5 bg-black/40 skew-x-[-1deg]">
                     <div className="skew-x-[1deg]">
                         <Map size={64} className="mx-auto text-white/5 mb-8" />
-                        <h3 className="text-3xl font-cyber font-black text-white/20 mb-4 uppercase tracking-[0.3em]">Sector_Data_Missing</h3>
+                        <h3 className="text-3xl font-cyber font-black text-white/20 mb-4 uppercase tracking-[0.3em]">섹터_데이터_누락</h3>
                         <p className="text-white/20 max-w-md mx-auto mb-10 font-mono text-sm uppercase">
-                            This sector protocol has not been initialized. <br />
-                            Return to command center to begin generation sequence.
+                            이 섹터 프로토콜이 초기화되지 않았습니다. <br />
+                            생성 시퀀스를 시작하려면 지휘 본부로 귀환하십시오.
                         </p>
                         <Button onClick={onBack} className="bg-cyber-pink text-white font-cyber font-black text-xs px-10 py-5 shadow-neon-pink border-none skew-x-[-10deg]">
-                            <span className="skew-x-[10deg]">INITIALIZE_IN_COMMAND_CENTER</span>
+                            <span className="skew-x-[10deg]">지휘_본부에서_초기화</span>
                         </Button>
                     </div>
                 </div>

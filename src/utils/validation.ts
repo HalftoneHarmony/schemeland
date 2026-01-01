@@ -82,17 +82,18 @@ export const validateVision = (vision: any): ValidationResult => {
 
     const errors: Record<string, string> = {};
 
-    if (!vision.year1 || vision.year1.trim().length < 5) {
-        errors.year1 = "1년차 목표를 조금 더 구체적으로 적어주세요. (5자 이상)";
-    }
+    const checkYear = (yearData: any, label: string) => {
+        if (!yearData || !yearData.vision || yearData.vision.trim().length < 5) {
+            errors[label] = `${label} 핵심 지침을 5자 이상 입력해주세요.`;
+        }
+        if (!yearData.keyResults || yearData.keyResults.some((kr: string) => kr.trim().length < 2)) {
+            errors[`${label}_kr`] = `${label} 마일스톤을 모두 채워주세요.`;
+        }
+    };
 
-    if (!vision.year2 || vision.year2.trim().length < 5) {
-        errors.year2 = "2년차 목표도 잊지 말고 채워주세요!";
-    }
-
-    if (!vision.year3 || vision.year3.trim().length < 5) {
-        errors.year3 = "3년차 목표를 통해 큰 그림을 완성해보세요.";
-    }
+    checkYear(vision.year1, "1년차");
+    checkYear(vision.year2, "2년차");
+    checkYear(vision.year3, "3년차");
 
     if (!vision.ultimateGoal || vision.ultimateGoal.trim().length < 5) {
         errors.ultimateGoal = "최종적인 북극성 같은 목표(Ultimate Goal)를 설정해주세요.";
@@ -101,7 +102,7 @@ export const validateVision = (vision: any): ValidationResult => {
     const isValid = Object.keys(errors).length === 0;
     return {
         isValid,
-        message: isValid ? undefined : "비전을 저장하려면 모든 항목을 5자 이상 입력해야 해요! 🎯",
+        message: isValid ? undefined : "비전을 저장하려면 모든 항목을 정성을 담아 채워주세요! 🎯",
         errors
     };
 };

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AppView, ProjectIdea, IdeaAnalysis, ProjectScheme, Difficulty, WeeklyPlanOption, ThreeYearVision, IdeaStatus, ProjectStatus } from './types';
+import { AppView, ProjectIdea, IdeaAnalysis, ProjectScheme, Difficulty, WeeklyPlanOption, ThreeYearVision, IdeaStatus, ProjectStatus, Priority, WeeklyMilestone } from './types';
 import { Zap, Briefcase } from 'lucide-react';
 import { analyzeIdeas, generateFullPlan, refineIdea, suggestIdeas, adjustWeeklyPlan, expandToThreeYears, generateMonthPlanOptions, extendRoadmap, compressRoadmap, refineThreeYearVision } from './services/geminiService';
 
@@ -70,29 +70,48 @@ export default function App() {
     // Focus Timer States
     const [timerActive, setTimerActive] = useState(false);
     const [timeLeft, setTimeLeft] = useState(25 * 60); // 25 min
-    const [timerMode, setTimerMode] = useState<'FOCUS' | 'BREAK'>('FOCUS');
+    const [timerMode, setTimerMode] = useState<'FOCUS' | 'SHORT_BREAK' | 'LONG_BREAK'>('FOCUS');
+    const [pomodoroCount, setPomodoroCount] = useState(1); // 1-4
+
 
     // Timer Effect
     useEffect(() => {
-        let interval: number;
+        let interval: any;
         if (timerActive && timeLeft > 0) {
-            interval = window.setInterval(() => {
+            interval = setInterval(() => {
                 setTimeLeft((prev) => prev - 1);
             }, 1000);
         } else if (timeLeft === 0) {
             setTimerActive(false);
+
             if (timerMode === 'FOCUS') {
-                alert("Focus Session Complete! Take a break.");
-                setTimerMode('BREAK');
-                setTimeLeft(5 * 60);
+                // Focus session ended
+                if (pomodoroCount < 4) {
+                    alert(`Focus Session ${pomodoroCount} Complete! Take a short break.`);
+                    setTimerMode('SHORT_BREAK');
+                    setTimeLeft(5 * 60);
+                } else {
+                    alert("Set Complete! 4 Pomodoros finished. Take a long break.");
+                    setTimerMode('LONG_BREAK');
+                    setTimeLeft(20 * 60); // 20 min long break
+                }
             } else {
-                alert("Break over! Ready to focus?");
-                setTimerMode('FOCUS');
-                setTimeLeft(25 * 60);
+                // Break ended
+                if (timerMode === 'LONG_BREAK') {
+                    alert("Long break over! Set reset. Ready for a new set?");
+                    setPomodoroCount(1);
+                    setTimerMode('FOCUS');
+                    setTimeLeft(25 * 60);
+                } else {
+                    alert("Short break over! Back to work.");
+                    setPomodoroCount(prev => prev + 1);
+                    setTimerMode('FOCUS');
+                    setTimeLeft(25 * 60);
+                }
             }
         }
         return () => clearInterval(interval);
-    }, [timerActive, timeLeft, timerMode]);
+    }, [timerActive, timeLeft, timerMode, pomodoroCount]);
 
     // --- Handlers ---
 
@@ -243,6 +262,76 @@ export default function App() {
         });
         setProjects(updatedProjects);
     }
+
+    const addTask = (weekIndex: number) => {
+        if (!activeProject) return;
+        const updatedProjects = projects.map(p => {
+            if (p.id === activeProject.id) {
+                const newMonthly = [...p.monthlyPlan];
+                const newWeekly = [...(newMonthly[selectedMonthIndex].detailedPlan || [])];
+                newWeekly[weekIndex].tasks.push({
+                    id: crypto.randomUUID(),
+                    text: '신규 미션 데이터 입력...',
+                    isCompleted: false,
+                    priority: Priority.MEDIUM,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                });
+                newMonthly[selectedMonthIndex].detailedPlan = newWeekly;
+                return { ...p, monthlyPlan: newMonthly };
+            }
+            return p;
+        });
+        setProjects(updatedProjects);
+    };
+
+    const deleteTask = (weekIndex: number, taskId: string) => {
+        if (!activeProject) return;
+        const updatedProjects = projects.map(p => {
+            if (p.id === activeProject.id) {
+                const newMonthly = [...p.monthlyPlan];
+                const newWeekly = [...(newMonthly[selectedMonthIndex].detailedPlan || [])];
+                newWeekly[weekIndex].tasks = newWeekly[weekIndex].tasks.filter(t => t.id !== taskId);
+                newMonthly[selectedMonthIndex].detailedPlan = newWeekly;
+                return { ...p, monthlyPlan: newMonthly };
+            }
+            return p;
+        });
+        setProjects(updatedProjects);
+    };
+
+    const updateWeekTheme = (weekIndex: number, theme: string) => {
+        if (!activeProject) return;
+        const updatedProjects = projects.map(p => {
+            if (p.id === activeProject.id) {
+                const newMonthly = [...p.monthlyPlan];
+                const newWeekly = [...(newMonthly[selectedMonthIndex].detailedPlan || [])];
+                newWeekly[weekIndex].theme = theme;
+                newMonthly[selectedMonthIndex].detailedPlan = newWeekly;
+                return { ...p, monthlyPlan: newMonthly };
+            }
+            return p;
+        });
+        setProjects(updatedProjects);
+    };
+
+    const initManualPlan = () => {
+        if (!activeProject) return;
+        const newWeekly: WeeklyMilestone[] = [1, 2, 3, 4].map(num => ({
+            weekNumber: num,
+            theme: `Sector_${num} 작전 수립 중`,
+            tasks: []
+        }));
+        const updatedProjects = projects.map(p => {
+            if (p.id === activeProject.id) {
+                const newMonthly = [...p.monthlyPlan];
+                newMonthly[selectedMonthIndex].detailedPlan = newWeekly;
+                return { ...p, monthlyPlan: newMonthly };
+            }
+            return p;
+        });
+        setProjects(updatedProjects);
+    };
 
     // --- Smart Adjustment Handlers ---
 
@@ -421,7 +510,13 @@ export default function App() {
 
         const updatedProjects = projects.map(p => {
             if (p.id === activeProject.id) {
-                return { ...p, threeYearVision: visionDraft };
+                // Sync year1 back to yearlyPlan for consistency
+                const updatedYearlyPlan = {
+                    ...p.yearlyPlan,
+                    vision: visionDraft.year1.vision,
+                    keyResults: visionDraft.year1.keyResults
+                };
+                return { ...p, threeYearVision: visionDraft, yearlyPlan: updatedYearlyPlan };
             }
             return p;
         });
@@ -535,6 +630,7 @@ export default function App() {
                         timerActive={timerActive}
                         timeLeft={timeLeft}
                         timerMode={timerMode}
+                        pomodoroCount={pomodoroCount}
 
                         compressModalOpen={compressModalOpen}
                         adjustmentModalOpen={adjustmentModalOpen}
@@ -572,6 +668,10 @@ export default function App() {
                         confirmPreviewPlan={confirmPreviewPlan}
                         toggleTask={toggleTask}
                         updateTaskText={updateTaskText}
+                        addTask={addTask}
+                        deleteTask={deleteTask}
+                        updateWeekTheme={updateWeekTheme}
+                        initManualPlan={initManualPlan}
                         onAbandonQuest={handleAbandonQuest}
                         onOpenCampaignDetail={() => setView(AppView.CAMPAIGN_DETAIL)}
                     />
