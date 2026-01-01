@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Calendar, FastForward, Plus, RefreshCw, Maximize2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, FastForward, Plus, RefreshCw, Maximize2, ChevronLeft, ChevronRight, ChevronsRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../Button';
 import { ProjectScheme } from '../../types';
@@ -183,7 +183,7 @@ export function CampaignSection({
                                         variants={cardVariants}
                                         onHoverStart={() => setIsHovered(true)}
                                         onHoverEnd={() => setIsHovered(false)}
-                                        onClick={() => handleMonthClick(idx)}
+                                        onClick={() => { handleMonthClick(idx); onOpenCampaignDetail(); }}
                                         className={`
                                             w-[340px] shrink-0 p-8 border transition-all duration-300 cursor-pointer relative group flex flex-col skew-x-[-2deg] overflow-hidden
                                             ${isSelected
@@ -207,13 +207,39 @@ export function CampaignSection({
                                         <div className="skew-x-[2deg] flex-1 flex flex-col relative">
                                             {/* Header Section */}
                                             <div className="flex justify-between items-start mb-10">
-                                                <div className="flex flex-col gap-1">
-                                                    <span className={`text-[9px] font-cyber font-black uppercase tracking-[0.3em] ${isSelected ? 'text-cyber-cyan' : 'text-white/30'}`}>
-                                                        Sector_{idx + 1 < 10 ? `0${idx + 1}` : idx + 1}
-                                                    </span>
-                                                    <div className={`text-3xl font-black tracking-tighter ${isSelected ? 'text-white' : 'text-zinc-500'}`}>
-                                                        {idx + 1 < 10 ? `0${idx + 1}` : idx + 1}
+                                                <div className="flex flex-col gap-2">
+                                                    <div className="flex items-center gap-2">
+                                                        <motion.div
+                                                            animate={isSelected || isHovered ? { x: [0, 3, 0], opacity: [1, 0.8, 1] } : {}}
+                                                            transition={{ duration: 1, repeat: Infinity }}
+                                                            className={isSelected ? 'text-cyber-cyan' : 'text-white/20'}
+                                                        >
+                                                            <ChevronsRight size={18} />
+                                                        </motion.div>
+                                                        <span className={`text-xl font-cyber font-black uppercase tracking-tighter italic ${isSelected ? 'text-white drop-shadow-[0_0_10px_rgba(0,255,255,0.8)] scale-110 origin-left transition-transform' : 'text-white/30'}`}>
+                                                            SPRINT_{idx + 1 < 10 ? `0${idx + 1}` : idx + 1}
+                                                        </span>
                                                     </div>
+
+                                                    {/* Speed Lines Animation */}
+                                                    {(isSelected || isHovered) && (
+                                                        <div className="flex gap-0.5 overflow-hidden h-1 w-24 opacity-60">
+                                                            {[...Array(6)].map((_, lineIdx) => (
+                                                                <motion.div
+                                                                    key={lineIdx}
+                                                                    className={`h-full w-3 -skew-x-[30deg] ${isSelected ? 'bg-cyber-cyan' : 'bg-white/40'}`}
+                                                                    initial={{ x: -50, opacity: 0 }}
+                                                                    animate={{ x: 100, opacity: [0, 1, 0] }}
+                                                                    transition={{
+                                                                        duration: 0.6,
+                                                                        delay: lineIdx * 0.05,
+                                                                        repeat: Infinity,
+                                                                        ease: "linear"
+                                                                    }}
+                                                                />
+                                                            ))}
+                                                        </div>
+                                                    )}
                                                 </div>
 
                                                 <div className="flex gap-2 items-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -225,9 +251,7 @@ export function CampaignSection({
                                                             <RefreshCw size={12} />
                                                         </button>
                                                     )}
-                                                    <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); onOpenCampaignDetail(); }} className="h-8 w-8 p-0 border border-cyber-cyan/30 text-cyber-cyan hover:bg-cyber-cyan hover:text-black rounded-full">
-                                                        <Maximize2 size={14} />
-                                                    </Button>
+
                                                 </div>
                                             </div>
 
@@ -325,19 +349,23 @@ export function CampaignSection({
                                         </div>
 
                                         {/* Selection Glow (Bottom) */}
-                                        {isSelected && (
-                                            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-cyber-cyan to-transparent opacity-50 blur-sm" />
-                                        )}
+                                        {
+                                            isSelected && (
+                                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-cyber-cyan to-transparent opacity-50 blur-sm" />
+                                            )
+                                        }
 
                                         {/* Hover Glow (Background) */}
-                                        {isHovered && (
-                                            <motion.div
-                                                layoutId="hoverGlow"
-                                                className="absolute inset-0 bg-cyber-cyan/5 rounded-none z-0 pointer-events-none mix-blend-screen"
-                                                initial={{ opacity: 0 }}
-                                                animate={{ opacity: 1 }}
-                                            />
-                                        )}
+                                        {
+                                            isHovered && (
+                                                <motion.div
+                                                    layoutId="hoverGlow"
+                                                    className="absolute inset-0 bg-cyber-cyan/5 rounded-none z-0 pointer-events-none mix-blend-screen"
+                                                    initial={{ opacity: 0 }}
+                                                    animate={{ opacity: 1 }}
+                                                />
+                                            )
+                                        }
                                     </motion.div>
                                 );
                             })}
@@ -379,8 +407,8 @@ export function CampaignSection({
                         </div>
                     </motion.div>
                 </div>
-            </div>
-        </motion.section>
+            </div >
+        </motion.section >
     );
 }
 
