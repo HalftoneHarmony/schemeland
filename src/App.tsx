@@ -18,6 +18,7 @@ import { QuickSearch } from './components/navigation/QuickSearch';
 
 import useLocalStorage from './hooks/useLocalStorage';
 import { useProjectManager } from './hooks/useProjectManager';
+import { useInitializeStore } from './hooks/useInitializeStore';
 import { validateAllIdeas, validateStartDate, validateVision } from './utils/validation';
 
 const INITIAL_IDEAS: ProjectIdea[] = [
@@ -32,6 +33,9 @@ const INITIAL_IDEAS: ProjectIdea[] = [
 ];
 
 export default function App() {
+    // 스토어 초기화 (자동 마이그레이션)
+    const { isInitialized, isMigrating } = useInitializeStore();
+
     const [view, setView] = useLocalStorage<AppView>('schemeland_view', AppView.LANDING);
 
     // -- Persistence Logic with Custom Data Hook --
@@ -651,6 +655,25 @@ export default function App() {
 
     // Helper: check if we need sidebar
     const showSidebar = view !== AppView.LANDING && view !== AppView.BRAIN_DUMP && view !== AppView.ANALYSIS;
+
+    // 스토어 초기화 중 로딩 화면
+    if (!isInitialized || isMigrating) {
+        return (
+            <div className="min-h-screen bg-background flex items-center justify-center">
+                <div className="text-center">
+                    <div className="w-16 h-16 bg-cyber-pink flex items-center justify-center text-white shadow-neon-pink mx-auto mb-6 animate-pulse skew-x-[-10deg]">
+                        <Zap size={32} fill="currentColor" className="skew-x-[10deg]" />
+                    </div>
+                    <h2 className="font-cyber font-black text-2xl text-white uppercase mb-2">
+                        {isMigrating ? 'DATA::MIGRATION' : 'SYSTEM::BOOT'}
+                    </h2>
+                    <p className="text-white/40 font-mono text-sm">
+                        {isMigrating ? '데이터 구조 업그레이드 중...' : '시스템 초기화 중...'}
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-background text-textMain font-sans selection:bg-cyber-pink/30">
