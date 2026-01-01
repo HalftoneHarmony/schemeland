@@ -98,6 +98,7 @@ interface StoreActions
     getActiveProject: () => ProjectScheme | null;
     getActiveMonthPlan: () => MonthlyGoal | null;
     getActiveWeeklyPlan: () => WeeklyMilestone[];
+    save: () => Promise<void>;
 }
 
 export type Store = StoreState & StoreActions;
@@ -727,6 +728,15 @@ export const useStore = create<Store>()(
             getActiveWeeklyPlan: () => {
                 const monthPlan = get().getActiveMonthPlan();
                 return monthPlan?.detailedPlan || [];
+            },
+
+            save: async () => {
+                const state = get();
+                const partialize = useStore.persist.getOptions().partialize;
+                if (partialize) {
+                    const part = partialize(state);
+                    await serverStorage.setItem('schemeland-store', JSON.stringify(part));
+                }
             },
         }),
         {

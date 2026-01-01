@@ -57,6 +57,7 @@ interface DashboardViewProps {
 
     onAbandonQuest: () => void;
     onOpenCampaignDetail: () => void;
+    onSave: () => Promise<void>;
 }
 
 const containerVariants = {
@@ -125,6 +126,7 @@ export function DashboardView(props: DashboardViewProps) {
                 setTimerActive={props.setTimerActive}
                 setTimerMode={props.setTimerMode}
                 setTimeLeft={props.setTimeLeft}
+                onSave={props.onSave}
             />
 
 

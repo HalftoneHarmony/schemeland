@@ -1,5 +1,6 @@
 import React from 'react';
-import { Play, Pause, Square, Zap } from 'lucide-react';
+import { Play, Pause, Square, Zap, Save, CheckCircle2, Loader2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface FloatingControlsProps {
     timerActive: boolean;
@@ -9,12 +10,28 @@ interface FloatingControlsProps {
     setTimerActive: (active: boolean) => void;
     setTimerMode: (mode: 'FOCUS' | 'SHORT_BREAK' | 'LONG_BREAK') => void;
     setTimeLeft: (time: number) => void;
+    onSave: () => Promise<void>;
 }
 
 export function FloatingControls({
     timerActive, timeLeft, timerMode, pomodoroCount,
-    setTimerActive, setTimerMode, setTimeLeft
+    setTimerActive, setTimerMode, setTimeLeft, onSave
 }: FloatingControlsProps) {
+    const [isSaving, setIsSaving] = React.useState(false);
+    const [showSaved, setShowSaved] = React.useState(false);
+
+    const handleSave = async () => {
+        setIsSaving(true);
+        try {
+            await onSave();
+            setShowSaved(true);
+            setTimeout(() => setShowSaved(false), 2000);
+        } catch (error) {
+            console.error('Save failed:', error);
+        } finally {
+            setIsSaving(false);
+        }
+    };
 
 
     const formatTime = (seconds: number) => {
@@ -89,15 +106,50 @@ export function FloatingControls({
 
 
             {!timerActive && timeLeft === 25 * 60 && (
-                <button
-                    onClick={() => setTimerActive(true)}
-                    className="w-16 h-16 bg-black border-2 border-cyber-yellow text-cyber-yellow flex items-center justify-center shadow-neon-yellow hover:scale-110 transition-all group relative skew-x-[-10deg]"
-                >
-                    <div className="skew-x-[10deg]">
-                        <Zap size={28} fill="currentColor" className="group-hover:animate-glitch" />
-                    </div>
-                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-cyber-yellow animate-ping rounded-full"></span>
-                </button>
+                <div className="flex flex-col gap-4">
+                    {/* Manual Save Button */}
+                    <button
+                        onClick={handleSave}
+                        disabled={isSaving}
+                        className={`
+                            w-16 h-16 bg-black border-2 flex items-center justify-center transition-all group relative skew-x-[-10deg]
+                            ${showSaved ? 'border-green-500 shadow-neon-green text-green-500' : 'border-cyber-cyan text-cyber-cyan shadow-neon-cyan hover:scale-110'}
+                        `}
+                    >
+                        <div className="skew-x-[10deg]">
+                            {isSaving ? (
+                                <Loader2 size={24} className="animate-spin" />
+                            ) : showSaved ? (
+                                <CheckCircle2 size={24} />
+                            ) : (
+                                <Save size={24} />
+                            )}
+                        </div>
+                        <AnimatePresence>
+                            {(isSaving || showSaved) && (
+                                <motion.span
+                                    initial={{ opacity: 0, x: 20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: 20 }}
+                                    className={`absolute right-20 bg-black/90 px-3 py-1 border text-[10px] font-cyber font-black uppercase tracking-widest whitespace-nowrap skew-x-[10deg] ${showSaved ? 'border-green-500 text-green-500 italic' : 'border-cyber-cyan text-cyber-cyan'}`}
+                                >
+                                    {isSaving ? 'SYNCING_DATA...' : 'PROTOCOL_SAVED'}
+                                </motion.span>
+                            )}
+                        </AnimatePresence>
+                    </button>
+
+                    {/* Timer Trigger */}
+                    <button
+                        onClick={() => setTimerActive(true)}
+                        className="w-16 h-16 bg-black border-2 border-cyber-yellow text-cyber-yellow flex items-center justify-center shadow-neon-yellow hover:scale-110 transition-all group relative skew-x-[-10deg]"
+                    >
+                        <div className="skew-x-[10deg]">
+                            <Zap size={28} fill="currentColor" className="group-hover:animate-glitch" />
+                        </div>
+                        <span className="absolute -top-1 -right-1 w-3 h-3 bg-cyber-yellow animate-ping rounded-full"></span>
+                    </button>
+                </div>
             )}
         </div>
     );

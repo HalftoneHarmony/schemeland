@@ -373,7 +373,7 @@ export default function App() {
                             onAbandonQuest={projectFeature.handleAbandonQuest}
                             handleUpdateMonthGoal={projectFeature.handleUpdateMonthGoal}
                             handleUpdateMonthObjectives={projectFeature.handleUpdateMonthObjectives}
-
+                            onSave={store.save}
                             onOpenCampaignDetail={() => handleNavigate(AppView.CAMPAIGN_DETAIL)}
                         />
                     )}
