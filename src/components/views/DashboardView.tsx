@@ -212,8 +212,8 @@ export function DashboardView(props: DashboardViewProps) {
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/10 blur-[60px]" />
                                 <div className="skew-x-[2deg]">
                                     <div className="flex items-center justify-between mb-8 border-b border-red-500/20 pb-6">
-                                        <h3 className="text-3xl font-cyber font-black flex items-center gap-4 text-red-500 tracking-tighter italic">
-                                            <Flame className="animate-pulse" fill="currentColor" size={32} /> HARDCORE_MODE
+                                        <h3 className="text-3xl font-cyber font-black flex items-center gap-4 text-red-400 tracking-tighter italic drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]">
+                                            <Flame className="animate-pulse text-red-500" fill="currentColor" size={32} /> HARDCORE_MODE
                                         </h3>
                                         <div className="px-3 py-1 bg-red-500 text-black font-cyber font-black text-[10px] uppercase tracking-widest shadow-red-500 shadow-sm">
                                             DANGER

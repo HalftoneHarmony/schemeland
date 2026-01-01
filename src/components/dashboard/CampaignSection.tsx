@@ -59,13 +59,13 @@ export function CampaignSection({
                 <Button
                     onClick={() => setCompressModalOpen(true)}
                     className={`
-                        border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-all duration-300 skew-x-[-10deg]
-                        ${isCompressing ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-[0_0_25px_rgba(239,68,68,0.7)]'}
+                        border-2 border-red-400 text-red-400 bg-red-500/5 hover:bg-red-500 hover:text-white transition-all duration-300 skew-x-[-10deg]
+                        ${isCompressing ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-[0_0_30px_rgba(239,68,68,0.8)] shadow-[0_0_15px_rgba(239,68,68,0.2)]'}
                     `}
                     isLoading={isCompressing}
                 >
-                    <span className="skew-x-[10deg] flex items-center gap-2 font-cyber font-black text-xs tracking-widest">
-                        <FastForward size={14} /> HARDCORE_MODE
+                    <span className="skew-x-[10deg] flex items-center gap-2 font-cyber font-black text-xs tracking-[0.2em]">
+                        <FastForward size={14} className="animate-pulse" /> HARDCORE_MODE
                     </span>
                 </Button>
             </div>
