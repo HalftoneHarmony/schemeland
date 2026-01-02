@@ -91,7 +91,7 @@ export function VisionSection({
                 value={value}
                 onChange={onChange}
                 rows={rows}
-                className="w-full bg-black border-2 border-white/5 p-5 text-base text-white/90 focus:outline-none focus:border-cyber-cyan font-mono resize-none leading-relaxed transition-all duration-300 hover:border-white/20"
+                className="w-full bg-black border border-white/5 p-5 text-base text-white/90 focus:outline-none focus:border-cyber-cyan font-mono resize-none leading-relaxed transition-all duration-300 hover:border-white/20 cyber-clipper"
             />
         </motion.div>
     );
@@ -330,7 +330,7 @@ export function VisionSection({
                                                         >
                                                             <label className="text-white/20 font-cyber font-black text-[8px] uppercase tracking-widest">Milestone_0{idx + 1}</label>
                                                             <textarea
-                                                                className="w-full bg-black border border-white/10 p-3 text-xs text-white/80 focus:outline-none focus:border-cyber-cyan font-mono resize-none h-24 transition-all duration-300 hover:border-white/30"
+                                                                className="w-full bg-black border border-white/10 p-3 text-xs text-white/80 focus:outline-none focus:border-cyber-cyan font-mono resize-none h-24 transition-all duration-300 hover:border-white/30 cyber-clipper"
                                                                 value={getYearValue(activeYearIndex === 0 ? visionDraft.year1 : activeYearIndex === 1 ? visionDraft.year2 : visionDraft.year3).keyResults[idx] || ''}
                                                                 onChange={(e) => {
                                                                     const key = activeYearIndex === 0 ? 'year1' : activeYearIndex === 1 ? 'year2' : 'year3';
@@ -497,7 +497,7 @@ export function VisionSection({
                                                 ]
                                             }}
                                             transition={{ duration: 4, repeat: Infinity }}
-                                            className="w-24 h-24 bg-black border-2 border-white/5 flex items-center justify-center mb-8 relative group"
+                                            className="w-24 h-24 bg-black border-2 border-white/5 flex items-center justify-center mb-8 relative group cyber-clipper"
                                         >
                                             <motion.div
                                                 className="absolute inset-0 bg-cyber-cyan/10 blur-[30px]"
@@ -508,7 +508,7 @@ export function VisionSection({
                                                 animate={{ rotate: [0, 360] }}
                                                 transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
                                             >
-                                                <Lock size={36} className="text-white/20" />
+                                                <Lock size={36} className="text-white/20 group-hover:text-cyber-cyan group-hover:animate-glitch-skew transition-colors" />
                                             </motion.div>
                                         </motion.div>
                                         <motion.h4

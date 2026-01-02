@@ -111,30 +111,35 @@ export const CoachView: React.FC<CoachViewProps> = ({ onBack }) => {
         : 'bg-red-900/10 hover:bg-red-900/20 border-red-500 text-red-500';
 
     return (
-        <div className="h-full flex flex-col relative overflow-hidden bg-background/50 backdrop-blur-sm">
-            {/* Background Atmosphere */}
-            <div className={`absolute inset-0 pointer-events-none opacity-10 ${isElon ? 'bg-cyber-cyan/5' : 'bg-red-900/10'}`} />
+        <div className="h-full flex flex-col relative overflow-hidden bg-zinc-950/80 backdrop-blur-md">
+            {/* Background Atmosphere & Grid */}
+            <div className={`absolute inset-0 pointer-events-none opacity-20 ${isElon ? 'bg-cyber-cyan/5' : 'bg-red-900/10'}`}>
+                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:30px_30px]" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,black_100%)]" />
+            </div>
 
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-white/5 relative z-10 glass-panel mb-4 mx-4 mt-4 rounded-xl">
+            <div className="flex items-center justify-between p-6 border-b border-white/5 relative z-10 bg-zinc-900/40 mb-4 mx-4 mt-4 cyber-clipper-lg">
                 <div className="flex items-center gap-4">
-                    <div className="flex gap-2">
+                    <div className="flex gap-4">
                         <button
                             onClick={() => toggleCoach(CoachType.ELON)}
-                            className={`p-3 rounded-lg border transition-all duration-300 ${coachType === CoachType.ELON ? 'bg-cyber-cyan/20 border-cyber-cyan text-cyber-cyan scale-110 shadow-neon-cyan' : 'border-white/10 text-gray-500 hover:bg-white/5'}`}
+                            className={`p-4 border transition-all duration-300 relative group overflow-hidden cyber-clipper ${coachType === CoachType.ELON ? 'bg-cyber-cyan/10 border-cyber-cyan text-cyber-cyan shadow-neon-cyan' : 'border-white/10 text-gray-500 hover:bg-white/5 hover:text-white'}`}
                         >
-                            <div className="flex flex-col items-center">
-                                <Zap size={24} />
-                                <span className="text-[10px] font-bold mt-1">ELON</span>
+                            <div className={`absolute inset-0 bg-cyber-cyan/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ${coachType === CoachType.ELON ? 'opacity-20' : ''}`} />
+                            <div className="flex flex-col items-center relative z-10">
+                                <Zap size={20} className={coachType === CoachType.ELON ? 'animate-pulse' : ''} />
+                                <span className="text-[9px] font-cyber font-black mt-2 tracking-widest">ELON_MUSK</span>
                             </div>
                         </button>
                         <button
                             onClick={() => toggleCoach(CoachType.GOGGINS)}
-                            className={`p-3 rounded-lg border transition-all duration-300 ${coachType === CoachType.GOGGINS ? 'bg-red-500/20 border-red-500 text-red-500 scale-110 shadow-[0_0_15px_rgba(239,68,68,0.5)]' : 'border-white/10 text-gray-500 hover:bg-white/5'}`}
+                            className={`p-4 border transition-all duration-300 relative group overflow-hidden cyber-clipper ${coachType === CoachType.GOGGINS ? 'bg-red-500/10 border-red-500 text-red-500 shadow-[0_0_20px_rgba(239,68,68,0.4)]' : 'border-white/10 text-gray-500 hover:bg-white/5 hover:text-white'}`}
                         >
-                            <div className="flex flex-col items-center">
-                                <Skull size={24} />
-                                <span className="text-[10px] font-bold mt-1">GOGGINS</span>
+                            <div className={`absolute inset-0 bg-red-500/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ${coachType === CoachType.GOGGINS ? 'opacity-20' : ''}`} />
+                            <div className="flex flex-col items-center relative z-10">
+                                <Skull size={20} className={coachType === CoachType.GOGGINS ? 'animate-pulse' : ''} />
+                                <span className="text-[9px] font-cyber font-black mt-2 tracking-widest">DAVID_GOGGINS</span>
                             </div>
                         </button>
                     </div>
@@ -165,8 +170,8 @@ export const CoachView: React.FC<CoachViewProps> = ({ onBack }) => {
                     {/* Project Context Indicator */}
                     {activeProject && (
                         <div className="hidden md:flex flex-col items-end opacity-60">
-                            <span className="text-[10px] uppercase tracking-widest text-white/50">Current Mission</span>
-                            <span className="text-sm font-bold text-white max-w-[200px] truncate">{currentIdea?.title || 'Unknown'}</span>
+                            <span className="text-[9px] uppercase tracking-widest text-cyber-cyan/70 font-cyber font-black">Current_Mission_Lock</span>
+                            <span className="text-sm font-bold text-white max-w-[200px] truncate font-mono bg-white/5 px-2 py-1 rounded-none cyber-clipper">{currentIdea?.title || 'Unknown'}</span>
                         </div>
                     )}
                 </div>
@@ -193,12 +198,11 @@ export const CoachView: React.FC<CoachViewProps> = ({ onBack }) => {
 
                                 {/* Message Bubble */}
                                 <div className={`flex flex-col ${isAi ? 'items-start' : 'items-end'}`}>
-                                    <div className={`p-4 rounded-2xl border backdrop-blur-md relative overflow-hidden group
+                                    <div className={`p-5 border backdrop-blur-md relative overflow-hidden group cyber-clipper
                                         ${isAi
                                             ? (isElon ? 'bg-cyber-cyan/5 border-cyber-cyan/30 text-cyber-cyan' : 'bg-red-500/5 border-red-500/30 text-red-100')
-                                            : 'bg-white/5 border-white/10 text-white rounded-tr-none'
+                                            : 'bg-white/5 border-white/10 text-white'
                                         }
-                                        ${isAi && 'rounded-tl-none'}
                                     `}>
                                         {/* Glitch Effect on Hover for Elon */}
                                         {isAi && isElon && (
@@ -222,12 +226,12 @@ export const CoachView: React.FC<CoachViewProps> = ({ onBack }) => {
                             <div className={`w-10 h-10 rounded-full flex items-center justify-center border bg-black ${isElon ? 'border-cyber-cyan text-cyber-cyan' : 'border-red-500 text-red-500'}`}>
                                 <Sparkles size={16} className="animate-spin-slow" />
                             </div>
-                            <div className={`p-4 rounded-xl border flex items-center gap-2 ${isElon ? 'bg-cyber-cyan/5 border-cyber-cyan/20' : 'bg-red-500/5 border-red-500/20'}`}>
-                                <div className={`w-2 h-2 rounded-full animate-bounce ${isElon ? 'bg-cyber-cyan' : 'bg-red-500'}`} style={{ animationDelay: '0s' }} />
-                                <div className={`w-2 h-2 rounded-full animate-bounce ${isElon ? 'bg-cyber-cyan' : 'bg-red-500'}`} style={{ animationDelay: '0.2s' }} />
-                                <div className={`w-2 h-2 rounded-full animate-bounce ${isElon ? 'bg-cyber-cyan' : 'bg-red-500'}`} style={{ animationDelay: '0.4s' }} />
-                                <span className="text-xs uppercase tracking-widest opacity-50 ml-2">
-                                    {isElon ? 'CALCULATING...' : 'TRAINING...'}
+                            <div className={`p-4 border flex items-center gap-2 cyber-clipper ${isElon ? 'bg-cyber-cyan/5 border-cyber-cyan/20' : 'bg-red-500/5 border-red-500/20'}`}>
+                                <div className={`w-1.5 h-1.5 rounded-none animate-pulse ${isElon ? 'bg-cyber-cyan' : 'bg-red-500'}`} style={{ animationDelay: '0s' }} />
+                                <div className={`w-1.5 h-1.5 rounded-none animate-pulse ${isElon ? 'bg-cyber-cyan' : 'bg-red-500'}`} style={{ animationDelay: '0.2s' }} />
+                                <div className={`w-1.5 h-1.5 rounded-none animate-pulse ${isElon ? 'bg-cyber-cyan' : 'bg-red-500'}`} style={{ animationDelay: '0.4s' }} />
+                                <span className="text-[10px] uppercase tracking-widest opacity-70 ml-2 font-cyber font-black">
+                                    {isElon ? 'NEURAL_PROCESSING...' : 'GRINDING_DATA...'}
                                 </span>
                             </div>
                         </div>
@@ -237,27 +241,32 @@ export const CoachView: React.FC<CoachViewProps> = ({ onBack }) => {
             </div>
 
             {/* Input Area */}
-            <div className="p-4 relative z-20">
-                <div className={`glass-panel p-2 rounded-xl border flex gap-2 items-center transition-all duration-300 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-black ${isElon ? 'border-cyber-cyan/30 focus-within:ring-cyber-cyan' : 'border-red-500/30 focus-within:ring-red-500'}`}>
-                    <input
-                        type="text"
-                        value={inputValue}
-                        onChange={(e) => setInputValue(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        placeholder={isElon ? "Input query for optimization..." : "STOP WHINING AND TYPE YOUR REPORT!"}
-                        className="flex-1 bg-transparent border-none outline-none text-white placeholder-white/20 px-4 py-2 font-mono"
-                        autoFocus
-                    />
+            <div className="p-6 relative z-20">
+                <div className={`p-1 border transition-all duration-300 flex gap-2 items-center cyber-clipper bg-black/40 ${isElon ? 'border-cyber-cyan/50 shadow-[0_0_30px_rgba(0,255,255,0.1)]' : 'border-red-500/50 shadow-[0_0_30px_rgba(239,68,68,0.1)]'}`}>
+                    <div className="flex-1 flex items-center">
+                        <span className={`pl-4 font-cyber font-black text-xs ${isElon ? 'text-cyber-cyan' : 'text-red-500'}`}>{'>'}</span>
+                        <input
+                            type="text"
+                            value={inputValue}
+                            onChange={(e) => setInputValue(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                            placeholder={isElon ? "Identify constraints or input data..." : "DON'T BE WEAK. REPORT IN."}
+                            className="flex-1 bg-transparent border-none outline-none text-white placeholder-white/20 px-4 py-4 font-mono text-sm"
+                            autoFocus
+                        />
+                    </div>
                     <button
                         onClick={handleSendMessage}
                         disabled={!inputValue.trim() || isTyping}
-                        className={`p-3 rounded-lg transition-all duration-200 
+                        className={`p-4 transition-all duration-200 cyber-clipper
                             ${!inputValue.trim() || isTyping
-                                ? 'opacity-50 cursor-not-allowed bg-white/5 text-white/20'
-                                : buttonClass + ' hover:scale-105 active:scale-95'
+                                ? 'opacity-30 cursor-not-allowed bg-white/5 text-white'
+                                : isElon
+                                    ? 'bg-cyber-cyan text-black hover:bg-white hover:shadow-neon-white'
+                                    : 'bg-red-600 text-black hover:bg-red-500 hover:shadow-[0_0_20px_rgba(239,68,68,0.6)]'
                             }`}
                     >
-                        <Send size={20} />
+                        <Send size={18} fill="currentColor" />
                     </button>
                 </div>
                 <div className="text-center mt-2">

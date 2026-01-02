@@ -18,6 +18,8 @@ import { APP_NAME } from './constants';
 // Hooks & Store
 import { useStore } from './store';
 import { useInitializeStore } from './hooks/useInitializeStore';
+import { useHistorySync } from './hooks/useHistorySync';
+import { useConflictDetection } from './hooks/useConflictDetection';
 import { useIdeaHandlers, useProjectHandlers, useTimer } from './features';
 
 // View Components
@@ -34,9 +36,18 @@ import { CoachView } from './components/views/CoachView';
 import { SideNavigation } from './components/navigation/SideNavigation';
 import { QuickSearch } from './components/navigation/QuickSearch';
 
+// UI Components
+import { ConflictWarning } from './components/ui/ConflictWarning';
+
 export default function App() {
     // 1. Store Initialization (Data Migration)
     const { isInitialized, isMigrating } = useInitializeStore();
+
+    // 1.5 History Sync (Back button support)
+    useHistorySync();
+
+    // 1.6 Conflict Detection (Multi-browser protection)
+    const conflictDetection = useConflictDetection();
 
     // 2. Zustand Store (Global State)
     const store = useStore();
@@ -188,6 +199,14 @@ export default function App() {
 
     return (
         <div className="min-h-screen bg-background text-textMain font-sans selection:bg-cyber-pink/30">
+            {/* Conflict Warning Banner */}
+            <ConflictWarning
+                isVisible={conflictDetection.isWarningVisible}
+                onDismiss={conflictDetection.dismissWarning}
+                onReload={conflictDetection.reloadPage}
+                sessionId={conflictDetection.sessionId}
+            />
+
             {/* Quick Search Modal */}
             <QuickSearch
                 isOpen={isQuickSearchOpen}

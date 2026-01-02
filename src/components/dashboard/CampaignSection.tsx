@@ -94,6 +94,7 @@ export function CampaignSection({
 
             <div className="relative group/container">
                 {/* Gradient Masks & Integrated Navigation */}
+
                 <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-black via-black/50 to-transparent z-[60] flex items-center justify-start pl-2 pointer-events-none opacity-0 group-hover/container:opacity-100 transition-opacity duration-500">
                     <button
                         onClick={() => scroll('left')}
@@ -185,10 +186,10 @@ export function CampaignSection({
                                         onHoverEnd={() => setIsHovered(false)}
                                         onClick={() => { handleMonthClick(idx); onOpenCampaignDetail(); }}
                                         className={`
-                                            w-[340px] shrink-0 p-8 border transition-all duration-300 cursor-pointer relative group flex flex-col skew-x-[-2deg] overflow-hidden
+                                            w-[340px] shrink-0 p-8 border transition-all duration-300 cursor-pointer relative group flex flex-col overflow-hidden cyber-clipper-lg
                                             ${isSelected
                                                 ? 'bg-gradient-to-br from-cyber-cyan/10 to-transparent border-cyber-cyan shadow-[0_0_30px_rgba(0,255,255,0.15)] z-20'
-                                                : 'bg-black/40 border-white/10 hover:border-cyber-cyan/30'
+                                                : 'bg-zinc-950/80 border-white/10 hover:border-cyber-cyan/30'
                                             }
                                             ${isPast ? 'opacity-60 saturate-0 hover:saturate-100 hover:opacity-100' : ''}
                                         `}
@@ -204,7 +205,7 @@ export function CampaignSection({
                                         }}
                                         style={{ minHeight: 460 }}
                                     >
-                                        <div className="skew-x-[2deg] flex-1 flex flex-col relative">
+                                        <div className="flex-1 flex flex-col relative">
                                             {/* Header Section */}
                                             <div className="flex justify-between items-start mb-10">
                                                 <div className="flex flex-col gap-2">
@@ -375,9 +376,9 @@ export function CampaignSection({
                                 variants={cardVariants}
                                 whileHover={{ scale: 1.02 }}
                                 onClick={handleExtendRoadmap}
-                                className="w-[150px] shrink-0 border border-dashed border-white/10 flex flex-col items-center justify-center cursor-pointer hover:border-cyber-pink hover:bg-cyber-pink/5 transition-all group h-[460px] skew-x-[-2deg]"
+                                className="w-[150px] shrink-0 border border-dashed border-white/10 flex flex-col items-center justify-center cursor-pointer hover:border-cyber-pink hover:bg-cyber-pink/5 transition-all group h-[460px] cyber-clipper-lg"
                             >
-                                <div className="skew-x-[2deg] flex flex-col items-center gap-6">
+                                <div className="flex flex-col items-center gap-6">
                                     {isExtending ? (
                                         <RefreshCw className="animate-spin text-cyber-pink" size={32} />
                                     ) : (

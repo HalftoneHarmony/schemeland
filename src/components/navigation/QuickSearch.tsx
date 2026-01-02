@@ -170,22 +170,25 @@ export const QuickSearch: React.FC<QuickSearchProps> = ({
                         animate={{ scale: 1, opacity: 1, y: 0 }}
                         exit={{ scale: 0.95, opacity: 0, y: -20 }}
                         transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                        className="w-full max-w-2xl bg-zinc-900/95 border border-white/10 rounded-xl shadow-2xl overflow-hidden"
+                        className="w-full max-w-2xl bg-zinc-950/80 backdrop-blur-xl border border-white/20 shadow-2xl overflow-hidden cyber-clipper-lg shadow-[0_0_50px_rgba(0,255,255,0.1)]"
                         onClick={(e) => e.stopPropagation()}
                     >
+                        {/* Decorative Header Line */}
+                        <div className="h-0.5 w-full bg-gradient-to-r from-cyber-cyan via-white to-cyber-pink" />
+
                         {/* Search Input */}
-                        <div className="flex items-center gap-3 px-4 py-4 border-b border-white/10">
-                            <Search size={20} className="text-zinc-500" />
+                        <div className="flex items-center gap-4 px-6 py-5 border-b border-white/10 bg-black/40">
+                            <Command size={24} className="text-cyber-cyan animate-pulse" />
                             <input
                                 type="text"
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
-                                placeholder="Search commands, projects, actions..."
-                                className="flex-1 bg-transparent text-white text-lg outline-none placeholder:text-zinc-500"
+                                placeholder="EXECUTE_COMMAND..."
+                                className="flex-1 bg-transparent text-white text-xl font-cyber font-light tracking-wider outline-none placeholder:text-zinc-600 placeholder:font-mono uppercase"
                                 autoFocus
                             />
-                            <div className="flex items-center gap-1 text-zinc-500">
-                                <kbd className="px-2 py-1 bg-zinc-800 rounded text-xs font-mono">esc</kbd>
+                            <div className="flex items-center gap-2 text-zinc-500">
+                                <span className="text-[10px] font-cyber font-black tracking-widest uppercase text-cyber-pink">ESC_TO_ABORT</span>
                             </div>
                         </div>
 
@@ -217,11 +220,17 @@ export const QuickSearch: React.FC<QuickSearchProps> = ({
                                                             key={result.id}
                                                             onClick={result.action}
                                                             onMouseEnter={() => setSelectedIndex(globalIndex)}
-                                                            className={`w-full px-4 py-3 flex items-center gap-3 transition-colors ${selectedIndex === globalIndex
-                                                                    ? 'bg-cyber-pink/10 text-white'
-                                                                    : 'text-zinc-400 hover:bg-white/5'
+                                                            className={`w-full px-6 py-4 flex items-center gap-4 transition-all relative group ${selectedIndex === globalIndex
+                                                                ? 'bg-cyber-cyan/10 text-white'
+                                                                : 'text-zinc-400 hover:bg-white/5'
                                                                 }`}
                                                         >
+                                                            {selectedIndex === globalIndex && (
+                                                                <motion.div
+                                                                    layoutId="active-selection"
+                                                                    className="absolute left-0 top-0 bottom-0 w-1 bg-cyber-cyan shadow-[0_0_10px_rgba(0,255,255,0.8)]"
+                                                                />
+                                                            )}
                                                             <span className={selectedIndex === globalIndex ? 'text-cyber-pink' : 'text-zinc-500'}>
                                                                 {result.icon}
                                                             </span>

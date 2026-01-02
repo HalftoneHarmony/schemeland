@@ -113,20 +113,21 @@ export function MissionSection({
                         animate={{ opacity: 1, y: 0 }}
                         className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar"
                     >
+
                         {previewOptions.map((option, idx) => (
                             <motion.button
                                 key={idx}
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
                                 onClick={() => setPreviewIndex(idx)}
-                                className={`flex-1 min-w-[280px] p-6 border-2 transition-all relative overflow-hidden flex flex-col items-start
+                                className={`flex-1 min-w-[280px] p-6 border transition-all relative overflow-hidden flex flex-col items-start cyber-clipper
                                     ${previewIndex === idx
                                         ? 'bg-cyber-pink/5 border-cyber-pink shadow-neon-pink'
                                         : 'bg-black border-white/10 hover:border-white/30'
                                     }
                                 `}
                             >
-                                <div className={`text-[10px] font-cyber font-black mb-3 px-2 py-0.5 ${previewIndex === idx ? 'bg-cyber-pink text-black' : 'bg-white/10 text-white/40'}`}>
+                                <div className={`text-[10px] font-cyber font-black mb-3 px-2 py-0.5 ${previewIndex === idx ? 'bg-cyber-pink text-black' : 'bg-white/10 text-white/40'} cyber-clipper`}>
                                     전략_0{idx + 1}
                                 </div>
                                 <div className="font-cyber font-black text-white mb-2 uppercase tracking-tight">{option.strategyName}</div>
@@ -149,9 +150,9 @@ export function MissionSection({
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 1.05 }}
-                        className="border-2 border-dashed border-white/5 p-20 text-center bg-black/40 skew-x-[-1deg]"
+                        className="border border-dashed border-white/20 p-20 text-center bg-black/40 cyber-clipper-lg"
                     >
-                        <div className="skew-x-[1deg]">
+                        <div className="flex flex-col items-center">
                             <Scroll size={64} className="mx-auto text-white/10 mb-8" />
                             <h3 className="text-2xl font-cyber font-black text-white/40 mb-4 uppercase tracking-[0.2em]">Data_Corrupted: 퀘스트를_찾을_수_없음</h3>
                             <p className="text-white/20 mb-10 max-w-md mx-auto font-mono text-sm leading-relaxed">현재 섹터의 미션 로그를 생성하기 위해 새로운 전략을 초기화하십시오.</p>
@@ -159,18 +160,18 @@ export function MissionSection({
                                 <Button
                                     onClick={() => handleGeneratePlanOptions(selectedMonthIndex)}
                                     isLoading={isGeneratingMonthDetail}
-                                    className="h-14 px-10 text-xs bg-cyber-pink text-white hover:bg-transparent hover:text-cyber-pink border-2 border-cyber-pink shadow-neon-pink skew-x-[-10deg]"
+                                    className="h-14 px-10 text-xs bg-cyber-pink text-white hover:bg-transparent hover:text-cyber-pink border-2 border-cyber-pink shadow-neon-pink cyber-clipper"
                                 >
-                                    <span className="skew-x-[10deg] flex items-center font-cyber font-black tracking-widest gap-3">
+                                    <span className="flex items-center font-cyber font-black tracking-widest gap-3">
                                         <Sparkles size={18} /> 퀘스트_체인_초기화
                                     </span>
                                 </Button>
                                 <Button
                                     onClick={initManualPlan}
                                     variant="ghost"
-                                    className="h-14 px-10 text-xs border-2 border-white/10 text-white/40 hover:text-white hover:border-white skew-x-[-10deg]"
+                                    className="h-14 px-10 text-xs border-2 border-white/10 text-white/40 hover:text-white hover:border-white cyber-clipper"
                                 >
-                                    <span className="skew-x-[10deg] flex items-center font-cyber font-black tracking-widest gap-3">
+                                    <span className="flex items-center font-cyber font-black tracking-widest gap-3">
                                         <Edit3 size={18} /> 수동_퀘스트_설계
                                     </span>
                                 </Button>
@@ -191,10 +192,10 @@ export function MissionSection({
                                 variants={itemVariants}
                                 className="relative flex"
                             >
-                                <div className="glass-panel border-white/5 p-8 w-full flex flex-col skew-x-[-1deg] group/panel hover:border-cyber-cyan/30 transition-all duration-500">
-                                    <div className="skew-x-[1deg] flex-1 flex flex-col">
+                                <div className="glass-panel border-white/5 p-8 w-full flex flex-col group/panel hover:border-cyber-cyan/30 transition-all duration-500 cyber-clipper-lg bg-zinc-950/20">
+                                    <div className="flex-1 flex flex-col">
                                         <div className="flex items-center gap-6 mb-8 border-b border-white/5 pb-6">
-                                            <div className="w-16 h-16 border-2 border-white/10 flex flex-col items-center justify-center shrink-0 bg-black/40 group-hover/panel:border-cyber-cyan transition-all">
+                                            <div className="w-16 h-16 border border-white/10 flex flex-col items-center justify-center shrink-0 bg-black/40 group-hover/panel:border-cyber-cyan transition-all cyber-clipper">
                                                 <span className="text-[9px] text-white/30 uppercase font-black font-cyber">Sector</span>
                                                 <span className="text-2xl font-cyber font-black text-white">0{week.weekNumber}</span>
                                             </div>
@@ -297,7 +298,7 @@ export function MissionSection({
                                                 <motion.button
                                                     whileHover={{ x: 5 }}
                                                     onClick={() => addTask(wIndex)}
-                                                    className="w-full mt-4 p-3 border border-dashed border-white/10 text-white/20 hover:text-cyber-cyan hover:border-cyber-cyan hover:bg-cyber-cyan/5 transition-all flex items-center justify-center gap-2 text-[10px] font-cyber font-black uppercase tracking-widest"
+                                                    className="w-full mt-4 p-3 border border-dashed border-white/10 text-white/20 hover:text-cyber-cyan hover:border-cyber-cyan hover:bg-cyber-cyan/5 transition-all flex items-center justify-center gap-2 text-[10px] font-cyber font-black uppercase tracking-widest cyber-clipper"
                                                 >
                                                     <Sparkles size={12} /> 미션_추가
                                                 </motion.button>
@@ -316,17 +317,17 @@ export function MissionSection({
                 <motion.div
                     initial={{ y: 50, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
-                    className="flex justify-end gap-6 pt-10 border-t border-white/10 sticky bottom-8 bg-black/90 backdrop-blur-2xl p-6 z-20 shadow-[0_-20px_40px_rgba(0,0,0,0.5)] mt-12 skew-x-[-5deg]"
+                    className="flex justify-end gap-6 pt-10 border-t border-white/10 sticky bottom-8 bg-black/90 backdrop-blur-2xl p-6 z-20 shadow-[0_-20px_40px_rgba(0,0,0,0.5)] mt-12 cyber-clipper-lg"
                 >
-                    <div className="skew-x-[5deg] flex gap-6">
-                        <Button variant="ghost" onClick={cancelPreview} className="text-[10px] font-cyber font-black text-white/40 hover:text-white tracking-[0.2em]">
+                    <div className="flex gap-6">
+                        <Button variant="ghost" onClick={cancelPreview} className="text-[10px] font-cyber font-black text-white/40 hover:text-white tracking-[0.2em] cyber-clipper">
                             변경_취소
                         </Button>
                         <Button
                             onClick={confirmPreviewPlan}
-                            className="bg-cyber-cyan text-black font-cyber font-black text-xs px-10 shadow-neon-cyan hover:bg-white border-none tracking-[0.2em] skew-x-[-10deg]"
+                            className="bg-cyber-cyan text-black font-cyber font-black text-xs px-10 shadow-neon-cyan hover:bg-white border-none tracking-[0.2em] cyber-clipper"
                         >
-                            <span className="skew-x-[10deg] flex items-center gap-2">
+                            <span className="flex items-center gap-2">
                                 <Check size={18} /> 전략_확정
                             </span>
                         </Button>

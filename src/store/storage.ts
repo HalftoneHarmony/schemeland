@@ -1,12 +1,40 @@
 /**
  * @file store/storage.ts
- * 저장소 추상화 레이어
+ * 저장소 추상화 레이어 (v2.1 - Conflict Detection)
  * 
  * 다양한 저장소 백엔드를 지원하기 위한 추상화:
  * - localStorage (현재)
  * - IndexedDB (대용량 데이터용, 향후)
  * - 클라우드 동기화 (향후)
+ * 
+ * v2.1 변경사항:
+ * - 세션 기반 충돌 감지 기능 추가
+ * - 다중 브라우저 동시 접근 시 데이터 보호
  */
+
+// ============================================
+// Session Management
+// ============================================
+
+const SESSION_ID = crypto.randomUUID();
+let lastKnownServerTimestamp: string | null = null;
+let conflictCallback: ((conflict: ConflictInfo) => void) | null = null;
+
+export interface ConflictInfo {
+    type: 'EXTERNAL_CHANGE' | 'DATA_OVERWRITTEN';
+    localTimestamp: string;
+    serverTimestamp: string;
+    sessionId: string;
+    serverSessionId?: string;
+}
+
+export function setConflictCallback(cb: (conflict: ConflictInfo) => void) {
+    conflictCallback = cb;
+}
+
+export function getSessionId(): string {
+    return SESSION_ID;
+}
 
 // ============================================
 // Storage Adapter Interface
@@ -280,14 +308,23 @@ export function createStorage(type: StorageType = 'localStorage'): StorageAdapte
 export const storage = createStorage('localStorage');
 
 // ============================================
-// Zustand-compatible Server Storage
+// Zustand-compatible Server Storage (with Conflict Detection)
 // ============================================
+
+interface ServerDBMeta {
+    _meta?: {
+        lastUpdatedAt: string;
+        lastUpdatedBy: string; // session ID
+    };
+    [key: string]: any;
+}
 
 /**
  * Zustand persist 미들웨어를 위한 서버 사이드 스토리지 어댑터
  * - 로컬 파일 시스템(via Vite API)에 데이터를 저장합니다.
  * - 오프라인 시 localStorage를 폴백으로 사용합니다.
  * - 최초 실행 시 localStorage 데이터를 서버로 자동 마이그레이션합니다.
+ * - v2.1: 충돌 감지 기능 추가
  */
 export const serverStorage = {
     getItem: async (name: string): Promise<string | null> => {
@@ -296,7 +333,12 @@ export const serverStorage = {
             const res = await fetch('/api/storage');
             if (!res.ok) throw new Error('Server unreachable');
 
-            const db = await res.json();
+            const db: ServerDBMeta = await res.json();
+
+            // 메타데이터 저장 (충돌 감지용)
+            if (db._meta?.lastUpdatedAt) {
+                lastKnownServerTimestamp = db._meta.lastUpdatedAt;
+            }
 
             // 2. 서버에 데이터가 존재하면 반환
             if (db[name]) {
@@ -309,8 +351,15 @@ export const serverStorage = {
             const localData = localStorage.getItem(name);
             if (localData) {
                 console.log(`[mnt] Migrating ${name} to server storage...`);
-                // 서버로 업로드
-                const newDb = { ...db, [name]: localData };
+                // 서버로 업로드 (with meta)
+                const newDb: ServerDBMeta = {
+                    ...db,
+                    [name]: localData,
+                    _meta: {
+                        lastUpdatedAt: new Date().toISOString(),
+                        lastUpdatedBy: SESSION_ID
+                    }
+                };
                 fetch('/api/storage', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -332,19 +381,56 @@ export const serverStorage = {
             // 1. 로컬 캐시 업데이트
             localStorage.setItem(name, value);
 
-            // 2. 서버 DB 업데이트
+            // 2. 서버 DB 조회 (충돌 감지)
             const res = await fetch('/api/storage');
-            const db = res.ok ? await res.json() : {};
+            const db: ServerDBMeta = res.ok ? await res.json() : {};
 
+            // 충돌 감지: 다른 세션이 변경했는지 확인
+            if (db._meta && lastKnownServerTimestamp) {
+                const serverTime = db._meta.lastUpdatedAt;
+                const serverSession = db._meta.lastUpdatedBy;
+
+                // 다른 세션이 변경했고, 우리가 알던 시간보다 새로운 경우
+                if (serverSession !== SESSION_ID && serverTime > lastKnownServerTimestamp) {
+                    console.warn(`[ServerStorage] ⚠️ CONFLICT DETECTED!`);
+                    console.warn(`  - Our last known: ${lastKnownServerTimestamp}`);
+                    console.warn(`  - Server has: ${serverTime} (by session ${serverSession.slice(0, 8)}...)`);
+
+                    // 충돌 콜백 호출
+                    if (conflictCallback) {
+                        conflictCallback({
+                            type: 'EXTERNAL_CHANGE',
+                            localTimestamp: lastKnownServerTimestamp,
+                            serverTimestamp: serverTime,
+                            sessionId: SESSION_ID,
+                            serverSessionId: serverSession
+                        });
+                    }
+
+                    // 일단 저장은 진행하되, 사용자에게는 알림
+                }
+            }
+
+            // 동일한 값이면 스킵
             if (db[name] === value) return;
 
+            // 3. 새로운 타임스탬프와 함께 저장
+            const newTimestamp = new Date().toISOString();
             db[name] = value;
+            db._meta = {
+                lastUpdatedAt: newTimestamp,
+                lastUpdatedBy: SESSION_ID
+            };
 
             await fetch('/api/storage', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(db)
             });
+
+            // 로컬 타임스탬프 업데이트
+            lastKnownServerTimestamp = newTimestamp;
+
         } catch (error) {
             console.error('[ServerStorage] Save failed:', error);
         }
@@ -354,8 +440,12 @@ export const serverStorage = {
         localStorage.removeItem(name);
         try {
             const res = await fetch('/api/storage');
-            const db = res.ok ? await res.json() : {};
+            const db: ServerDBMeta = res.ok ? await res.json() : {};
             delete db[name];
+            db._meta = {
+                lastUpdatedAt: new Date().toISOString(),
+                lastUpdatedBy: SESSION_ID
+            };
             await fetch('/api/storage', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -366,4 +456,3 @@ export const serverStorage = {
         }
     },
 };
-

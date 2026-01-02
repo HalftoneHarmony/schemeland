@@ -215,8 +215,8 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
                     <button
                         onClick={() => onWeekSelect(null)}
                         className={`px-4 py-2 rounded-sm border transition-all text-xs font-cyber ${selectedWeek === null
-                                ? 'bg-cyber-pink/20 border-cyber-pink/50 text-cyber-pink shadow-neon-pink'
-                                : 'bg-zinc-900/50 border-white/10 text-zinc-400 hover:border-white/20'
+                            ? 'bg-cyber-pink/20 border-cyber-pink/50 text-cyber-pink shadow-neon-pink'
+                            : 'bg-zinc-900/50 border-white/10 text-zinc-400 hover:border-white/20'
                             }`}
                     >
                         ALL::SECTORS
@@ -226,8 +226,8 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
                             key={week}
                             onClick={() => onWeekSelect(week)}
                             className={`px-4 py-2 rounded-sm border transition-all text-xs font-cyber ${selectedWeek === week
-                                    ? 'bg-cyber-cyan/20 border-cyber-cyan/50 text-cyber-cyan shadow-neon-cyan'
-                                    : 'bg-zinc-900/50 border-white/10 text-zinc-400 hover:border-white/20'
+                                ? 'bg-cyber-cyan/20 border-cyber-cyan/50 text-cyber-cyan shadow-neon-cyan'
+                                : 'bg-zinc-900/50 border-white/10 text-zinc-400 hover:border-white/20'
                                 }`}
                         >
                             WEEK_{String(week).padStart(2, '0')}
@@ -246,30 +246,31 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
                     return (
                         <motion.div
                             key={status}
-                            className={`flex flex-col rounded-lg border-2 transition-all duration-200 ${isDropTarget
-                                    ? `${config.dropHighlight} bg-white/5 shadow-lg`
-                                    : `${config.borderColor} border-opacity-50`
-                                } bg-gradient-to-b ${config.gradient} backdrop-blur-sm overflow-hidden`}
+                            className={`flex flex-col border-r border-white/5 last:border-r-0 transition-all duration-200 ${isDropTarget
+                                ? `${config.dropHighlight} bg-white/5`
+                                : 'border-transparent'
+                                } bg-gradient-to-b ${config.gradient} overflow-hidden h-full`}
                             onDragOver={(e) => handleDragOver(e, status)}
                             onDragLeave={handleDragLeave}
                             onDrop={(e) => handleDrop(e, status)}
                         >
                             {/* Column Header */}
-                            <div className={`flex-shrink-0 px-4 py-3 border-b ${config.borderColor} backdrop-blur-xl`}>
-                                <div className="flex items-center justify-between">
+                            <div className={`flex-shrink-0 px-4 py-4 border-b ${config.borderColor} backdrop-blur-xl relative overflow-hidden group`}>
+                                <div className={`absolute left-0 top-0 bottom-0 w-1 ${config.bgColor.replace('/10', '')}`} />
+                                <div className="flex items-center justify-between relative z-10">
                                     <div className="flex items-center gap-2">
                                         <span className={config.color}>{config.icon}</span>
-                                        <span className={`text-xs font-cyber font-bold tracking-wider ${config.color}`}>
+                                        <span className={`text-xs font-cyber font-black tracking-widest uppercase ${config.color}`}>
                                             {config.title}
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <span className={`text-[10px] font-mono ${config.color} bg-white/5 px-2 py-0.5 rounded-sm`}>
+                                        <span className={`text-[10px] font-mono font-bold ${config.color} bg-black/40 px-2 py-0.5 cyber-clipper`}>
                                             {tasksInColumn.length}
                                         </span>
                                         <button
                                             onClick={() => setShowTaskModal({ weekNumber: weekNumbers[0] || 1, status })}
-                                            className={`p-1 rounded-sm hover:bg-white/10 ${config.color} transition-colors`}
+                                            className={`p-1 hover:bg-white/10 ${config.color} transition-colors cyber-clipper`}
                                         >
                                             <Plus size={14} />
                                         </button>
@@ -315,13 +316,13 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
                             </div>
 
                             {/* Quick Add Button */}
-                            <div className="flex-shrink-0 p-3 border-t border-white/5">
+                            <div className="flex-shrink-0 p-3 pt-0">
                                 <button
                                     onClick={() => setShowTaskModal({ weekNumber: weekNumbers[0] || 1, status })}
-                                    className={`w-full py-2 rounded-sm border border-dashed ${config.borderColor} text-xs font-cyber ${config.color} hover:bg-white/5 transition-colors flex items-center justify-center gap-2`}
+                                    className={`w-full py-3 border border-dashed ${config.borderColor} text-[10px] font-cyber tracking-widest ${config.color} hover:bg-white/5 transition-colors flex items-center justify-center gap-2 cyber-clipper opacity-60 hover:opacity-100`}
                                 >
-                                    <Plus size={14} />
-                                    <span>ADD::TASK</span>
+                                    <Plus size={12} />
+                                    <span>NEW_ENTRY</span>
                                 </button>
                             </div>
                         </motion.div>
@@ -343,98 +344,102 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
                             initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.9, opacity: 0 }}
-                            className="bg-zinc-900 border border-white/10 rounded-lg p-6 w-full max-w-md"
-                            onClick={(e) => e.stopPropagation()}
                         >
-                            <div className="flex items-center justify-between mb-6">
-                                <div className="flex items-center gap-3">
-                                    <span className={statusConfig[showTaskModal.status].color}>
-                                        {statusConfig[showTaskModal.status].icon}
-                                    </span>
-                                    <h3 className="font-cyber text-lg text-white">NEW::TASK</h3>
-                                </div>
-                                <button
-                                    onClick={() => setShowTaskModal(null)}
-                                    className="p-1 hover:bg-white/10 rounded-sm transition-colors"
-                                >
-                                    <X size={18} className="text-zinc-400" />
-                                </button>
-                            </div>
-
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-[10px] font-cyber text-zinc-500 mb-2 tracking-wider">
-                                        TASK::DESCRIPTION
-                                    </label>
-                                    <textarea
-                                        value={newTaskText}
-                                        onChange={(e) => setNewTaskText(e.target.value)}
-                                        placeholder="Enter task description..."
-                                        className="w-full px-4 py-3 bg-zinc-800/50 border border-white/10 rounded-sm text-white text-sm focus:outline-none focus:border-cyber-pink/50 resize-none"
-                                        rows={3}
-                                        autoFocus
-                                    />
+                            <div
+                                className="bg-zinc-950 border border-white/20 p-8 w-full max-w-lg cyber-clipper-lg relative overflow-hidden shadow-[0_0_50px_rgba(255,0,255,0.15)]"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyber-pink via-purple-500 to-cyber-cyan" />
+                                <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/10">
+                                    <div className="flex items-center gap-3">
+                                        <span className={statusConfig[showTaskModal.status].color}>
+                                            {statusConfig[showTaskModal.status].icon}
+                                        </span>
+                                        <h3 className="font-cyber text-lg text-white">NEW::TASK</h3>
+                                    </div>
+                                    <button
+                                        onClick={() => setShowTaskModal(null)}
+                                        className="p-1 hover:bg-white/10 rounded-sm transition-colors"
+                                    >
+                                        <X size={18} className="text-zinc-400" />
+                                    </button>
                                 </div>
 
-                                <div>
-                                    <label className="block text-[10px] font-cyber text-zinc-500 mb-2 tracking-wider">
-                                        PRIORITY::LEVEL
-                                    </label>
-                                    <div className="flex gap-2">
-                                        {Object.values(Priority).map((priority) => (
-                                            <button
-                                                key={priority}
-                                                onClick={() => setNewTaskPriority(priority)}
-                                                className={`flex-1 py-2 rounded-sm border text-xs font-cyber transition-all ${newTaskPriority === priority
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-[10px] font-cyber text-zinc-500 mb-2 tracking-wider">
+                                            TASK::DESCRIPTION
+                                        </label>
+                                        <textarea
+                                            value={newTaskText}
+                                            onChange={(e) => setNewTaskText(e.target.value)}
+                                            placeholder="Enter task description..."
+                                            className="w-full px-4 py-3 bg-zinc-800/50 border border-white/10 rounded-sm text-white text-sm focus:outline-none focus:border-cyber-pink/50 resize-none"
+                                            rows={3}
+                                            autoFocus
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-[10px] font-cyber text-zinc-500 mb-2 tracking-wider">
+                                            PRIORITY::LEVEL
+                                        </label>
+                                        <div className="flex gap-2">
+                                            {Object.values(Priority).map((priority) => (
+                                                <button
+                                                    key={priority}
+                                                    onClick={() => setNewTaskPriority(priority)}
+                                                    className={`flex-1 py-2 rounded-sm border text-xs font-cyber transition-all ${newTaskPriority === priority
                                                         ? `${priorityConfig[priority].color} border-current bg-current/10`
                                                         : 'border-white/10 text-zinc-400 hover:border-white/20'
-                                                    }`}
-                                            >
-                                                {priorityConfig[priority].label}
-                                            </button>
-                                        ))}
+                                                        }`}
+                                                >
+                                                    {priorityConfig[priority].label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-[10px] font-cyber text-zinc-500 mb-2 tracking-wider">
+                                            WEEK::SECTOR
+                                        </label>
+                                        <select
+                                            value={showTaskModal.weekNumber}
+                                            onChange={(e) => setShowTaskModal({ ...showTaskModal, weekNumber: parseInt(e.target.value) })}
+                                            className="w-full px-4 py-3 bg-zinc-800/50 border border-white/10 rounded-sm text-white text-sm focus:outline-none focus:border-cyber-pink/50"
+                                        >
+                                            {weekNumbers.map((week) => (
+                                                <option key={week} value={week}>
+                                                    Week {week}
+                                                </option>
+                                            ))}
+                                        </select>
                                     </div>
                                 </div>
 
-                                <div>
-                                    <label className="block text-[10px] font-cyber text-zinc-500 mb-2 tracking-wider">
-                                        WEEK::SECTOR
-                                    </label>
-                                    <select
-                                        value={showTaskModal.weekNumber}
-                                        onChange={(e) => setShowTaskModal({ ...showTaskModal, weekNumber: parseInt(e.target.value) })}
-                                        className="w-full px-4 py-3 bg-zinc-800/50 border border-white/10 rounded-sm text-white text-sm focus:outline-none focus:border-cyber-pink/50"
+                                <div className="flex gap-3 mt-6">
+                                    <button
+                                        onClick={() => setShowTaskModal(null)}
+                                        className="flex-1 py-3 rounded-sm border border-white/10 text-zinc-400 text-sm font-cyber hover:bg-white/5 transition-colors"
                                     >
-                                        {weekNumbers.map((week) => (
-                                            <option key={week} value={week}>
-                                                Week {week}
-                                            </option>
-                                        ))}
-                                    </select>
+                                        CANCEL
+                                    </button>
+                                    <button
+                                        onClick={handleAddNewTask}
+                                        disabled={!newTaskText.trim()}
+                                        className="flex-1 py-3 rounded-sm bg-gradient-to-r from-cyber-pink to-cyber-purple text-white text-sm font-cyber hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                    >
+                                        <Sparkles size={14} />
+                                        CREATE::TASK
+                                    </button>
                                 </div>
-                            </div>
-
-                            <div className="flex gap-3 mt-6">
-                                <button
-                                    onClick={() => setShowTaskModal(null)}
-                                    className="flex-1 py-3 rounded-sm border border-white/10 text-zinc-400 text-sm font-cyber hover:bg-white/5 transition-colors"
-                                >
-                                    CANCEL
-                                </button>
-                                <button
-                                    onClick={handleAddNewTask}
-                                    disabled={!newTaskText.trim()}
-                                    className="flex-1 py-3 rounded-sm bg-gradient-to-r from-cyber-pink to-cyber-purple text-white text-sm font-cyber hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                                >
-                                    <Sparkles size={14} />
-                                    CREATE::TASK
-                                </button>
                             </div>
                         </motion.div>
                     </motion.div>
                 )}
             </AnimatePresence>
-        </div>
+        </div >
     );
 };
 
@@ -503,9 +508,11 @@ const KanbanCard: React.FC<KanbanCardProps> = ({
             draggable={!isEditing}
             onDragStart={onDragStart}
             onDragEnd={onDragEnd}
-            className={`group bg-zinc-900/80 border border-white/10 rounded-lg p-3 cursor-grab active:cursor-grabbing hover:border-white/20 transition-all ${isDragging ? 'shadow-2xl shadow-cyber-pink/20 z-50' : ''
+            className={`group bg-zinc-900/40 border border-white/10 cyber-clipper p-4 cursor-grab active:cursor-grabbing hover:border-white/30 transition-all relative overflow-hidden ${isDragging ? 'shadow-[0_0_30px_rgba(255,0,255,0.2)] z-50 bg-zinc-900/90' : ''
                 }`}
         >
+            {/* Priority Indicator Strip */}
+            <div className={`absolute left-0 top-0 bottom-0 w-0.5 ${priorityConfig[task.priority].color.replace('text-', 'bg-')}`} />
             {/* Drag Handle */}
             <div className="flex items-start gap-2">
                 <div className="mt-1 opacity-0 group-hover:opacity-50 transition-opacity cursor-grab">
@@ -544,8 +551,8 @@ const KanbanCard: React.FC<KanbanCardProps> = ({
                             {/* Task Meta */}
                             <div className="flex items-center gap-3 mt-3">
                                 {/* Week Badge */}
-                                <span className="text-[10px] font-mono text-zinc-500 bg-zinc-800 px-2 py-0.5 rounded">
-                                    W{task.weekNumber}
+                                <span className="text-[9px] font-cyber font-black tracking-widest text-zinc-500 bg-black/40 px-2 py-1 cyber-clipper">
+                                    WEEK_{task.weekNumber}
                                 </span>
 
                                 {/* Priority */}

@@ -59,11 +59,11 @@ export function ProjectListView({ projects, onSelectProject, onNewAdventure }: P
                     onClick={onNewAdventure}
                     whileHover={{ scale: 1.02, y: -5 }}
                     whileTap={{ scale: 0.98 }}
-                    className="border-2 border-dashed border-white/5 bg-white/5 p-10 flex flex-col items-center justify-center cursor-pointer hover:border-cyber-pink hover:bg-cyber-pink/5 transition-all min-h-[340px] group skew-x-[-2deg]"
+                    className="border border-dashed border-white/20 bg-white/5 p-10 flex flex-col items-center justify-center cursor-pointer hover:border-cyber-pink hover:bg-cyber-pink/5 transition-all min-h-[340px] group cyber-clipper"
                 >
-                    <div className="skew-x-[2deg] flex flex-col items-center">
+                    <div className="flex flex-col items-center">
                         <motion.div
-                            className="w-20 h-20 border-2 border-white/10 flex items-center justify-center mb-8 group-hover:border-cyber-pink group-hover:shadow-neon-pink transition-all bg-black"
+                            className="w-20 h-20 border border-white/10 flex items-center justify-center mb-8 group-hover:border-cyber-pink group-hover:shadow-neon-pink transition-all bg-black cyber-clipper"
                             whileHover={{ rotate: 90, scale: 1.1 }}
                             transition={{ type: "spring", stiffness: 300 }}
                         >
@@ -87,7 +87,7 @@ export function ProjectListView({ projects, onSelectProject, onNewAdventure }: P
                             onClick={() => onSelectProject(project.id)}
                             whileHover={{ scale: 1.02, y: -5 }}
                             whileTap={{ scale: 0.98 }}
-                            className="glass-panel border-2 border-white/5 p-10 cursor-pointer hover:border-cyber-cyan transition-all relative overflow-hidden group min-h-[340px] flex flex-col bg-black skew-x-[-1deg] shadow-2xl"
+                            className="border border-white/10 p-10 cursor-pointer hover:border-cyber-cyan transition-all relative overflow-hidden group min-h-[340px] flex flex-col bg-zinc-950/80 cyber-clipper-lg"
                         >
                             {/* Animated Background Element */}
                             <motion.div
@@ -102,17 +102,17 @@ export function ProjectListView({ projects, onSelectProject, onNewAdventure }: P
                             {/* Hover glow effect */}
                             <div className="absolute inset-0 bg-gradient-to-br from-cyber-cyan/0 to-cyber-cyan/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
-                            <div className="skew-x-[1deg] flex-1 relative z-10 flex flex-col">
+                            <div className="flex-1 relative z-10 flex flex-col">
                                 <div className="flex justify-between items-start mb-8">
                                     <motion.div
-                                        className="w-16 h-16 border-2 border-white/10 bg-black flex items-center justify-center text-4xl group-hover:border-cyber-cyan transition-all"
+                                        className="w-16 h-16 border border-white/10 bg-black flex items-center justify-center text-4xl group-hover:border-cyber-cyan transition-all cyber-clipper"
                                         whileHover={{ rotate: [0, -10, 10, 0] }}
                                         transition={{ duration: 0.5 }}
                                     >
                                         {project.selectedIdea.emoji || '🚀'}
                                     </motion.div>
                                     <div className="flex flex-col items-end gap-1">
-                                        <div className="bg-black border border-white/10 px-3 py-1 text-[10px] font-cyber font-black text-white/40 uppercase tracking-widest">
+                                        <div className="bg-black border border-white/10 px-3 py-1 text-[10px] font-cyber font-black text-white/40 uppercase tracking-widest cyber-clipper">
                                             등급_{Math.floor(progress / 10) + 1}
                                         </div>
                                         <Activity size={14} className="text-cyber-cyan animate-pulse" />
@@ -146,9 +146,9 @@ export function ProjectListView({ projects, onSelectProject, onNewAdventure }: P
                                 </div>
                             </div>
 
-                            <div className="mt-10 pt-8 border-t border-white/5 flex justify-between items-center opacity-40 group-hover:opacity-100 transition-opacity skew-x-[1deg]">
+                            <div className="mt-10 pt-8 border-t border-white/5 flex justify-between items-center opacity-70 group-hover:opacity-100 transition-opacity">
                                 <div className="flex items-center gap-2">
-                                    <Terminal size={14} className="text-white/20" />
+                                    <Terminal size={14} className="text-cyber-cyan" />
                                     <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest">{new Date(project.startDate).toLocaleDateString()}</span>
                                 </div>
                                 <motion.div

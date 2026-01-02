@@ -5,6 +5,7 @@ import { ProjectScheme, WeeklyPlanOption, ThreeYearVision, Difficulty } from '..
 
 // Sub-components
 import { DashboardHeader } from '../dashboard/DashboardHeader';
+import { DashboardStats } from '../dashboard/DashboardStats';
 import { VisionSection } from '../dashboard/VisionSection';
 import { CampaignSection } from '../dashboard/CampaignSection';
 import { FloatingControls } from '../dashboard/FloatingControls';
@@ -105,14 +106,22 @@ export function DashboardView(props: DashboardViewProps) {
 
     const today = new Date();
     const startDate = new Date(activeProject.startDate);
+
+    // Sprint (Month) Calculations
     const currentMonthStart = new Date(startDate);
     currentMonthStart.setDate(startDate.getDate() + (props.selectedMonthIndex * 30));
-    const diffTime = Math.max(0, today.getTime() - currentMonthStart.getTime());
-    const daysPassed = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    const diffTimeSprint = Math.max(0, today.getTime() - currentMonthStart.getTime());
+    const sprintDaysPassed = Math.floor(diffTimeSprint / (1000 * 60 * 60 * 24));
     const totalDaysInMonth = 30;
-    const timeProgress = Math.min(100, Math.round((daysPassed / totalDaysInMonth) * 100));
+    const sprintProgress = Math.min(100, Math.round((sprintDaysPassed / totalDaysInMonth) * 100));
 
-    const isAhead = progress >= timeProgress;
+    // Global (Year) Calculations
+    const diffTimeTotal = Math.max(0, today.getTime() - startDate.getTime());
+    const yearDaysPassed = Math.floor(diffTimeTotal / (1000 * 60 * 60 * 24));
+    const totalDaysInYear = 365;
+    const yearProgress = Math.min(100, Math.round((yearDaysPassed / totalDaysInYear) * 100));
+
+    const isAhead = progress >= sprintProgress;
     const statusColor = isAhead ? 'text-cyber-cyan shadow-neon-cyan' : 'text-red-500 shadow-neon-pink';
     const statusMessage = isAhead ? '동기화_안정' : '동기화_지연';
 
@@ -197,31 +206,41 @@ export function DashboardView(props: DashboardViewProps) {
                 <motion.div variants={sectionVariants} className="mb-8">
                     <DashboardHeader
                         activeProject={activeProject}
-                        progress={progress}
-                        daysPassed={daysPassed}
-                        timeProgress={timeProgress}
-                        isAhead={isAhead}
-                        statusColor={statusColor}
-                        statusMessage={statusMessage}
                         isPreviewMode={isPreviewMode}
                         onAbandonQuest={props.onAbandonQuest}
                     />
                 </motion.div>
 
                 <div className="flex flex-col gap-12">
-                    <motion.div variants={sectionVariants}>
-                        <VisionSection
-                            activeProject={activeProject}
-                            isEditingVision={props.isEditingVision}
-                            visionDraft={props.visionDraft}
-                            isExpandingVision={props.isExpandingVision}
-                            handleEditVision={props.handleEditVision}
-                            handleCancelEditVision={props.handleCancelEditVision}
-                            handleSaveVision={props.handleSaveVision}
-                            handleExpandVision={props.handleExpandVision}
-                            setVisionDraft={props.setVisionDraft}
-                        />
-                    </motion.div>
+                    <div className="flex flex-col xl:flex-row gap-8">
+                        <motion.div variants={sectionVariants} className="flex-1 min-w-0">
+                            <VisionSection
+                                activeProject={activeProject}
+                                isEditingVision={props.isEditingVision}
+                                visionDraft={props.visionDraft}
+                                isExpandingVision={props.isExpandingVision}
+                                handleEditVision={props.handleEditVision}
+                                handleCancelEditVision={props.handleCancelEditVision}
+                                handleSaveVision={props.handleSaveVision}
+                                handleExpandVision={props.handleExpandVision}
+                                setVisionDraft={props.setVisionDraft}
+                            />
+                        </motion.div>
+
+                        <motion.div
+                            variants={sectionVariants}
+                            className="w-full xl:w-80 shrink-0"
+                        >
+                            <DashboardStats
+                                progress={progress}
+                                sprintDaysPassed={sprintDaysPassed}
+                                sprintProgress={sprintProgress}
+                                yearDaysPassed={yearDaysPassed}
+                                yearProgress={yearProgress}
+                                isAhead={isAhead}
+                            />
+                        </motion.div>
+                    </div>
 
                     <motion.div variants={sectionVariants}>
                         <CampaignSection

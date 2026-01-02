@@ -44,11 +44,11 @@ export function FloatingControls({
         <div className="fixed bottom-8 right-8 z-50 flex flex-col items-end gap-4 pointer-events-auto">
             {/* Focus Timer */}
             {(timerActive || timeLeft !== 25 * 60) && (
-                <div className={`glass-panel p-6 w-64 mb-2 shadow-2xl animate-scale-in border-l-4 skew-x-[-5deg] ${timerMode === 'FOCUS' ? 'border-l-cyber-pink shadow-neon-pink/20' :
+                <div className={`glass-panel p-6 w-64 mb-2 shadow-2xl animate-scale-in border-l-4 cyber-clipper-lg ${timerMode === 'FOCUS' ? 'border-l-cyber-pink shadow-neon-pink/20' :
                     timerMode === 'SHORT_BREAK' ? 'border-l-cyber-cyan shadow-neon-cyan/20' :
                         'border-l-cyber-yellow shadow-neon-yellow/20'
                     }`}>
-                    <div className="skew-x-[5deg]">
+                    <div className="flex flex-col">
                         <div className="flex justify-between items-center mb-2">
                             <div className={`text-[10px] font-cyber font-black tracking-[0.2em] uppercase ${timerMode === 'FOCUS' ? 'text-cyber-pink' :
                                 timerMode === 'SHORT_BREAK' ? 'text-cyber-cyan' :
@@ -112,11 +112,11 @@ export function FloatingControls({
                         onClick={handleSave}
                         disabled={isSaving}
                         className={`
-                            w-16 h-16 bg-black border-2 flex items-center justify-center transition-all group relative skew-x-[-10deg]
+                            w-16 h-16 bg-black border-2 flex items-center justify-center transition-all group relative cyber-clipper
                             ${showSaved ? 'border-green-500 shadow-neon-green text-green-500' : 'border-cyber-cyan text-cyber-cyan shadow-neon-cyan hover:scale-110'}
                         `}
                     >
-                        <div className="skew-x-[10deg]">
+                        <div className="flex items-center justify-center">
                             {isSaving ? (
                                 <Loader2 size={24} className="animate-spin" />
                             ) : showSaved ? (
@@ -131,7 +131,7 @@ export function FloatingControls({
                                     initial={{ opacity: 0, x: 20 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     exit={{ opacity: 0, x: 20 }}
-                                    className={`absolute right-20 bg-black/90 px-3 py-1 border text-[10px] font-cyber font-black uppercase tracking-widest whitespace-nowrap skew-x-[10deg] ${showSaved ? 'border-green-500 text-green-500 italic' : 'border-cyber-cyan text-cyber-cyan'}`}
+                                    className={`absolute right-20 bg-black/90 px-3 py-1 border text-[10px] font-cyber font-black uppercase tracking-widest whitespace-nowrap cyber-clipper ${showSaved ? 'border-green-500 text-green-500 italic' : 'border-cyber-cyan text-cyber-cyan'}`}
                                 >
                                     {isSaving ? 'SYNCING_DATA...' : 'PROTOCOL_SAVED'}
                                 </motion.span>
@@ -142,9 +142,9 @@ export function FloatingControls({
                     {/* Timer Trigger */}
                     <button
                         onClick={() => setTimerActive(true)}
-                        className="w-16 h-16 bg-black border-2 border-cyber-yellow text-cyber-yellow flex items-center justify-center shadow-neon-yellow hover:scale-110 transition-all group relative skew-x-[-10deg]"
+                        className="w-16 h-16 bg-black border-2 border-cyber-yellow text-cyber-yellow flex items-center justify-center shadow-neon-yellow hover:scale-110 transition-all group relative cyber-clipper"
                     >
-                        <div className="skew-x-[10deg]">
+                        <div className="flex items-center justify-center">
                             <Zap size={28} fill="currentColor" className="group-hover:animate-glitch" />
                         </div>
                         <span className="absolute -top-1 -right-1 w-3 h-3 bg-cyber-yellow animate-ping rounded-full"></span>
