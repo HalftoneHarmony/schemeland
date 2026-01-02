@@ -152,6 +152,7 @@ export function useProjectHandlers() {
         });
 
         if (lastProjectId) {
+            store.resetIdeas();
             handleSelectProject(lastProjectId);
         }
     }, [ideas, projectStartDate, store, handleSelectProject]);
@@ -192,6 +193,7 @@ export function useProjectHandlers() {
         try {
             const plan = await generateFullPlan(idea, analysis.reasoning);
             const newProject = store.createProject(idea, analysis, plan, projectStartDate);
+            store.resetIdeas();
             handleSelectProject(newProject.id);
         } catch (e) {
             alert("로드맵 생성에 실패했습니다.");

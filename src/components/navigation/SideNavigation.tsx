@@ -52,12 +52,6 @@ export const SideNavigation: React.FC<SideNavigationProps> = ({
 
     const mainNavItems: NavItem[] = [
         {
-            id: 'landing',
-            label: 'HOME::BASE',
-            icon: <Home size={18} />,
-            view: AppView.LANDING
-        },
-        {
             id: 'projects',
             label: 'MISSION::HUB',
             icon: <FolderKanban size={18} />,
@@ -127,13 +121,20 @@ export const SideNavigation: React.FC<SideNavigationProps> = ({
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -20 }}
-                            className="flex items-center gap-3"
+                            className="flex items-center gap-3 cursor-pointer group/logo"
+                            onClick={() => {
+                                if (activeProjectId) {
+                                    onNavigate(AppView.DASHBOARD);
+                                } else {
+                                    onNavigate(AppView.PROJECT_LIST);
+                                }
+                            }}
                         >
-                            <div className="w-10 h-10 bg-gradient-to-br from-cyber-pink to-cyber-purple flex items-center justify-center shadow-neon-pink cyber-clipper">
+                            <div className="w-10 h-10 bg-gradient-to-br from-cyber-pink to-cyber-purple flex items-center justify-center shadow-neon-pink cyber-clipper group-hover/logo:scale-105 transition-transform">
                                 <Zap size={20} fill="currentColor" className="text-white" />
                             </div>
                             <div>
-                                <span className="font-cyber font-black text-lg tracking-tighter text-white uppercase italic">
+                                <span className="font-cyber font-black text-lg tracking-tighter text-white uppercase italic group-hover/logo:text-cyber-pink transition-colors">
                                     SchemeLand
                                 </span>
                                 <div className="text-[8px] font-mono text-cyber-cyan/60 tracking-widest pl-0.5">
@@ -282,7 +283,7 @@ export const SideNavigation: React.FC<SideNavigationProps> = ({
                     )}
                 </button>
             </div>
-        </motion.aside>
+        </motion.aside >
     );
 };
 

@@ -175,6 +175,9 @@ export const useStore = create<Store>()(
 
             getIdea: (id) => get().ideas[id],
             getAllIdeas: () => Object.values(get().ideas),
+            resetIdeas: () => {
+                set({ ideas: {} });
+            },
 
             // ========== Analysis Actions ==========
             addAnalysis: (analysis) => {

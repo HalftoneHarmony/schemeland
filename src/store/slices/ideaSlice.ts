@@ -20,6 +20,7 @@ export interface IdeaActions {
     deleteIdea: (id: string) => void;
     getIdea: (id: string) => ProjectIdea | undefined;
     getAllIdeas: () => ProjectIdea[];
+    resetIdeas: () => void;
 }
 
 export type IdeaSlice = IdeaState & IdeaActions;
@@ -88,4 +89,8 @@ export const createIdeaSlice: StateCreator<
     getIdea: (id) => get().ideas[id],
 
     getAllIdeas: () => Object.values(get().ideas),
+
+    resetIdeas: () => {
+        set({ ideas: {} });
+    },
 });
