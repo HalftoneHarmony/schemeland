@@ -152,7 +152,7 @@ export function useProjectHandlers() {
         });
 
         if (lastProjectId) {
-            store.resetIdeas();
+            // resetIdeas()를 호출하지 않음 - 프로젝트 생성 시 idea가 projects에 연결됨
             handleSelectProject(lastProjectId);
         }
     }, [ideas, projectStartDate, store, handleSelectProject]);
@@ -193,7 +193,7 @@ export function useProjectHandlers() {
         try {
             const plan = await generateFullPlan(idea, analysis.reasoning);
             const newProject = store.createProject(idea, analysis, plan, projectStartDate);
-            store.resetIdeas();
+            // resetIdeas()를 호출하지 않음 - 프로젝트 생성 시 idea가 projects에 연결됨
             handleSelectProject(newProject.id);
         } catch (e) {
             alert("로드맵 생성에 실패했습니다.");
