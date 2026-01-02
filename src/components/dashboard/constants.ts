@@ -96,6 +96,26 @@ export const shimmerVariants: Variants = {
     }
 };
 
+/**
+ * 둥둥 떠있는 효과
+ */
+export const floatVariants: Variants = {
+    animate: {
+        y: [0, -8, 0],
+        transition: { duration: 4, repeat: Infinity, ease: "easeInOut" }
+    }
+};
+
+/**
+ * 스캔라인 효과
+ */
+export const scanlineVariants: Variants = {
+    animate: {
+        x: ["-100%", "200%"],
+        transition: { duration: 3, repeat: Infinity, ease: "linear" }
+    }
+};
+
 // ============================================
 // 공통 스타일 클래스
 // ============================================
