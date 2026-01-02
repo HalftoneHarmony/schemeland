@@ -99,6 +99,9 @@ export const CoachView: React.FC<CoachViewProps> = ({ onBack }) => {
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
+        // 한국어 IME 조합 중에는 Enter를 무시 (중복 전송 방지)
+        if (e.nativeEvent.isComposing) return;
+
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             handleSendMessage();
