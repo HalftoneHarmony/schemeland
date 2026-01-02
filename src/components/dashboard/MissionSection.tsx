@@ -1,8 +1,18 @@
-import React, { useState } from 'react';
-import { Rocket, Layers, CheckCircle2, Scroll, Sparkles, Circle, Check, Edit3, Save, Wifi, Activity } from 'lucide-react';
+/**
+ * @file components/dashboard/MissionSection.tsx
+ * Mission 섹션 컴포넌트 (리팩토링됨)
+ * 
+ * 주간 미션 로그를 표시하고 관리하는 섹션
+ * WeekCard와 TaskItem 서브컴포넌트 사용
+ */
+
+import React from 'react';
+import { Rocket, Layers, CheckCircle2, Scroll, Sparkles, Edit3, Wifi, Activity, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../ui';
 import { ProjectScheme, WeeklyPlanOption, WeeklyMilestone } from '../../types';
+import { WeekCard } from './subcomponents';
+import { listVariants } from './constants';
 
 interface MissionSectionProps {
     activeProject: ProjectScheme;
@@ -26,31 +36,14 @@ interface MissionSectionProps {
     onAbandonQuest: () => void;
 }
 
-const listVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-        opacity: 1,
-        transition: {
-            staggerChildren: 0.1
-        }
-    }
-};
-
-const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 }
-};
-
 export function MissionSection({
     activeProject, activeMonthlyPlan, weeklyPlan, isPreviewMode, previewOptions, previewIndex, isGeneratingMonthDetail, selectedMonthIndex,
     setPreviewIndex, handleGeneratePlanOptions, cancelPreview, confirmPreviewPlan, toggleTask, updateTaskText, addTask, deleteTask, updateWeekTheme, initManualPlan, onAbandonQuest
 }: MissionSectionProps) {
 
-    const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
-    const [editingWeekIndex, setEditingWeekIndex] = useState<number | null>(null);
-
     return (
         <section className="mt-12">
+            {/* Header */}
             <div className="flex flex-col gap-6 mb-12">
                 <div className="flex items-center justify-between border-b border-white/10 pb-6">
                     <div>
@@ -64,7 +57,9 @@ export function MissionSection({
                                 <span className="text-[10px] font-cyber font-black text-cyber-pink uppercase tracking-widest">활성_퀘스트</span>
                             </div>
                             <span className="text-white/20">/</span>
-                            <span className="text-xs font-mono text-white/40 uppercase tracking-tighter">{selectedMonthIndex + 1}월차: {activeMonthlyPlan.theme}</span>
+                            <span className="text-xs font-mono text-white/40 uppercase tracking-tighter">
+                                {selectedMonthIndex + 1}월차: {activeMonthlyPlan.theme}
+                            </span>
                         </div>
                     </div>
 
@@ -113,7 +108,6 @@ export function MissionSection({
                         animate={{ opacity: 1, y: 0 }}
                         className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar"
                     >
-
                         {previewOptions.map((option, idx) => (
                             <motion.button
                                 key={idx}
@@ -143,8 +137,10 @@ export function MissionSection({
                 )}
             </div>
 
+            {/* Content */}
             <AnimatePresence mode="wait">
                 {!weeklyPlan.length ? (
+                    /* Empty State */
                     <motion.div
                         key="empty"
                         initial={{ opacity: 0, scale: 0.95 }}
@@ -154,8 +150,12 @@ export function MissionSection({
                     >
                         <div className="flex flex-col items-center">
                             <Scroll size={64} className="mx-auto text-white/10 mb-8" />
-                            <h3 className="text-2xl font-cyber font-black text-white/40 mb-4 uppercase tracking-[0.2em]">Data_Corrupted: 퀘스트를_찾을_수_없음</h3>
-                            <p className="text-white/20 mb-10 max-w-md mx-auto font-mono text-sm leading-relaxed">현재 섹터의 미션 로그를 생성하기 위해 새로운 전략을 초기화하십시오.</p>
+                            <h3 className="text-2xl font-cyber font-black text-white/40 mb-4 uppercase tracking-[0.2em]">
+                                Data_Corrupted: 퀘스트를_찾을_수_없음
+                            </h3>
+                            <p className="text-white/20 mb-10 max-w-md mx-auto font-mono text-sm leading-relaxed">
+                                현재 섹터의 미션 로그를 생성하기 위해 새로운 전략을 초기화하십시오.
+                            </p>
                             <div className="flex flex-col md:flex-row gap-4 justify-center">
                                 <Button
                                     onClick={() => handleGeneratePlanOptions(selectedMonthIndex)}
@@ -179,6 +179,7 @@ export function MissionSection({
                         </div>
                     </motion.div>
                 ) : (
+                    /* Week Cards Grid */
                     <motion.div
                         key="list"
                         variants={listVariants}
@@ -187,126 +188,18 @@ export function MissionSection({
                         className="grid grid-cols-1 md:grid-cols-2 gap-8"
                     >
                         {weeklyPlan.map((week, wIndex) => (
-                            <motion.div
-                                key={week.weekNumber}
-                                variants={itemVariants}
-                                className="relative flex"
-                            >
-                                <div className="glass-panel border-white/5 p-8 w-full flex flex-col group/panel hover:border-cyber-cyan/30 transition-all duration-500 cyber-clipper-lg bg-zinc-950/20">
-                                    <div className="flex-1 flex flex-col">
-                                        <div className="flex items-center gap-6 mb-8 border-b border-white/5 pb-6">
-                                            <div className="w-16 h-16 border border-white/10 flex flex-col items-center justify-center shrink-0 bg-black/40 group-hover/panel:border-cyber-cyan transition-all cyber-clipper">
-                                                <span className="text-[9px] text-white/30 uppercase font-black font-cyber">Sector</span>
-                                                <span className="text-2xl font-cyber font-black text-white">0{week.weekNumber}</span>
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex justify-between items-start">
-                                                    <div className="text-cyber-cyan font-cyber font-black text-[10px] uppercase tracking-[0.2em] mb-1">중점_분야</div>
-                                                    {!isPreviewMode && (
-                                                        <button
-                                                            onClick={() => setEditingWeekIndex(editingWeekIndex === wIndex ? null : wIndex)}
-                                                            className="text-[10px] text-white/20 hover:text-cyber-cyan font-cyber"
-                                                        >
-                                                            {editingWeekIndex === wIndex ? '확인' : '편집'}
-                                                        </button>
-                                                    )}
-                                                </div>
-                                                {editingWeekIndex === wIndex ? (
-                                                    <input
-                                                        className="bg-black/50 border-b-2 border-cyber-cyan w-full text-base font-cyber font-black text-white uppercase tracking-tight focus:outline-none"
-                                                        value={week.theme}
-                                                        autoFocus
-                                                        onChange={(e) => updateWeekTheme(wIndex, e.target.value)}
-                                                        onKeyDown={(e) => e.key === 'Enter' && setEditingWeekIndex(null)}
-                                                    />
-                                                ) : (
-                                                    <h3 className="font-cyber font-black text-lg text-white uppercase tracking-tight truncate" title={week.theme}>{week.theme}</h3>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        <ul className="space-y-4">
-                                            <AnimatePresence>
-                                                {week.tasks.map((task) => (
-                                                    <motion.li
-                                                        key={task.id}
-                                                        layout
-                                                        initial={{ opacity: 0, x: -10 }}
-                                                        animate={{ opacity: 1, x: 0 }}
-                                                        className={`flex items-start gap-4 p-3 border-l-2 transition-all cursor-pointer group/task relative overflow-hidden
-                                                                ${task.isCompleted
-                                                                ? 'bg-cyber-cyan/5 border-cyber-cyan shadow-[inset_10px_0_10px_-10px_rgba(0,255,255,0.2)]'
-                                                                : 'border-white/5 hover:border-white/30 hover:bg-white/5'}
-                                                            `}
-                                                        onClick={() => !isPreviewMode && editingTaskId !== task.id && toggleTask(wIndex, task.id)}
-                                                    >
-                                                        {task.isCompleted && (
-                                                            <div className="absolute top-0 right-0 px-2 py-0.5 bg-cyber-cyan text-black font-cyber font-black text-[8px] uppercase tracking-widest">완료됨</div>
-                                                        )}
-
-                                                        <motion.div
-                                                            animate={{ scale: task.isCompleted ? 1.1 : 1 }}
-                                                            className={`mt-0.5 transition-all ${task.isCompleted ? 'text-cyber-cyan' : 'text-white/20 group-hover/task:text-white/40'}`}
-                                                        >
-                                                            {task.isCompleted ? <Check size={18} strokeWidth={4} /> : <Circle size={18} />}
-                                                        </motion.div>
-
-                                                        {editingTaskId === task.id && !isPreviewMode ? (
-                                                            <div className="flex-1 flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
-                                                                <input
-                                                                    className="bg-black/50 border-b-2 border-cyber-cyan w-full text-sm text-white focus:outline-none py-1.5 px-3 font-mono"
-                                                                    value={task.text}
-                                                                    autoFocus
-                                                                    onChange={(e) => updateTaskText(wIndex, task.id, e.target.value)}
-                                                                    onKeyDown={(e) => e.key === 'Enter' && setEditingTaskId(null)}
-                                                                />
-                                                                <button
-                                                                    onClick={(e) => { e.stopPropagation(); setEditingTaskId(null); }}
-                                                                    className="p-2 bg-cyber-cyan text-black hover:bg-white transition-all shadow-neon-cyan"
-                                                                >
-                                                                    <Save size={16} />
-                                                                </button>
-                                                            </div>
-                                                        ) : (
-                                                            <div className="flex-1 flex items-start justify-between gap-4 relative group/item">
-                                                                <span
-                                                                    className={`text-sm font-mono leading-relaxed transition-all flex-1 tracking-tight ${task.isCompleted ? 'text-white/20 italic line-through' : 'text-white/80'}`}
-                                                                    onDoubleClick={(e) => { e.stopPropagation(); setEditingTaskId(task.id); }}
-                                                                >
-                                                                    {task.text}
-                                                                </span>
-                                                                <div className="flex items-center gap-1 opacity-0 group-hover/task:opacity-100 transition-all shrink-0">
-                                                                    <button
-                                                                        onClick={(e) => { e.stopPropagation(); setEditingTaskId(task.id); }}
-                                                                        className="p-1 px-2 border border-white/10 text-white/20 hover:text-white hover:border-white transition-all text-[10px] font-cyber"
-                                                                    >
-                                                                        편집
-                                                                    </button>
-                                                                    <button
-                                                                        onClick={(e) => { e.stopPropagation(); deleteTask(wIndex, task.id); }}
-                                                                        className="p-1 px-2 border border-white/10 text-white/20 hover:text-red-500 hover:border-red-500 transition-all text-[10px] font-cyber"
-                                                                    >
-                                                                        삭제
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </motion.li>
-                                                ))}
-                                            </AnimatePresence>
-                                            {!isPreviewMode && (
-                                                <motion.button
-                                                    whileHover={{ x: 5 }}
-                                                    onClick={() => addTask(wIndex)}
-                                                    className="w-full mt-4 p-3 border border-dashed border-white/10 text-white/20 hover:text-cyber-cyan hover:border-cyber-cyan hover:bg-cyber-cyan/5 transition-all flex items-center justify-center gap-2 text-[10px] font-cyber font-black uppercase tracking-widest cyber-clipper"
-                                                >
-                                                    <Sparkles size={12} /> 미션_추가
-                                                </motion.button>
-                                            )}
-                                        </ul>
-                                    </div>
-                                </div>
-                            </motion.div>
+                            <React.Fragment key={week.weekNumber}>
+                                <WeekCard
+                                    week={week}
+                                    weekIndex={wIndex}
+                                    isPreviewMode={isPreviewMode}
+                                    onToggleTask={toggleTask}
+                                    onUpdateTaskText={updateTaskText}
+                                    onAddTask={addTask}
+                                    onDeleteTask={deleteTask}
+                                    onUpdateWeekTheme={updateWeekTheme}
+                                />
+                            </React.Fragment>
                         ))}
                     </motion.div>
                 )}
