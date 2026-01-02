@@ -2,17 +2,16 @@
  * @file App.tsx
  * 애플리케이션 메인 진입점
  * 
- * 주요 변경사항 (v2.1):
- * - DashboardView Props 연결 수정 (onMonthClick -> handleMonthClick)
- * - CampaignDetailView, KanbanView 복구 및 연결
- * - KanbanView 상태 관리 로직 개선 (App 레벨 핸들러 연결)
+ * 주요 변경사항 (v2.2):
+ * - Task 핸들러를 useTaskHandlers 훅으로 분리
+ * - 코드 가독성 및 유지보수성 향상
  */
 
 import React, { useEffect } from 'react';
 import { Zap } from 'lucide-react';
 
 // Types & Constants
-import { AppView, Priority, TaskStatus, KanbanTask } from './types';
+import { AppView } from './types';
 import { APP_NAME } from './constants';
 
 // Hooks & Store
@@ -21,6 +20,7 @@ import { useInitializeStore } from './hooks/useInitializeStore';
 import { useHistorySync } from './hooks/useHistorySync';
 import { useConflictDetection } from './hooks/useConflictDetection';
 import { useSessionLock } from './hooks/useSessionLock';
+import { useTaskHandlers } from './hooks/useTaskHandlers';
 import { useIdeaHandlers, useProjectHandlers, useTimer } from './features';
 
 // View Components
@@ -63,104 +63,9 @@ export default function App() {
     const projectFeature = useProjectHandlers();
     const timerFeature = useTimer();
 
-    // 4. Task Handlers (Bridge to Store)
-    const handleToggleTask = (weekIndex: number, taskId: string) => {
-        store.toggleTaskStatus(taskId);
-    };
+    // 4. Task Handlers (Extracted to custom hook)
+    const taskHandlers = useTaskHandlers();
 
-    const handleUpdateTaskText = (weekIndex: number, taskId: string, text: string) => {
-        store.updateTask(taskId, { text });
-    };
-
-    const handleAddTask = (weekIndex: number, text?: string) => {
-        const activeMonth = store.getActiveMonthPlan();
-        if (!activeMonth) return;
-
-        const month = store.months[activeMonth.id];
-        if (!month || !month.weekIds[weekIndex]) return;
-
-        const weekId = month.weekIds[weekIndex];
-        store.addTask(weekId, text);
-    };
-
-    const handleDeleteTask = (taskId: string) => {
-        store.deleteTask(taskId);
-    };
-    // App.tsx 내부 래퍼 (weekIndex 무시, taskId만 사용)
-    const handleDeleteTaskWrapper = (weekIndex: number, taskId: string) => handleDeleteTask(taskId);
-
-    const handleUpdateWeekTheme = (weekIndex: number, theme: string) => {
-        const activeMonth = store.getActiveMonthPlan();
-        if (!activeMonth) return;
-        const month = store.months[activeMonth.id];
-        if (!month || !month.weekIds[weekIndex]) return;
-
-        store.updateWeekTheme(month.weekIds[weekIndex], theme);
-    };
-
-    const handleUpdateTaskStatus = (taskId: string, status: TaskStatus) => {
-        store.updateTaskStatus(taskId, status);
-    };
-    // CampaignDetailView용 래퍼
-    const handleUpdateTaskStatusWrapper = (weekIndex: number, taskId: string, status: TaskStatus) => handleUpdateTaskStatus(taskId, status);
-
-
-    const handleInitManualPlan = () => {
-        const activeMonth = store.getActiveMonthPlan();
-        if (!activeMonth) return;
-        store.initializeMonthWeeks(activeMonth.id);
-    };
-
-    // Kanban Specific Handlers
-    const handleKanbanAddTask = (monthIndex: number, weekNumber: number, status: TaskStatus, text: string, priority: Priority) => {
-        if (!activeProjectId) return;
-        const project = store.projects[activeProjectId];
-        if (!project) return;
-
-        const monthId = project.monthIds[monthIndex];
-        const month = store.months[monthId];
-        if (!month) return;
-
-        // weekNumber is 1-based, array is 0-based
-        const weekId = month.weekIds[weekNumber - 1];
-        if (!weekId) return;
-
-        // 1. Add Placehoder Task
-        store.addTask(weekId);
-
-        // 2. Find the newly added task (Assuming last one)
-        // We need to re-fetch the week from store to get updated taskIds
-        const updatedWeek = useStore.getState().weeks[weekId];
-        if (!updatedWeek || updatedWeek.taskIds.length === 0) return;
-
-        const newTaskId = updatedWeek.taskIds[updatedWeek.taskIds.length - 1]; // Last added
-
-        // 3. Update Content
-        store.updateTask(newTaskId, {
-            text,
-            status,
-            priority,
-            isCompleted: status === TaskStatus.DONE
-        });
-    };
-
-    const handleKanbanUpdateTask = (taskId: string, updates: Partial<KanbanTask>) => {
-        store.updateTask(taskId, updates);
-    };
-
-    const handleMoveTask = (taskId: string, sourceWeekIndex: number, targetWeekIndex: number) => {
-        const activeMonth = store.getActiveMonthPlan();
-        if (!activeMonth) return;
-        const month = store.months[activeMonth.id];
-        if (!month) return;
-
-        const sourceWeekId = month.weekIds[sourceWeekIndex];
-        const targetWeekId = month.weekIds[targetWeekIndex];
-
-        if (sourceWeekId && targetWeekId) {
-            store.moveTask(taskId, sourceWeekId, targetWeekId);
-        }
-    };
 
 
     // 5. Global Keyboard Shortcuts
@@ -424,13 +329,13 @@ export default function App() {
                             selectedMonthIndex={selectedMonthIndex}
                             onBack={() => handleNavigate(AppView.DASHBOARD)}
 
-                            toggleTask={handleToggleTask}
-                            addTask={handleAddTask}
-                            deleteTask={handleDeleteTaskWrapper}
-                            updateTaskText={handleUpdateTaskText}
-                            updateWeekTheme={handleUpdateWeekTheme}
-                            updateTaskStatus={handleUpdateTaskStatusWrapper}
-                            moveTask={handleMoveTask}
+                            toggleTask={taskHandlers.handleToggleTask}
+                            addTask={taskHandlers.handleAddTask}
+                            deleteTask={taskHandlers.handleDeleteTaskWrapper}
+                            updateTaskText={taskHandlers.handleUpdateTaskText}
+                            updateWeekTheme={taskHandlers.handleUpdateWeekTheme}
+                            updateTaskStatus={taskHandlers.handleUpdateTaskStatusWrapper}
+                            moveTask={taskHandlers.handleMoveTask}
                             onSelectMonth={projectFeature.handleMonthClick}
                         />
                     )}
@@ -443,10 +348,10 @@ export default function App() {
                             onBack={() => handleNavigate(AppView.DASHBOARD)}
 
                             // New Handlers
-                            onTaskStatusChange={handleUpdateTaskStatus}
-                            onAddTask={handleKanbanAddTask}
-                            onDeleteTask={handleDeleteTask}
-                            onUpdateTask={handleKanbanUpdateTask}
+                            onTaskStatusChange={taskHandlers.handleUpdateTaskStatus}
+                            onAddTask={taskHandlers.handleKanbanAddTask}
+                            onDeleteTask={taskHandlers.handleDeleteTask}
+                            onUpdateTask={taskHandlers.handleKanbanUpdateTask}
                         />
                     )}
 
