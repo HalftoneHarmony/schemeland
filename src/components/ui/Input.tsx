@@ -9,7 +9,9 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     label?: string;
     error?: string;
     variant?: 'default' | 'cyber';
+    className?: string;
 }
+
 
 export function Input({
     label,

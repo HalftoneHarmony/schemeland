@@ -94,12 +94,16 @@ interface StoreActions
     reset: () => void;
     moveTask: (taskId: string, sourceWeekId: string, targetWeekId: string) => void;
 
+    // Data Repair
+    repairCorruptedData: () => Promise<{ repairCount: number; saved: boolean }>;
+
     // Computed Helpers (레거시 호환용)
     getActiveProject: () => ProjectScheme | null;
     getActiveMonthPlan: () => MonthlyGoal | null;
     getActiveWeeklyPlan: () => WeeklyMilestone[];
     save: () => Promise<void>;
 }
+
 
 export type Store = StoreState & StoreActions;
 
@@ -701,6 +705,56 @@ export const useStore = create<Store>()(
                 set(initialState);
                 localStorage.removeItem('schemeland-store');
             },
+
+            repairCorruptedData: async () => {
+                const { scanForCorruption, repairCorruptedData: repairData } = await import('../utils/dataValidator');
+                const state = get();
+
+                const report = scanForCorruption({
+                    ideas: state.ideas,
+                    projects: state.projects,
+                    months: state.months,
+                    weeks: state.weeks,
+                    tasks: state.tasks,
+                });
+
+                if (!report.isCorrupted) {
+                    console.log('✅ 손상된 데이터 없음');
+                    return { repairCount: 0, saved: false };
+                }
+
+                console.warn('⚠️ 손상된 데이터 감지:', report.totalIssues, '개');
+                console.table(report.issues);
+
+                const repaired = repairData({
+                    ideas: state.ideas,
+                    projects: state.projects,
+                    months: state.months,
+                    weeks: state.weeks,
+                    tasks: state.tasks,
+                });
+
+                set({
+                    ideas: repaired.ideas,
+                    projects: repaired.projects,
+                    months: repaired.months,
+                    weeks: repaired.weeks,
+                    tasks: repaired.tasks,
+                });
+
+                console.log('🔧 데이터 복구 완료:', repaired.repairCount, '개 항목');
+
+                // 즉시 저장
+                try {
+                    await get().save();
+                    console.log('💾 복구된 데이터 저장 완료');
+                    return { repairCount: repaired.repairCount, saved: true };
+                } catch (e) {
+                    console.error('❌ 저장 실패:', e);
+                    return { repairCount: repaired.repairCount, saved: false };
+                }
+            },
+
 
             // ========== Computed Helpers (레거시 호환) ==========
             getActiveProject: () => {

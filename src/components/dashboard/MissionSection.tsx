@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Rocket, Layers, CheckCircle2, Scroll, Sparkles, Circle, Check, Edit3, Save, Wifi, Activity } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Button } from '../Button';
+import { Button } from '../ui';
 import { ProjectScheme, WeeklyPlanOption, WeeklyMilestone } from '../../types';
 
 interface MissionSectionProps {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { ArrowLeft, Lightbulb, Plus, Sparkles, Database, Cpu, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Button } from '../Button';
+import { Button } from '../ui';
 import { IdeaCard } from '../IdeaCard';
 import { ProjectIdea } from '../../types';
 

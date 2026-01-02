@@ -1,7 +1,7 @@
 import React from 'react';
 import { ArrowLeft, Calendar, BarChart3, Target, Shield, Zap } from 'lucide-react';
 import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, Radar } from 'recharts';
-import { Button } from '../Button';
+import { Button } from '../ui';
 import { IdeaAnalysis, ProjectIdea } from '../../types';
 
 interface AnalysisViewProps {

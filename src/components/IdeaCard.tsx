@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ProjectIdea } from '../types';
 import { Trash2, Wand2, Sparkles, AlertCircle, Loader2, Hash, FileText } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { Button } from './Button';
+import { Button } from './ui';
 import { clsx } from 'clsx';
 
 interface IdeaCardProps {

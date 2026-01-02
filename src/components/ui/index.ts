@@ -10,5 +10,5 @@ export { LoadingSpinner } from './LoadingSpinner';
 export { Input } from './Input';
 export { ProgressBar } from './ProgressBar';
 
-// 기존 Button 컴포넌트 re-export
-export { default as Button } from '../Button';
+// Button도 이제 ui 폴더에 위치
+export { Button, default as ButtonDefault } from './Button';

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Target, Edit3, Save, Sparkles, Flag, Star, Rocket, Crown, ChevronLeft, ChevronRight, Lock, Zap, Activity, Wifi } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Button } from '../Button';
+import { Button } from '../ui';
 import { ProjectScheme, ThreeYearVision } from '../../types';
 
 interface VisionSectionProps {

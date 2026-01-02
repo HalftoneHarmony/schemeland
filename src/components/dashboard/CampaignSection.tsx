@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Calendar, FastForward, Plus, RefreshCw, Maximize2, ChevronLeft, ChevronRight, ChevronsRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Button } from '../Button';
+import { Button } from '../ui';
 import { ProjectScheme } from '../../types';
 
 interface CampaignSectionProps {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrainCircuit, ChevronRight, Sparkles, Scroll, Trophy, Zap, Terminal, Activity, Cpu, Play, Clock, ArrowRight } from 'lucide-react';
 import { motion, useScroll, useTransform, useSpring, useMotionValue } from 'framer-motion';
-import { Button } from '../Button';
+import { Button } from '../ui';
 export interface RecentProjectSummary {
     id: string;
     title: string;

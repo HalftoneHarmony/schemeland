@@ -2,12 +2,15 @@
  * @file hooks/useInitializeStore.ts
  * 스토어 초기화 및 마이그레이션 훅
  * 
- * 앱 시작 시 레거시 데이터를 자동으로 마이그레이션합니다.
+ * 앱 시작 시 레거시 데이터를 자동으로 마이그레이션하고,
+ * 손상된 데이터를 감지하여 자동 복구합니다.
  */
 
 import { useEffect, useState } from 'react';
 import { useStore } from '../store';
 import { checkMigrationNeeded, migrateFromLocalStorage } from '../store/migration';
+import { scanForCorruption, repairCorruptedData, CorruptionReport } from '../utils/dataValidator';
+
 
 interface InitializationState {
     isInitialized: boolean;
@@ -50,6 +53,49 @@ export function useInitializeStore(): InitializationState {
             try {
                 // 이미 마이그레이션 되었는지 확인
                 if (store.isMigrated) {
+                    // 이미 마이그레이션됨 - 손상 데이터 검사
+                    const currentState = useStore.getState();
+                    const report = scanForCorruption({
+                        ideas: currentState.ideas,
+                        projects: currentState.projects,
+                        months: currentState.months,
+                        weeks: currentState.weeks,
+                        tasks: currentState.tasks,
+                    });
+
+                    if (report.isCorrupted) {
+                        console.warn('⚠️ 손상된 데이터 감지:', report.totalIssues, '개의 문제 발견');
+                        console.table(report.issues);
+
+                        // 자동 복구
+                        const repaired = repairCorruptedData({
+                            ideas: currentState.ideas,
+                            projects: currentState.projects,
+                            months: currentState.months,
+                            weeks: currentState.weeks,
+                            tasks: currentState.tasks,
+                        });
+
+                        useStore.setState({
+                            ideas: repaired.ideas,
+                            projects: repaired.projects,
+                            months: repaired.months,
+                            weeks: repaired.weeks,
+                            tasks: repaired.tasks,
+                        });
+
+                        console.log('🔧 데이터 복구 완료:', repaired.repairCount, '개 항목 복구됨');
+
+                        // 복구된 데이터를 로컬 스토리지에 즉시 저장
+                        try {
+                            await useStore.getState().save();
+                            console.log('💾 복구된 데이터 저장 완료');
+                        } catch (saveError) {
+                            console.warn('⚠️ 복구된 데이터 저장 실패 (다음 저장 시 재시도됨):', saveError);
+                        }
+                    }
+
+
                     setState({
                         isInitialized: true,
                         isMigrating: false,
@@ -58,6 +104,7 @@ export function useInitializeStore(): InitializationState {
                     });
                     return;
                 }
+
 
                 // 마이그레이션 필요 여부 확인
                 const needsMigration = checkMigrationNeeded();
