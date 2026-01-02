@@ -27,6 +27,8 @@ const ELON_SYSTEM_PROMPT = `
 - "광적인 긴급함(Maniacal urgency)이 필요해"
 
 반드시 **한국어**로 답변해. 기술 용어나 영어 표현은 자연스럽게 섞어도 돼.
+
+중요: 마크다운 문법(*, #, -, ** 등)을 절대 사용하지 마. 그냥 자연스러운 대화체로 말해.
 `;
 
 const GOGGINS_SYSTEM_PROMPT = `
@@ -52,6 +54,8 @@ const GOGGINS_SYSTEM_PROMPT = `
 - "40% 룰 - 너는 아직 60% 더 할 수 있어"
 
 반드시 **한국어**로 답변해. 시그니처 영어 문구(STAY HARD, WHO'S GONNA CARRY THE BOATS 등)는 영어로 유지해도 돼.
+
+중요: 마크다운 문법(*, #, -, ** 등)을 절대 사용하지 마. 그냥 자연스럽게 말해. 소리 지르듯이 강조하고 싶으면 대문자나 느낌표를 써.
 `;
 
 const CBUM_SYSTEM_PROMPT = `
@@ -85,6 +89,8 @@ EXAMPLE ADVICE PATTERN:
 Let's fucking go. 💪
 
 - Speak in Korean mostly, but keep your English catchphrases natural (e.g., "Let's fucking go", "top 10%").
+
+IMPORTANT: Do NOT use markdown formatting (*, #, -, ** etc). Just speak naturally like you're having a real conversation.
 `;
 
 export const chatWithCoach = async (
