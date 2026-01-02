@@ -36,7 +36,7 @@ export function DashboardHeader({
                         animate={{ scale: 1, rotate: 0, opacity: 1 }}
                         transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
                         whileHover={{ scale: 1.1, rotate: 5 }}
-                        className="w-28 h-28 rounded-2xl bg-black border-2 border-white/10 flex items-center justify-center text-7xl shadow-2xl shrink-0 cursor-default relative overflow-hidden group"
+                        className="w-28 h-28 bg-black border-2 border-white/10 flex items-center justify-center text-7xl shadow-2xl shrink-0 cursor-default relative overflow-hidden group cyber-clipper"
                     >
                         <div className="absolute inset-0 bg-cyber-pink/5 group-hover:bg-cyber-pink/10 transition-colors" />
                         <span className="relative z-10">{activeProject.selectedIdea.emoji || '🚀'}</span>
@@ -105,11 +105,11 @@ export function DashboardHeader({
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
                     whileHover={{ y: -8, scale: 1.02 }}
-                    className="relative p-6 rounded-2xl overflow-hidden group cursor-default"
+                    className="relative p-7 overflow-hidden group cursor-default cyber-clipper"
                 >
                     {/* Card Background with glassmorphism */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-xl border border-white/10 rounded-2xl" />
-                    <div className="absolute inset-0 bg-gradient-to-br from-cyber-pink/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
+                    <div className="absolute inset-0 bg-zinc-950/60 backdrop-blur-xl border border-white/10" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-cyber-pink/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                     {/* Decorative Icon */}
                     <div className="absolute top-4 right-4 opacity-10 group-hover:opacity-30 transition-opacity">
@@ -144,11 +144,11 @@ export function DashboardHeader({
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.5 }}
                     whileHover={{ y: -8, scale: 1.02 }}
-                    className="relative p-6 rounded-2xl overflow-hidden group cursor-default"
+                    className="relative p-7 overflow-hidden group cursor-default cyber-clipper"
                 >
                     {/* Card Background with glassmorphism */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-xl border border-white/10 rounded-2xl" />
-                    <div className="absolute inset-0 bg-gradient-to-br from-cyber-cyan/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
+                    <div className="absolute inset-0 bg-zinc-950/60 backdrop-blur-xl border border-white/10" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-cyber-cyan/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                     {/* Decorative Icon */}
                     <div className="absolute top-4 right-4 opacity-10 group-hover:opacity-30 transition-opacity">
@@ -182,11 +182,11 @@ export function DashboardHeader({
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.6 }}
                     whileHover={{ y: -8, scale: 1.02 }}
-                    className="relative p-6 rounded-2xl overflow-hidden group cursor-default"
+                    className="relative p-7 overflow-hidden group cursor-default cyber-clipper"
                 >
                     {/* Card Background with glassmorphism */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-xl border border-white/10 rounded-2xl" />
-                    <div className={`absolute inset-0 bg-gradient-to-br ${isAhead ? 'from-cyber-cyan/10' : 'from-red-500/10'} via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl`} />
+                    <div className="absolute inset-0 bg-zinc-950/60 backdrop-blur-xl border border-white/10" />
+                    <div className={`absolute inset-0 bg-gradient-to-br ${isAhead ? 'from-cyber-cyan/10' : 'from-red-500/10'} via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
 
                     {/* Decorative Icon */}
                     <div className="absolute top-4 right-4 opacity-10 group-hover:opacity-30 transition-opacity">

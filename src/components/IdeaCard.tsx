@@ -28,7 +28,7 @@ export const IdeaCard: React.FC<IdeaCardProps> = ({
   return (
     <motion.div
       className={clsx(
-        "relative group transition-all duration-500 rounded-2xl overflow-hidden",
+        "relative group transition-all duration-500 overflow-hidden cyber-clipper-lg",
         "hover:-translate-y-1"
       )}
       onMouseEnter={() => setIsHovered(true)}
@@ -37,31 +37,31 @@ export const IdeaCard: React.FC<IdeaCardProps> = ({
     >
       {/* Card Background */}
       <div className={clsx(
-        "absolute inset-0 rounded-2xl transition-all duration-500",
-        "bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-xl",
+        "absolute inset-0 transition-all duration-500",
+        "bg-zinc-950/80 backdrop-blur-xl",
         isFocused ? "border-cyber-cyan/40" : "border-white/10",
         "border"
       )} />
 
       {/* Hover Glow Effect */}
       <motion.div
-        className="absolute inset-0 rounded-2xl pointer-events-none"
+        className="absolute inset-0 pointer-events-none"
         initial={{ opacity: 0 }}
         animate={{ opacity: isHovered ? 1 : 0 }}
         transition={{ duration: 0.3 }}
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-cyber-pink/10 via-transparent to-cyber-cyan/5 rounded-2xl" />
-        <div className="absolute inset-0 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] rounded-2xl" />
+        <div className="absolute inset-0 bg-gradient-to-br from-cyber-pink/10 via-transparent to-cyber-cyan/5" />
+        <div className="absolute inset-0 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]" />
       </motion.div>
 
       {/* Focus Glow */}
       {isFocused && (
         <motion.div
-          className="absolute inset-0 rounded-2xl pointer-events-none"
+          className="absolute inset-0 pointer-events-none"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
-          <div className="absolute inset-0 shadow-[0_0_30px_rgba(0,255,255,0.15)] rounded-2xl" />
+          <div className="absolute inset-0 shadow-[0_0_30px_rgba(0,255,255,0.15)]" />
         </motion.div>
       )}
 
@@ -71,7 +71,7 @@ export const IdeaCard: React.FC<IdeaCardProps> = ({
           {/* Emoji Box */}
           <motion.div
             className={clsx(
-              "shrink-0 w-16 h-16 rounded-xl bg-black/40 border flex items-center justify-center text-4xl relative transition-all duration-300",
+              "shrink-0 w-16 h-16 bg-black/40 border flex items-center justify-center text-4xl relative transition-all duration-300 cyber-clipper",
               isHovered ? "border-cyber-pink/50 shadow-[0_0_20px_rgba(255,0,255,0.2)]" : "border-white/10"
             )}
             whileHover={{ scale: 1.05, rotate: 5 }}
@@ -127,7 +127,7 @@ export const IdeaCard: React.FC<IdeaCardProps> = ({
                 <Button
                   variant="ghost"
                   className={clsx(
-                    "h-10 px-4 rounded-lg text-[11px] font-medium tracking-wide",
+                    "h-10 px-5 text-[11px] font-medium tracking-widest uppercase cyber-clipper",
                     "text-cyber-cyan border border-cyber-cyan/30",
                     "hover:bg-cyber-cyan hover:text-black hover:shadow-[0_0_20px_rgba(0,255,255,0.3)]",
                     "transition-all"
@@ -137,7 +137,7 @@ export const IdeaCard: React.FC<IdeaCardProps> = ({
                 >
                   <span className="flex items-center gap-2">
                     <Wand2 size={14} className={isMagicLoading ? "animate-spin" : ""} />
-                    {isMagicLoading ? '처리중' : 'AI 정제'}
+                    {isMagicLoading ? '처리중' : 'AI_정제'}
                   </span>
                 </Button>
               </motion.div>
@@ -147,7 +147,7 @@ export const IdeaCard: React.FC<IdeaCardProps> = ({
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={() => onDelete(idea.id)}
-              className="w-10 h-10 rounded-lg border border-white/10 flex items-center justify-center text-white/20 hover:text-red-500 hover:border-red-500/50 hover:bg-red-500/10 transition-all"
+              className="w-10 h-10 border border-white/10 flex items-center justify-center text-white/20 hover:text-red-500 hover:border-red-500/50 hover:bg-red-500/10 transition-all cyber-clipper"
             >
               <Trash2 size={16} />
             </motion.button>
@@ -162,8 +162,8 @@ export const IdeaCard: React.FC<IdeaCardProps> = ({
           <div className="relative">
             <textarea
               className={clsx(
-                "w-full bg-black/30 rounded-xl border p-4 text-sm text-white/70 placeholder-white/20 resize-none",
-                "focus:ring-0 focus:outline-none focus:text-white h-28 leading-relaxed transition-all",
+                "w-full bg-black/30 border p-5 text-base text-white/70 placeholder-white/20 resize-none cyber-clipper",
+                "focus:ring-0 focus:outline-none focus:text-white h-32 leading-relaxed transition-all",
                 isFocused ? "border-cyber-cyan/30" : "border-white/5 hover:border-white/10"
               )}
               placeholder="프로젝트에 대한 설명, 해결하려는 문제, 대상 시장 등을 입력하세요..."

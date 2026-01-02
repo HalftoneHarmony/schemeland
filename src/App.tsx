@@ -28,6 +28,7 @@ import { ProjectListView } from './components/views/ProjectListView';
 import { DashboardView } from './components/views/DashboardView';
 import { CampaignDetailView } from './components/views/CampaignDetailView';
 import { KanbanView } from './components/views/KanbanView';
+import { CoachView } from './components/views/CoachView';
 
 // Navigation Components
 import { SideNavigation } from './components/navigation/SideNavigation';
@@ -407,6 +408,12 @@ export default function App() {
                             onAddTask={handleKanbanAddTask}
                             onDeleteTask={handleDeleteTask}
                             onUpdateTask={handleKanbanUpdateTask}
+                        />
+                    )}
+
+                    {currentView === AppView.COACH && (
+                        <CoachView
+                            onBack={() => handleNavigate(AppView.DASHBOARD)}
                         />
                     )}
                 </main>

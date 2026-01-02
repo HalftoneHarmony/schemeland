@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ProjectScheme, MonthlyGoal, Priority, TaskStatus } from '../../types';
 import { Button } from '../Button';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
     ArrowLeft, Map, Calendar, Flag, Zap, Plus, Shield, Activity, Terminal, Trash2, Edit3,
     Circle, Loader2, AlertCircle, CheckCircle2, ChevronRight, ChevronLeft
@@ -156,13 +157,13 @@ export function CampaignDetailView({
                             {stats.total > 0 ? Math.round((stats.done / stats.total) * 100) : 0}%
                         </span>
                     </div>
-                    <div className="h-4 bg-white/5 border border-white/10 p-1 skew-x-[-15deg]">
-                        <div
-                            className="h-full bg-gradient-to-r from-cyber-cyan via-cyber-blue to-cyber-pink shadow-neon-cyan transition-all duration-1000 ease-out relative overflow-hidden"
-                            style={{ width: `${stats.total > 0 ? (stats.done / stats.total) * 100 : 0}%` }}
-                        >
-                            <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.3)_50%,transparent_100%)] animate-[scanline_2s_linear_infinite] w-24"></div>
-                        </div>
+                    <div className="data-progress-v2 h-5 skew-x-[-15deg] border border-white/10 p-[2px]">
+                        <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${stats.total > 0 ? (stats.done / stats.total) * 100 : 0}%` }}
+                            className="fill h-full bg-gradient-to-r from-cyber-cyan via-cyber-blue to-cyber-pink shadow-neon-cyan"
+                            transition={{ duration: 1.5, ease: "easeOut" }}
+                        />
                     </div>
                 </div>
 
@@ -216,8 +217,8 @@ export function CampaignDetailView({
                         </button>
 
                         <div className="inline-block skew-x-[-10deg]">
-                            <span className="bg-cyber-pink text-white font-cyber font-black text-[10px] px-6 py-2 uppercase tracking-[0.4em] shadow-neon-pink">
-                                Scrum_0{monthPlan.month}_Protocol::스크럼_{monthPlan.month}_프로토콜
+                            <span className="bg-cyber-pink text-white font-cyber font-black text-[10px] px-6 py-2 uppercase tracking-[0.4em] shadow-neon-pink cyber-clipper">
+                                SPRINT_0{monthPlan.month}_PROTOCOL::스프린트_0{monthPlan.month}_프로토콜
                             </span>
                         </div>
 
@@ -279,13 +280,13 @@ export function CampaignDetailView({
                         {hasPlan ? weeks.map((week, idx) => (
                             <div key={idx} className="flex flex-col items-center gap-6 group">
                                 <div className={`
-                                w-10 h-10 flex items-center justify-center transition-all duration-500 border-2 skew-x-[-10deg]
+                                w-12 h-12 flex items-center justify-center transition-all duration-500 border-2 cyber-clipper-lg
                                 ${idx === 0
-                                        ? 'bg-cyber-cyan border-white shadow-neon-cyan scale-125'
-                                        : 'bg-black border-white/10 group-hover:border-cyber-cyan group-hover:shadow-neon-cyan group-hover:scale-110'
+                                        ? 'bg-cyber-cyan border-white shadow-neon-cyan scale-110'
+                                        : 'bg-black border-white/10 group-hover:border-cyber-cyan group-hover:shadow-neon-cyan group-hover:scale-105'
                                     }
                             `}>
-                                    <div className={`skew-x-[10deg] font-cyber font-black text-xs ${idx === 0 ? 'text-black' : 'text-white/20 group-hover:text-cyber-cyan'}`}>
+                                    <div className={`font-cyber font-black text-sm ${idx === 0 ? 'text-black' : 'text-white/20 group-hover:text-cyber-cyan'}`}>
                                         0{week.weekNumber}
                                     </div>
                                 </div>
@@ -451,10 +452,10 @@ export function CampaignDetailView({
                                                                     }
                                                                 }}
                                                                 className={`
-                                                                    p-4 border text-[11px] font-mono transition-all relative overflow-hidden group/item cursor-pointer
+                                                                    p-5 border text-[12px] font-mono transition-all relative overflow-hidden group/item cursor-pointer cyber-clipper
                                                                     ${config.bgColor} ${config.borderColor}
                                                                     ${taskStatus === TaskStatus.DONE ? 'opacity-60' : 'hover:opacity-100 hover:border-cyber-cyan/50 hover:shadow-neon-cyan'}
-                                                                    ${editingTaskId === task.id ? 'ring-2 ring-cyber-pink shadow-neon-pink' : ''}
+                                                                    ${editingTaskId === task.id ? 'ring-2 ring-cyber-pink shadow-neon-pink' : 'hover:bg-white/[0.03]'}
                                                                 `}
                                                             >
                                                                 {/* Status indicator bar */}
@@ -489,21 +490,23 @@ export function CampaignDetailView({
                                                                         />
                                                                     ) : (
                                                                         <>
-                                                                            <div className={`flex-1 min-w-0 break-words pr-2 ${taskStatus === TaskStatus.DONE ? 'line-through text-white/40' : 'text-white/80'}`}>
+                                                                            <div className={`flex-1 min-w-0 break-words pb-2 leading-relaxed ${taskStatus === TaskStatus.DONE ? 'line-through text-white/40' : 'text-white/90'}`}>
                                                                                 {task.text}
                                                                             </div>
-                                                                            <div className="flex items-center gap-1 opacity-0 group-hover/task:opacity-100 transition-all shrink-0 ml-1">
+                                                                            <div className="flex flex-col items-center gap-2 opacity-0 group-hover:opacity-100 transition-all shrink-0 ml-3 bg-black/40 p-1.5 rounded-sm border border-white/5">
                                                                                 <button
                                                                                     onClick={(e) => { e.stopPropagation(); setEditingTaskId(task.id); }}
-                                                                                    className="p-1 hover:text-cyber-cyan transition-all"
+                                                                                    className="p-1.5 hover:text-cyber-cyan hover:bg-white/5 transition-all rounded-sm"
+                                                                                    title="Edit Task"
                                                                                 >
-                                                                                    <Edit3 size={12} />
+                                                                                    <Edit3 size={14} />
                                                                                 </button>
                                                                                 <button
                                                                                     onClick={(e) => { e.stopPropagation(); deleteTask(idx, task.id); }}
-                                                                                    className="p-1 hover:text-red-500 transition-all"
+                                                                                    className="p-1.5 hover:text-red-500 hover:bg-red-500/10 transition-all rounded-sm"
+                                                                                    title="Delete Task"
                                                                                 >
-                                                                                    <Trash2 size={12} />
+                                                                                    <Trash2 size={14} />
                                                                                 </button>
                                                                             </div>
                                                                         </>

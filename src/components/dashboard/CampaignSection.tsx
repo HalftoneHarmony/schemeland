@@ -97,17 +97,17 @@ export function CampaignSection({
                 <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-black via-black/50 to-transparent z-[60] flex items-center justify-start pl-2 pointer-events-none opacity-0 group-hover/container:opacity-100 transition-opacity duration-500">
                     <button
                         onClick={() => scroll('left')}
-                        className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm border border-white/10 text-white/40 hover:text-cyber-cyan hover:border-cyber-cyan hover:bg-black flex items-center justify-center transition-all pointer-events-auto hover:scale-110 active:scale-95 shadow-lg group/nav"
+                        className="w-12 h-12 bg-black/50 backdrop-blur-sm border border-white/10 text-white/40 hover:text-cyber-cyan hover:border-cyber-cyan hover:bg-black flex items-center justify-center transition-all pointer-events-auto hover:scale-110 active:scale-95 shadow-lg group/nav cyber-clipper"
                     >
-                        <ChevronLeft size={20} className="group-hover/nav:-translate-x-0.5 transition-transform" />
+                        <ChevronLeft size={24} className="group-hover/nav:-translate-x-0.5 transition-transform" />
                     </button>
                 </div>
                 <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-black via-black/50 to-transparent z-[60] flex items-center justify-end pr-2 pointer-events-none opacity-0 group-hover/container:opacity-100 transition-opacity duration-500">
                     <button
                         onClick={() => scroll('right')}
-                        className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm border border-white/10 text-white/40 hover:text-cyber-cyan hover:border-cyber-cyan hover:bg-black flex items-center justify-center transition-all pointer-events-auto hover:scale-110 active:scale-95 shadow-lg group/nav"
+                        className="w-12 h-12 bg-black/50 backdrop-blur-sm border border-white/10 text-white/40 hover:text-cyber-cyan hover:border-cyber-cyan hover:bg-black flex items-center justify-center transition-all pointer-events-auto hover:scale-110 active:scale-95 shadow-lg group/nav cyber-clipper"
                     >
-                        <ChevronRight size={20} className="group-hover/nav:translate-x-0.5 transition-transform" />
+                        <ChevronRight size={24} className="group-hover/nav:translate-x-0.5 transition-transform" />
                     </button>
                 </div>
 
@@ -130,30 +130,30 @@ export function CampaignSection({
                             className="absolute inset-0 bg-red-500/20 blur-xl rounded-full"
                         />
                         <div className={`
-                            relative flex items-center gap-2 px-3 py-1.5 rounded-full border backdrop-blur-md transition-all duration-300
+                            relative flex items-center gap-2 px-4 py-2 border backdrop-blur-md transition-all duration-300 cyber-clipper
                             ${isCompressing
-                                ? 'bg-red-500/10 border-red-500 text-red-500'
-                                : 'bg-black/20 border-white/5 text-white/20 hover:border-red-500/50 hover:text-white'
+                                ? 'bg-red-500/10 border-red-500 text-red-500 shadow-neon-pink'
+                                : 'bg-black/20 border-white/5 text-white/20 hover:border-red-500/50 hover:text-white hover:bg-red-950/20'
                             }
                         `}>
                             <motion.div
                                 variants={{
                                     idle: { rotate: 0 },
                                     burning: {
-                                        rotate: [-5, 5, -5],
-                                        scale: [1, 1.2, 1],
-                                        filter: "brightness(1.5) drop-shadow(0 0 5px #ef4444)"
+                                        rotate: [-10, 10, -10],
+                                        scale: [1, 1.3, 1],
+                                        filter: "brightness(2) drop-shadow(0 0 10px #ef4444)"
                                     }
                                 }}
                                 transition={{
-                                    rotate: { duration: 0.2, repeat: Infinity, repeatType: 'mirror' },
-                                    scale: { duration: 0.4, repeat: Infinity, repeatType: 'mirror' }
+                                    rotate: { duration: 0.15, repeat: Infinity, repeatType: 'mirror' },
+                                    scale: { duration: 0.3, repeat: Infinity, repeatType: 'mirror' }
                                 }}
                             >
-                                <FastForward size={14} fill={isCompressing ? "currentColor" : "none"} />
+                                <FastForward size={16} fill={isCompressing ? "currentColor" : "none"} />
                             </motion.div>
-                            <span className="text-[9px] font-cyber font-black uppercase tracking-widest hidden group-hover:block whitespace-nowrap overflow-hidden">
-                                {isCompressing ? 'COMPRESSING' : 'HARDCORE'}
+                            <span className="text-[10px] font-cyber font-black uppercase tracking-[0.2em] hidden group-hover:block whitespace-nowrap overflow-hidden">
+                                {isCompressing ? 'COMPRESSING' : 'HARDCORE_PROTOCOL'}
                             </span>
                         </div>
                     </motion.button>

@@ -153,11 +153,10 @@ export function VisionSection({
                     whileTap={{ scale: 0.9 }}
                     onClick={handlePrev}
                     disabled={activeYearIndex === 0}
-                    className={`absolute left-0 top-1/2 -translate-y-1/2 w-14 h-14 border-2 flex items-center justify-center transition-all z-20 skew-x-[-10deg]
+                    className={`absolute left-0 top-1/2 -translate-y-1/2 w-14 h-14 border-2 flex items-center justify-center transition-all z-20 cyber-clipper
                         ${activeYearIndex === 0 ? 'opacity-0 pointer-events-none' : 'border-white/10 text-white hover:border-cyber-cyan hover:text-cyber-cyan bg-black shadow-neon-cyan'}`}
                 >
                     <motion.div
-                        className="skew-x-[10deg]"
                         animate={{ x: [-2, 2, -2] }}
                         transition={{ duration: 1.5, repeat: Infinity }}
                     >
@@ -170,11 +169,10 @@ export function VisionSection({
                     whileTap={{ scale: 0.9 }}
                     onClick={handleNext}
                     disabled={activeYearIndex >= 2 || (!hasVision && activeYearIndex === 1)}
-                    className={`absolute right-0 top-1/2 -translate-y-1/2 w-14 h-14 border-2 flex items-center justify-center transition-all z-20 skew-x-[-10deg]
+                    className={`absolute right-0 top-1/2 -translate-y-1/2 w-14 h-14 border-2 flex items-center justify-center transition-all z-20 cyber-clipper
                         ${activeYearIndex >= 2 || (!hasVision && activeYearIndex === 1) ? 'opacity-0 pointer-events-none' : 'border-white/10 text-white hover:border-cyber-cyan hover:text-cyber-cyan bg-black shadow-neon-cyan'}`}
                 >
                     <motion.div
-                        className="skew-x-[10deg]"
                         animate={{ x: [2, -2, 2] }}
                         transition={{ duration: 1.5, repeat: Infinity }}
                     >
@@ -190,7 +188,7 @@ export function VisionSection({
                     onHoverEnd={() => setIsHovered(false)}
                     whileHover={{ y: -5 }}
                     className={`
-                        min-h-[450px] flex flex-col relative overflow-hidden border-2 transition-all duration-700 skew-x-[-1deg] bg-black
+                        min-h-[450px] flex flex-col relative overflow-hidden border-2 transition-all duration-700 bg-zinc-950/80 cyber-clipper-lg
                         ${currentTheme.border} ${currentTheme.shadow}
                     `}
                 >
@@ -281,7 +279,7 @@ export function VisionSection({
                                     onClick={handleEditVision}
                                     whileHover={{ scale: 1.05, borderColor: "rgba(255,255,255,0.5)" }}
                                     whileTap={{ scale: 0.95 }}
-                                    className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 text-white/40 hover:text-white hover:border-white transition-all text-[10px] font-cyber font-black uppercase tracking-widest"
+                                    className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 text-white/40 hover:text-white hover:border-white transition-all text-[10px] font-cyber font-black uppercase tracking-widest cyber-clipper"
                                 >
                                     <Edit3 size={12} /> 재보정
                                 </motion.button>
@@ -427,16 +425,16 @@ export function VisionSection({
                                                                     borderColor: "rgba(255,255,255,0.4)",
                                                                     backgroundColor: "rgba(255,255,255,0.1)"
                                                                 }}
-                                                                className={`flex items-start gap-4 p-4 border border-white/5 bg-white/5 transition-all cursor-default relative overflow-hidden group`}
+                                                                className={`flex items-start gap-4 p-5 border border-white/5 bg-zinc-900/40 transition-all cursor-default relative overflow-hidden group cyber-clipper`}
                                                             >
                                                                 <motion.div
-                                                                    className={`absolute top-0 left-0 w-[3px] h-full ${currentTheme.text.replace('text-', 'bg-')}`}
+                                                                    className={`absolute top-0 left-0 w-[4px] h-full ${currentTheme.text.replace('text-', 'bg-')}`}
                                                                     initial={{ height: 0 }}
                                                                     animate={{ height: "100%" }}
                                                                     transition={{ delay: 0.6 + (0.15 * idx), duration: 0.4 }}
                                                                 />
                                                                 <motion.div
-                                                                    className={`mt-1 flex items-center justify-center w-6 h-6 ${currentTheme.text.replace('text-', 'bg-')} text-black shrink-0`}
+                                                                    className={`mt-1 flex items-center justify-center w-6 h-6 ${currentTheme.text.replace('text-', 'bg-')} text-black shrink-0 cyber-clipper`}
                                                                     whileHover={{ rotate: 180, scale: 1.2 }}
                                                                     transition={{ type: "spring", stiffness: 200 }}
                                                                 >
@@ -455,7 +453,7 @@ export function VisionSection({
                                                         animate={{ opacity: 1, y: 0, scale: 1 }}
                                                         transition={{ delay: 0.8, type: "spring" }}
                                                         whileHover={{ scale: 1.02, boxShadow: "0 0 40px rgba(255,0,255,0.3)" }}
-                                                        className="mt-6 p-6 border-2 border-cyber-pink bg-cyber-pink/5 relative overflow-hidden shadow-neon-pink"
+                                                        className="mt-6 p-7 border-2 border-cyber-pink bg-cyber-pink/5 relative overflow-hidden shadow-neon-pink cyber-clipper-lg"
                                                     >
                                                         <motion.div
                                                             className="absolute top-0 right-0 p-2 bg-cyber-pink text-black font-cyber font-black text-[8px] uppercase tracking-widest shadow-neon-pink"

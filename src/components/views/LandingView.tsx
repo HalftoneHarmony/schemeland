@@ -208,15 +208,15 @@ export function LandingView({ onStart, onLoadSave, hasProjects, recentProject, o
                             onClick={() => onResume(recentProject.id)}
                             whileHover={{ scale: 1.02, y: -5 }}
                             whileTap={{ scale: 0.98 }}
-                            className="relative group w-full max-w-2xl"
+                            className="relative group w-full max-w-2xl cyber-clipper-lg"
                         >
-                            <div className="absolute -inset-1 bg-gradient-to-r from-cyber-cyan via-white to-cyber-pink rounded-2xl opacity-50 group-hover:opacity-100 blur-md transition-opacity duration-300" />
-                            <div className="relative bg-black/80 backdrop-blur-xl border border-white/20 rounded-xl p-6 flex flex-col md:flex-row items-center justify-between gap-6 skew-x-[-2deg] overflow-hidden">
+                            <div className="absolute -inset-1 bg-gradient-to-r from-cyber-cyan via-white to-cyber-pink opacity-50 group-hover:opacity-100 blur-md transition-opacity duration-300" />
+                            <div className="relative bg-zinc-950 border border-white/20 p-6 flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden">
                                 {/* Progress Bar Background */}
                                 <div className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-cyber-cyan via-white to-cyber-pink w-[65%]" />
 
-                                <div className="flex items-center gap-6 skew-x-[2deg]">
-                                    <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 flex items-center justify-center text-4xl shadow-inner">
+                                <div className="flex items-center gap-6">
+                                    <div className="w-16 h-16 bg-gradient-to-br from-white/10 to-white/5 border border-white/10 flex items-center justify-center text-4xl shadow-inner cyber-clipper">
                                         {recentProject.emoji || '🚀'}
                                     </div>
                                     <div className="text-left">
@@ -229,7 +229,7 @@ export function LandingView({ onStart, onLoadSave, hasProjects, recentProject, o
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-3 skew-x-[2deg] bg-white/5 px-4 py-2 rounded-lg border border-white/10 group-hover:bg-cyber-cyan group-hover:text-black transition-colors">
+                                <div className="flex items-center gap-3 bg-white/5 px-6 py-3 border border-white/10 group-hover:bg-cyber-cyan group-hover:text-black transition-colors cyber-clipper">
                                     <span className="text-xs font-cyber font-black tracking-widest uppercase">Resume Mission</span>
                                     <ArrowRight size={16} />
                                 </div>
@@ -240,11 +240,9 @@ export function LandingView({ onStart, onLoadSave, hasProjects, recentProject, o
 
                 <motion.div
                     variants={itemVariants}
-                    className="inline-flex items-center gap-3 px-6 py-2 bg-black border border-cyber-pink/30 text-[10px] font-cyber font-black text-cyber-pink mb-12 tracking-[0.4em] uppercase skew-x-[-15deg] shadow-neon-pink"
+                    className="inline-flex items-center gap-3 px-6 py-2 bg-black border border-cyber-pink/30 text-[10px] font-cyber font-black text-cyber-pink mb-12 tracking-[0.4em] uppercase shadow-neon-pink cyber-clipper"
                 >
-                    <div className="skew-x-[15deg] flex items-center gap-3">
-                        <Sparkles size={14} className="animate-pulse" /> AI_실행_프로토콜_v4.2
-                    </div>
+                    <Sparkles size={14} className="animate-pulse" /> AI_실행_프로토콜_v4.2
                 </motion.div>
 
                 <motion.div
@@ -391,13 +389,13 @@ export function LandingView({ onStart, onLoadSave, hasProjects, recentProject, o
                         key={idx}
                         variants={itemVariants}
                         className={`
-                            glass-panel p-12 flex flex-col items-center text-center transition-all duration-700 bg-black/60 border-2 ${feature.color} hover:bg-white/5 group h-full skew-x-[-2deg]
+                            p-12 flex flex-col items-center text-center transition-all duration-700 bg-zinc-950/60 border-2 ${feature.color} hover:bg-white/5 group h-full cyber-clipper-lg
                         `}
                     >
-                        <div className="skew-x-[2deg] flex flex-col items-center">
+                        <div className="flex flex-col items-center">
                             <motion.div
                                 whileHover={{ rotate: [0, -10, 10, -10, 0], scale: 1.1 }}
-                                className={`w-20 h-20 bg-black border-2 ${feature.color} flex items-center justify-center mb-10 group-hover:${feature.glow} transition-all`}
+                                className={`w-20 h-20 bg-black border-2 ${feature.color} flex items-center justify-center mb-10 group-hover:${feature.glow} transition-all cyber-clipper`}
                             >
                                 {feature.icon}
                             </motion.div>

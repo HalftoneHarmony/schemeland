@@ -32,6 +32,7 @@ export enum AppView {
   PROJECT_LIST = 'PROJECT_LIST',
   CAMPAIGN_DETAIL = 'CAMPAIGN_DETAIL',
   KANBAN = 'KANBAN',
+  COACH = 'COACH',
 }
 
 /**
@@ -386,3 +387,28 @@ export type RecordToArray<T> = T[];
  * 부분 업데이트를 위한 타입
  */
 export type PartialUpdate<T> = Partial<Omit<T, keyof BaseEntity>> & { id: string };
+
+// ============================================
+// AI Coach Feature
+// ============================================
+
+export enum CoachType {
+  ELON = 'ELON',
+  GOGGINS = 'GOGGINS'
+}
+
+export interface ChatMessage extends BaseEntity {
+  sender: 'user' | 'ai';
+  text: string;
+  coachType: CoachType;
+  timestamp: string;
+}
+
+export interface CoachPersona {
+  type: CoachType;
+  name: string;
+  title: string;
+  description: string;
+  avatar: string; // URL or Emoji
+  themeColor: string;
+}

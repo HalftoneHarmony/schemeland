@@ -17,7 +17,8 @@ import {
     Moon,
     Sun,
     Command,
-    Map
+    Map,
+    Bot
 } from 'lucide-react';
 import { AppView, ProjectScheme } from '../../types';
 
@@ -80,6 +81,12 @@ export const SideNavigation: React.FC<SideNavigationProps> = ({
             label: 'CAMPAIGN::DETAIL',
             icon: <Map size={18} />,
             view: AppView.CAMPAIGN_DETAIL
+        },
+        {
+            id: 'coach',
+            label: 'AI::COACH',
+            icon: <Bot size={18} />,
+            view: AppView.COACH
         },
     ];
 
