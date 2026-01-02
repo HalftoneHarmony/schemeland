@@ -29,11 +29,19 @@ export function useTaskHandlers() {
     /**
      * 새 Task 추가
      */
-    const handleAddTask = useCallback((weekIndex: number, text?: string) => {
-        const activeMonth = store.getActiveMonthPlan();
-        if (!activeMonth) return;
+    const handleAddTask = useCallback((weekIndex: number, text?: string, monthIndex?: number) => {
+        const { activeProjectId, projects, months } = store;
+        if (!activeProjectId) return;
 
-        const month = store.months[activeMonth.id];
+        const project = projects[activeProjectId];
+        if (!project) return;
+
+        // monthIndex가 주어지지 않으면 현재 선택된 월을 사용
+        const targetMonthIndex = monthIndex !== undefined ? monthIndex : store.selectedMonthIndex;
+        const monthId = project.monthIds[targetMonthIndex];
+        if (!monthId) return;
+
+        const month = months[monthId];
         if (!month || !month.weekIds[weekIndex]) return;
 
         const weekId = month.weekIds[weekIndex];

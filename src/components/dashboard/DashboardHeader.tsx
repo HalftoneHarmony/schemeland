@@ -191,7 +191,7 @@ export function DashboardHeader({
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: 0.8 }}
-                                className="relative h-8 bg-cyan-950/30 border border-cyan-500/30 px-3 flex items-center gap-2 rounded-sm overflow-hidden"
+                                className="relative h-8 bg-cyan-950/30 border border-cyan-500/30 px-4 flex items-center gap-2 rounded-sm min-w-fit"
                             >
                                 <div className="flex gap-0.5 items-end h-4">
                                     {[...Array(5)].map((_, i) => (
@@ -203,7 +203,7 @@ export function DashboardHeader({
                                         />
                                     ))}
                                 </div>
-                                <span className="text-[10px] font-cyber font-bold text-cyan-400 tracking-widest">
+                                <span className="text-[10px] font-cyber font-bold text-cyan-400 tracking-widest whitespace-nowrap">
                                     ONLINE
                                 </span>
                             </motion.div>

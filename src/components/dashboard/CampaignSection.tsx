@@ -26,7 +26,7 @@ export function CampaignSection({
     setCompressModalOpen, handleMonthClick, handleExtendRoadmap, handleUpdateMonthGoal, handleUpdateMonthObjectives, triggerSmartAdjustment, onOpenCampaignDetail
 }: CampaignSectionProps) {
 
-    const [isEditingMonthTheme, setIsEditingMonthTheme] = useState(false);
+    const [editingMonthIndex, setEditingMonthIndex] = useState<number | null>(null);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
 
     // Calculate layout variables
@@ -143,10 +143,13 @@ export function CampaignSection({
                                         index={idx}
                                         isSelected={selectedMonthIndex === idx}
                                         isPast={idx < selectedMonthIndex}
-                                        isEditing={isEditingMonthTheme}
+                                        isEditing={editingMonthIndex === idx}
                                         isAdjusting={isAdjustingPlan}
-                                        onEditStart={() => setIsEditingMonthTheme(true)}
-                                        onEditEnd={() => setIsEditingMonthTheme(false)}
+                                        onEditStart={() => {
+                                            setEditingMonthIndex(idx);
+                                            handleMonthClick(idx);
+                                        }}
+                                        onEditEnd={() => setEditingMonthIndex(null)}
                                         onClick={() => { handleMonthClick(idx); onOpenCampaignDetail(); }}
                                         onUpdateTheme={handleUpdateMonthGoal}
                                         onUpdateObjectives={handleUpdateMonthObjectives}

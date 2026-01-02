@@ -4,7 +4,7 @@ import { Button } from '../ui';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     ArrowLeft, Map, Calendar, Flag, Zap, Plus, Shield, Activity, Terminal, Trash2, Edit3,
-    Circle, Loader2, AlertCircle, CheckCircle2, ChevronRight, ChevronLeft
+    Circle, Loader2, AlertCircle, CheckCircle2, ChevronRight, ChevronLeft, Wand2
 } from 'lucide-react';
 
 interface CampaignDetailViewProps {
@@ -12,13 +12,19 @@ interface CampaignDetailViewProps {
     selectedMonthIndex: number;
     onBack: () => void;
     toggleTask: (weekIndex: number, taskId: string) => void;
-    addTask: (weekIndex: number, text?: string) => void;
+    addTask: (weekIndex: number, text?: string, monthIndex?: number) => void;
     deleteTask: (weekIndex: number, taskId: string) => void;
     updateTaskText: (weekIndex: number, taskId: string, text: string) => void;
     updateWeekTheme: (weekIndex: number, theme: string) => void;
     updateTaskStatus?: (weekIndex: number, taskId: string, status: TaskStatus) => void;
     moveTask?: (taskId: string, sourceWeekIndex: number, targetWeekIndex: number) => void;
     onSelectMonth: (index: number) => void;
+    updateMonthGoals?: (monthIndex: number, goals: string[]) => void;
+    onInitializeMonth?: (monthIndex: number) => void;
+    onGenerateWeekTheme?: (monthIndex: number, weekIndex: number) => void;
+    onGenerateWeekTasks?: (monthIndex: number, weekIndex: number) => void;
+    onGenerateEntireSprint?: (monthIndex: number) => void;
+    isGeneratingEntireSprint?: boolean;
 }
 
 // 상태별 설정
@@ -66,7 +72,8 @@ const statusConfig: Record<TaskStatus, {
 
 export function CampaignDetailView({
     activeProject, selectedMonthIndex, onBack,
-    toggleTask, addTask, deleteTask, updateTaskText, updateWeekTheme, updateTaskStatus, moveTask, onSelectMonth
+    toggleTask, addTask, deleteTask, updateTaskText, updateWeekTheme, updateTaskStatus, moveTask, onSelectMonth, updateMonthGoals,
+    onInitializeMonth, onGenerateWeekTheme, onGenerateWeekTasks, onGenerateEntireSprint, isGeneratingEntireSprint
 }: CampaignDetailViewProps) {
     const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
     const [editingWeekIndex, setEditingWeekIndex] = useState<number | null>(null);
@@ -81,6 +88,13 @@ export function CampaignDetailView({
 
     const weeks = monthPlan.detailedPlan || [];
     const hasPlan = weeks.length > 0;
+
+    // Auto-initialize if plan is missing
+    React.useEffect(() => {
+        if (!hasPlan && onInitializeMonth) {
+            onInitializeMonth(selectedMonthIndex);
+        }
+    }, [selectedMonthIndex, hasPlan, onInitializeMonth]);
 
     // 상태별 통계
     const getStatusStats = () => {
@@ -139,6 +153,38 @@ export function CampaignDetailView({
     const unassignedGoals = monthPlan.goals.filter(goal =>
         !allTasks.some(t => t.text.trim() === goal.trim())
     );
+
+    // 목표를 자동으로 채우는 함수
+    const handleAutoPopulateGoals = () => {
+        if (!updateMonthGoals) return;
+
+        // 모든 태스크에서 고유한 목표 추출
+        const uniqueGoals = Array.from(new Set(
+            weeks.flatMap(week => week.tasks.map(task => task.text.trim()))
+        )).filter(text => text && text !== '신규 미션 데이터 입력...');
+
+        updateMonthGoals(selectedMonthIndex, uniqueGoals);
+    };
+
+    // 체크리스트를 자동으로 채우는 함수 (각 주의 태스크를 목표로 추가)
+    const handleAutoPopulateChecklist = () => {
+        if (!updateMonthGoals) return;
+
+        // 각 주의 태스크들을 수집
+        const checklistItems: string[] = [];
+        weeks.forEach(week => {
+            week.tasks.forEach(task => {
+                if (task.text && task.text !== '신규 미션 데이터 입력...') {
+                    checklistItems.push(task.text.trim());
+                }
+            });
+        });
+
+        // 중복 제거
+        const uniqueChecklist = Array.from(new Set(checklistItems));
+        updateMonthGoals(selectedMonthIndex, uniqueChecklist);
+    };
+
 
     return (
         <div className="min-h-screen relative overflow-hidden bg-black">
@@ -264,6 +310,68 @@ export function CampaignDetailView({
                         </div>
                     </div>
 
+                    {/* PRIMARY_OBJECTIVES Section */}
+                    <div className="max-w-4xl mx-auto mb-12 mt-8">
+                        <div className="border-2 border-cyber-cyan/30 bg-black/60 p-8 relative overflow-hidden">
+                            {/* Background glow */}
+                            <div className="absolute inset-0 bg-gradient-to-br from-cyber-cyan/5 to-transparent pointer-events-none"></div>
+
+                            <div className="relative z-10">
+                                {/* Header */}
+                                <div className="flex items-center justify-between mb-6">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-2 h-2 bg-cyber-cyan animate-pulse rounded-full shadow-neon-cyan"></div>
+                                        <h3 className="text-[12px] font-cyber font-black text-cyber-cyan uppercase tracking-[0.3em]">
+                                            PRIMARY_OBJECTIVES::주요_목표
+                                        </h3>
+                                    </div>
+
+                                    {/* Action Buttons */}
+                                    {updateMonthGoals && (
+                                        <div className="flex gap-3">
+                                            <button
+                                                onClick={handleAutoPopulateGoals}
+                                                className="px-4 py-2 bg-cyber-pink/10 border border-cyber-pink/30 text-cyber-pink hover:bg-cyber-pink/20 hover:shadow-neon-pink transition-all text-[9px] font-cyber font-black uppercase tracking-wider skew-x-[-10deg]"
+                                                title="태스크에서 고유한 전략 추출"
+                                            >
+                                                <span className="skew-x-[10deg] inline-block">STRATEGY_SYNC::핵심_전략_동기화</span>
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Goals List */}
+                                <div className="space-y-3">
+                                    {monthPlan.goals && monthPlan.goals.length > 0 ? (
+                                        monthPlan.goals.map((goal, idx) => (
+                                            <div
+                                                key={idx}
+                                                className="flex items-start gap-3 p-4 bg-black/40 border border-cyber-cyan/20 hover:border-cyber-cyan/40 transition-all cyber-clipper group"
+                                            >
+                                                <div className="w-2 h-2 bg-cyber-cyan rotate-45 mt-2 group-hover:shadow-neon-cyan transition-all"></div>
+                                                <span className="flex-1 text-white/90 font-mono text-sm leading-relaxed">
+                                                    {goal}
+                                                </span>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="text-center py-12 border border-dashed border-white/10 bg-white/[0.02]">
+                                            <Flag size={32} className="mx-auto text-white/10 mb-3" />
+                                            <p className="text-white/20 text-[10px] uppercase font-cyber font-black tracking-widest">
+                                                목표가_설정되지_않았습니다
+                                            </p>
+                                            {updateMonthGoals && (
+                                                <p className="text-white/10 text-[9px] font-mono mt-2">
+                                                    위의 버튼을 사용하여 목표를 채워보세요
+                                                </p>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div className="flex justify-center items-center gap-4 text-white/20 font-mono text-xs uppercase tracking-[0.2em]">
                         <span className="w-12 h-[1px] bg-white/10" />
                         Strategic_Drill_Down::전략적_상세_분석
@@ -303,31 +411,63 @@ export function CampaignDetailView({
                 </div>
 
 
+                {/* AI Auto-Fill Sprint Button */}
+                {hasPlan && onGenerateEntireSprint && (
+                    <div className="mb-8 max-w-4xl mx-auto">
+                        <div className="border-2 border-dashed border-cyber-yellow/30 bg-cyber-yellow/5 p-6 relative overflow-hidden">
+                            <div className="absolute inset-0 bg-gradient-to-br from-cyber-yellow/10 to-transparent pointer-events-none"></div>
+
+                            <div className="relative z-10 flex items-center justify-between">
+                                <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <Zap size={16} className="text-cyber-yellow" />
+                                        <h3 className="text-[11px] font-cyber font-black text-cyber-yellow uppercase tracking-[0.25em]">
+                                            TACTICAL_DEPLOYMENT_OVERRIDE::전술_데이터_전구역_강제_주입
+                                        </h3>
+                                    </div>
+                                    <p className="text-[9px] text-white/40 font-mono">
+                                        중앙 전술망(AI)으로부터 1~4주차 전체 작전 계획을 일괄 수신하여 프로젝트를 초기화합니다
+                                    </p>
+                                </div>
+
+                                <button
+                                    onClick={() => onGenerateEntireSprint(selectedMonthIndex)}
+                                    disabled={isGeneratingEntireSprint}
+                                    className="px-8 py-4 bg-cyber-yellow text-black hover:bg-white hover:shadow-[0_0_20px_rgba(255,215,0,0.6)] disabled:opacity-50 disabled:cursor-not-allowed transition-all text-[10px] font-cyber font-black uppercase tracking-wider skew-x-[-10deg] border-2 border-cyber-yellow flex items-center gap-2"
+                                    title="전체 스프린트 자동 생성"
+                                >
+                                    <span className="skew-x-[10deg] inline-flex items-center gap-2">
+                                        {isGeneratingEntireSprint ? (
+                                            <>
+                                                <Loader2 size={14} className="animate-spin" />
+                                                OVERRIDING...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Zap size={14} />
+                                                AUTO_FILL_SEQUENCE::일괄_전개
+                                            </>
+                                        )}
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* Objective Staging Area */}
-                {hasPlan && unassignedGoals.length > 0 && (
+                {/* Sub Task Queue (Previously Objective Staging Area) */}
+                {hasPlan && (
                     <div className="mb-12 max-w-7xl mx-auto">
                         <div className="flex items-center gap-4 mb-4">
                             <div className="w-1.5 h-1.5 bg-cyber-pink animate-pulse shadow-neon-pink rounded-full" />
-                            <h3 className="text-[10px] font-cyber font-black text-cyber-pink uppercase tracking-[0.2em]">OBJECTIVE_STAGING_AREA::목표_할당_대기열</h3>
+                            <h3 className="text-[10px] font-cyber font-black text-cyber-pink uppercase tracking-[0.2em]">SUB_TASK_QUEUE::서브_태스크_대기열</h3>
                             <div className="h-px flex-1 bg-gradient-to-r from-cyber-pink/50 to-transparent" />
                         </div>
-                        <div className="flex flex-wrap gap-4 p-6 border-2 border-dashed border-white/10 bg-white/[0.02] rounded-lg">
-                            {unassignedGoals.map((goal, idx) => (
-                                <div
-                                    key={idx}
-                                    draggable
-                                    onDragStart={(e) => {
-                                        e.dataTransfer.setData('type', 'goal');
-                                        e.dataTransfer.setData('text', goal);
-                                        e.dataTransfer.effectAllowed = 'copy';
-                                    }}
-                                    className="group flex items-center gap-3 px-4 py-3 bg-black border border-white/20 hover:border-cyber-pink hover:bg-cyber-pink/10 hover:shadow-neon-pink transition-all w-fit cursor-grab active:cursor-grabbing skew-x-[-10deg]"
-                                >
-                                    <div className="w-1.5 h-1.5 bg-white/20 group-hover:bg-cyber-pink rotate-45 skew-x-[10deg] transition-colors" />
-                                    <span className="text-xs font-mono text-white/80 group-hover:text-white skew-x-[10deg]">{goal}</span>
-                                </div>
-                            ))}
+                        <div className="flex flex-wrap gap-4 p-6 border-2 border-dashed border-white/10 bg-white/[0.02] rounded-lg min-h-[120px] items-center justify-center">
+                            <span className="text-white/10 text-[10px] uppercase font-cyber font-black tracking-widest">
+                                대기중인_서브_태스크_없음
+                            </span>
                         </div>
                         <p className="mt-2 text-[10px] text-white/30 font-mono flex items-center gap-2">
                             DRAG_TO_SPRINT::스프린트로_드래그하여_할당하십시오
@@ -365,7 +505,7 @@ export function CampaignDetailView({
                                         const type = e.dataTransfer.getData('type');
                                         if (type === 'goal') {
                                             const text = e.dataTransfer.getData('text');
-                                            if (text) addTask(idx, text);
+                                            if (text) addTask(idx, text, selectedMonthIndex);
                                             return;
                                         }
 
@@ -404,10 +544,21 @@ export function CampaignDetailView({
                                                 </div>
                                                 <div className="flex items-center gap-2 mb-3">
                                                     <div className={`w-1.5 h-1.5 rounded-full ${idx === 0 ? 'bg-cyber-cyan animate-pulse shadow-neon-cyan' : 'bg-white/10'}`}></div>
-                                                    <span className="text-[9px] font-cyber font-black text-white/20 uppercase tracking-[0.3em]">스프린트_업데이트</span>
+                                                    <span className="text-[9px] font-cyber font-black text-white/20 uppercase tracking-[0.3em] flex-1">스프린트_업데이트</span>
+
+                                                    {onGenerateWeekTheme && (
+                                                        <button
+                                                            onClick={() => onGenerateWeekTheme(selectedMonthIndex, idx)}
+                                                            className="text-[10px] text-cyber-pink hover:text-white font-cyber mr-3 flex items-center gap-1 opacity-50 hover:opacity-100 transition-opacity"
+                                                            title="전술망 신호 동기화"
+                                                        >
+                                                            <Wand2 size={10} /> SYNC_SIGNAL
+                                                        </button>
+                                                    )}
+
                                                     <button
                                                         onClick={() => setEditingWeekIndex(editingWeekIndex === idx ? null : idx)}
-                                                        className="ml-auto text-[10px] text-white/20 hover:text-cyber-cyan font-cyber mr-8"
+                                                        className="text-[10px] text-white/20 hover:text-cyber-cyan font-cyber mr-4"
                                                     >
                                                         {editingWeekIndex === idx ? '확인' : '편집'}
                                                     </button>
@@ -421,7 +572,7 @@ export function CampaignDetailView({
                                                         onKeyDown={(e) => e.key === 'Enter' && setEditingWeekIndex(null)}
                                                     />
                                                 ) : (
-                                                    <h3 className="font-cyber font-black text-lg text-white leading-tight uppercase tracking-tight group-hover:text-cyber-cyan transition-colors h-14 line-clamp-2">
+                                                    <h3 className="font-cyber font-black text-lg text-white leading-tight uppercase tracking-tight group-hover:text-cyber-cyan transition-colors min-h-[3.5rem]">
                                                         {week.theme}
                                                     </h3>
                                                 )}
@@ -547,9 +698,18 @@ export function CampaignDetailView({
                                                 </div>
                                             </div>
 
-                                            <div className="p-4 border-t border-white/5 bg-white/[0.02] flex justify-center opacity-0 group-hover:opacity-100 transition-all">
+                                            <div className="p-4 border-t border-white/5 bg-white/[0.02] flex justify-between items-center opacity-0 group-hover:opacity-100 transition-all gap-2">
+                                                {onGenerateWeekTasks && (
+                                                    <button
+                                                        onClick={() => onGenerateWeekTasks(selectedMonthIndex, idx)}
+                                                        className="text-[10px] font-cyber font-black text-cyber-yellow/50 hover:text-cyber-yellow transition-all uppercase flex items-center gap-1 px-2 py-1 hover:bg-cyber-yellow/10 rounded"
+                                                        title="분산 작전 데이터 전개"
+                                                    >
+                                                        <Wand2 size={10} /> DEPLOY_OPS
+                                                    </button>
+                                                )}
                                                 <button
-                                                    onClick={() => addTask(idx)}
+                                                    onClick={() => addTask(idx, undefined, selectedMonthIndex)}
                                                     className="text-[10px] font-cyber font-black text-white/20 hover:text-cyber-pink hover:tracking-widest transition-all uppercase flex items-center gap-2"
                                                 >
                                                     <Plus size={12} /> 서브_태스크_추가
@@ -563,17 +723,16 @@ export function CampaignDetailView({
                     </div>
                 ) : (
                     /* Empty State / Generator Link */
-                    <div className="text-center py-32 border-2 border-dashed border-white/5 bg-black/40 skew-x-[-1deg]">
-                        <div className="skew-x-[1deg]">
-                            <Map size={64} className="mx-auto text-white/5 mb-8" />
-                            <h3 className="text-3xl font-cyber font-black text-white/20 mb-4 uppercase tracking-[0.3em]">스크럼_데이터_누락</h3>
-                            <p className="text-white/20 max-w-md mx-auto mb-10 font-mono text-sm uppercase">
-                                이 스크럼 프로토콜이 초기화되지 않았습니다. <br />
-                                생성 시퀀스를 시작하려면 지휘 본부로 귀환하십시오.
+                    /* Loading State (Initializing) */
+                    <div className="text-center py-32 border-2 border-dashed border-white/5 bg-black/40 skew-x-[-1deg] flex flex-col items-center justify-center">
+                        <div className="skew-x-[1deg] flex flex-col items-center">
+                            <Loader2 size={48} className="text-cyber-cyan animate-spin mb-6" />
+                            <h3 className="text-xl font-cyber font-black text-cyber-cyan mb-2 uppercase tracking-[0.3em] animate-pulse">
+                                INITIALIZING_SECTOR...
+                            </h3>
+                            <p className="text-white/20 font-mono text-xs uppercase tracking-widest">
+                                작전 구역 자동 생성 및 전개 중
                             </p>
-                            <Button onClick={onBack} className="bg-cyber-pink text-white font-cyber font-black text-xs px-10 py-5 shadow-neon-pink border-none skew-x-[-10deg]">
-                                <span className="skew-x-[10deg]">지휘_본부에서_초기화</span>
-                            </Button>
                         </div>
                     </div>
                 )}

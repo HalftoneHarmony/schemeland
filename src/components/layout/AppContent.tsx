@@ -175,6 +175,12 @@ export function AppContent({
                     updateTaskStatus={taskHandlers.handleUpdateTaskStatusWrapper}
                     moveTask={taskHandlers.handleMoveTask}
                     onSelectMonth={projectFeature.handleMonthClick}
+                    updateMonthGoals={projectFeature.handleUpdateMonthGoalsByIndex}
+                    onInitializeMonth={projectFeature.handleInitializeMonth}
+                    onGenerateWeekTheme={projectFeature.handleGenerateWeekTheme}
+                    onGenerateWeekTasks={projectFeature.handleGenerateWeekTasks}
+                    onGenerateEntireSprint={projectFeature.handleGenerateEntireSprint}
+                    isGeneratingEntireSprint={projectFeature.isGeneratingEntireSprint}
                 />
             )}
 

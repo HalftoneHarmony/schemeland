@@ -194,6 +194,26 @@ const monthlyListSchema: Schema = {
   }
 };
 
+const singleResultSchema: Schema = {
+  type: Type.OBJECT,
+  properties: {
+    result: { type: Type.STRING, description: "Generated result text" }
+  },
+  required: ["result"]
+};
+
+const taskListSchema: Schema = {
+  type: Type.OBJECT,
+  properties: {
+    tasks: {
+      type: Type.ARRAY,
+      items: { type: Type.STRING },
+      description: "List of generated tasks"
+    }
+  },
+  required: ["tasks"]
+};
+
 // ... [Previous functions remain identical] ...
 export const analyzeIdeas = async (ideas: ProjectIdea[]): Promise<IdeaAnalysis[]> => {
   const prompt = `
@@ -573,7 +593,71 @@ export const compressRoadmap = async (idea: ProjectIdea, currentPlan: MonthlyGoa
     }
     throw new Error("Roadmap compression failed");
   } catch (error) {
-    console.error("Compress roadmap failed", error);
+    throw error;
+  }
+};
+
+export const suggestWeeklyTheme = async (idea: ProjectIdea, monthTheme: string, weekNumber: number): Promise<string> => {
+  const prompt = `
+    프로젝트: ${idea.title} - ${idea.description}
+    이번 달 목표: ${monthTheme}
+    
+    위 목표를 달성하기 위한 ${weekNumber}주차의 주간 테마(Weekly Theme)를 1개 제안해주세요.
+    형식: '나는 ~한다' 형태의 3P(Positive, Present, Personal) 문장. (R=VD 기법)
+    예시: "나는 핵심 기능을 완벽하게 구현하여 MVP를 출시한다."
+    
+    JSON { "result": "..." } 형태로 반환.
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: prompt,
+      config: {
+        responseMimeType: 'application/json',
+        responseSchema: singleResultSchema,
+      },
+    });
+
+    if (response.text) {
+      const parsed = JSON.parse(response.text) as { result: string };
+      return parsed.result;
+    }
+    throw new Error("Theme suggestion failed");
+  } catch (error) {
+    console.error("Suggest weekly theme failed", error);
+    throw error;
+  }
+};
+
+export const suggestWeeklyTasks = async (idea: ProjectIdea, weekTheme: string): Promise<string[]> => {
+  const prompt = `
+    프로젝트: ${idea.title}
+    이번 주 테마: ${weekTheme}
+    
+    이 테마를 달성하기 위한 구체적이고 실행 가능한 서브 태스크(Sub-tasks) 3~5개를 제안해주세요.
+    개발, 디자인, 마케팅 등 실질적인 작업 위주로 작성.
+    
+    JSON { "tasks": ["task1", "task2", ...] } 형태로 반환.
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: prompt,
+      config: {
+        responseMimeType: 'application/json',
+        responseSchema: taskListSchema,
+      },
+    });
+
+    if (response.text) {
+      const parsed = JSON.parse(response.text) as { tasks: string[] };
+      return parsed.tasks;
+    }
+    throw new Error("Task suggestion failed");
+  } catch (error) {
+    console.error("Suggest weekly tasks failed", error);
     throw error;
   }
 };

@@ -28,9 +28,9 @@ export function VisionDisplay({
 
     return (
         <div className="flex flex-col gap-8">
-            <div className="flex flex-col md:flex-row gap-12 items-start">
+            <div className="flex flex-col gap-8 items-start w-full">
                 <motion.div
-                    className="flex-1"
+                    className="w-full"
                     variants={floatVariants}
                     animate="animate"
                 >
@@ -52,7 +52,7 @@ export function VisionDisplay({
                         initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
                         animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                         transition={{ delay: 0.3, duration: 0.6 }}
-                        className="text-3xl md:text-4xl font-cyber font-black text-white leading-tight uppercase tracking-tight skew-x-[-5deg] relative"
+                        className="text-3xl md:text-5xl font-cyber font-black text-white leading-tight uppercase tracking-tight skew-x-[-5deg] relative max-w-4xl"
                     >
                         <motion.span
                             className="relative inline-block"
@@ -63,7 +63,7 @@ export function VisionDisplay({
                     </motion.h3>
                 </motion.div>
 
-                <div className="w-full md:w-5/12 flex flex-col gap-3">
+                <div className="w-full flex flex-col gap-4">
                     <motion.div
                         className="text-[9px] font-cyber font-black text-white/20 uppercase tracking-[0.4em] mb-2 flex items-center gap-2"
                         initial={{ opacity: 0 }}
@@ -78,35 +78,37 @@ export function VisionDisplay({
                         </motion.span>
                         Milestone_Checkpoints::마일스톤
                     </motion.div>
-                    {keyResults.map((kr, idx) => (
-                        <motion.div
-                            key={idx}
-                            initial={{ opacity: 0, x: 30, scale: 0.9 }}
-                            animate={{ opacity: 1, x: 0, scale: 1 }}
-                            transition={{ delay: 0.5 + (0.15 * idx), type: "spring", stiffness: 100 }}
-                            whileHover={{
-                                x: 8,
-                                borderColor: "rgba(255,255,255,0.4)",
-                                backgroundColor: "rgba(255,255,255,0.1)"
-                            }}
-                            className={`flex items-start gap-4 p-5 border border-white/5 bg-zinc-900/40 transition-all cursor-default relative overflow-hidden group cyber-clipper`}
-                        >
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
+                        {keyResults.map((kr, idx) => (
                             <motion.div
-                                className={`absolute top-0 left-0 w-[4px] h-full ${bgClass}`}
-                                initial={{ height: 0 }}
-                                animate={{ height: "100%" }}
-                                transition={{ delay: 0.6 + (0.15 * idx), duration: 0.4 }}
-                            />
-                            <motion.div
-                                className={`mt-1 flex items-center justify-center w-6 h-6 ${bgClass} text-black shrink-0 cyber-clipper`}
-                                whileHover={{ rotate: 180, scale: 1.2 }}
-                                transition={{ type: "spring", stiffness: 200 }}
+                                key={idx}
+                                initial={{ opacity: 0, x: 30, scale: 0.9 }}
+                                animate={{ opacity: 1, x: 0, scale: 1 }}
+                                transition={{ delay: 0.5 + (0.15 * idx), type: "spring", stiffness: 100 }}
+                                whileHover={{
+                                    y: -5,
+                                    borderColor: "rgba(255,255,255,0.4)",
+                                    backgroundColor: "rgba(255,255,255,0.1)"
+                                }}
+                                className={`flex items-start gap-4 p-5 border border-white/5 bg-zinc-900/40 transition-all cursor-default relative overflow-hidden group cyber-clipper h-full`}
                             >
-                                <Star size={14} fill="currentColor" />
+                                <motion.div
+                                    className={`absolute top-0 left-0 w-[4px] h-full ${bgClass}`}
+                                    initial={{ height: 0 }}
+                                    animate={{ height: "100%" }}
+                                    transition={{ delay: 0.6 + (0.15 * idx), duration: 0.4 }}
+                                />
+                                <motion.div
+                                    className={`mt-1 flex items-center justify-center w-6 h-6 ${bgClass} text-black shrink-0 cyber-clipper`}
+                                    whileHover={{ rotate: 180, scale: 1.2 }}
+                                    transition={{ type: "spring", stiffness: 200 }}
+                                >
+                                    <Star size={14} fill="currentColor" />
+                                </motion.div>
+                                <span className="text-white/80 text-xs font-mono font-bold leading-relaxed">{kr}</span>
                             </motion.div>
-                            <span className="text-white/80 text-xs font-mono font-bold leading-relaxed">{kr}</span>
-                        </motion.div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
             </div>
 

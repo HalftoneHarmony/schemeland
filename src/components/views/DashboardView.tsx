@@ -9,7 +9,6 @@ import { DashboardStats } from '../dashboard/DashboardStats';
 import { VisionSection } from '../dashboard/VisionSection';
 import { CampaignSection } from '../dashboard/CampaignSection';
 import { FloatingControls } from '../dashboard/FloatingControls';
-import { SystemVerdictSection } from '../dashboard/SystemVerdictSection';
 
 interface DashboardViewProps {
     activeProject: ProjectScheme | null;
@@ -214,10 +213,6 @@ export function DashboardView(props: DashboardViewProps) {
                         isPreviewMode={isPreviewMode}
                         onAbandonQuest={props.onAbandonQuest}
                     />
-                </motion.div>
-
-                <motion.div variants={sectionVariants} className="mb-12">
-                    <SystemVerdictSection analysis={activeProject.analysis} />
                 </motion.div>
 
                 <div className="flex flex-col gap-12">

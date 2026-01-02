@@ -12,9 +12,11 @@ import { useStore } from '../../store';
 
 export function useIdeaHandlers() {
     const store = useStore();
-    const ideas = Object.values(store.ideas).sort((a, b) =>
-        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-    );
+    const ideas = Object.values(store.ideas)
+        .filter(idea => idea.status !== IdeaStatus.ACTIVE && idea.status !== IdeaStatus.ARCHIVED)
+        .sort((a, b) =>
+            new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+        );
 
     // Loading States
     const [isRefiningMap, setIsRefiningMap] = useState<Record<string, boolean>>({});

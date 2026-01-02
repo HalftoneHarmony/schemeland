@@ -27,7 +27,9 @@ import {
     generateMonthPlanOptions,
     extendRoadmap,
     compressRoadmap,
-    refineThreeYearVision
+    refineThreeYearVision,
+    suggestWeeklyTheme,
+    suggestWeeklyTasks
 } from '../../services/geminiService';
 import { validateAllIdeas, validateStartDate, validateVision } from '../../utils/validation';
 import { useStore, denormalizeProject } from '../../store';
@@ -72,6 +74,7 @@ export function useProjectHandlers() {
     const [isAdjustingPlan, setIsAdjustingPlan] = useState(false);
     const [isEditingVision, setIsEditingVision] = useState(false);
     const [isRefiningVision, setIsRefiningVision] = useState(false);
+    const [isGeneratingEntireSprint, setIsGeneratingEntireSprint] = useState(false);
 
     // --- UI States ---
     const [adjustmentModalOpen, setAdjustmentModalOpen] = useState(false);
@@ -223,6 +226,20 @@ export function useProjectHandlers() {
         const activeMonth = store.getActiveMonthPlan();
         if (!activeMonth) return;
         store.updateMonthGoals(activeMonth.id, goals);
+    }, [store]);
+
+    // 특정 월의 목표 업데이트 (인덱스 기반)
+    const handleUpdateMonthGoalsByIndex = useCallback((monthIndex: number, goals: string[]) => {
+        const { activeProjectId, projects, months } = store;
+        if (!activeProjectId) return;
+
+        const project = projects[activeProjectId];
+        if (!project) return;
+
+        const monthId = project.monthIds[monthIndex];
+        if (!monthId) return;
+
+        store.updateMonthGoals(monthId, goals);
     }, [store]);
 
     // 스마트 조정 (Smart Adjustment)
@@ -509,6 +526,145 @@ export function useProjectHandlers() {
         }
     }, [activeProject, visionDraft]);
 
+    // ==========================================
+    // AI Generation Handlers (Weekly)
+    // ==========================================
+
+    const handleInitializeMonth = useCallback((monthIndex: number) => {
+        const { activeProjectId, projects } = store;
+        if (!activeProjectId) return;
+        const project = projects[activeProjectId];
+        if (!project) return;
+        const monthId = project.monthIds[monthIndex];
+        if (!monthId) return;
+
+        store.initializeMonthWeeks(monthId);
+    }, [store]);
+
+    const handleGenerateWeekTheme = useCallback(async (monthIndex: number, weekIndex: number) => {
+        const project = store.getActiveProject();
+        if (!project) return;
+        const month = project.monthlyPlan[monthIndex];
+        if (!month) return;
+
+        const normalizedMonth = store.months[month.id];
+        if (!normalizedMonth) return;
+
+        let weekId = normalizedMonth.weekIds[weekIndex];
+
+        // Auto initialize if needed
+        if (!weekId) {
+            const monthId = month.id;
+            store.initializeMonthWeeks(monthId);
+            const updatedMonth = store.getMonth(monthId);
+            weekId = updatedMonth.weekIds[weekIndex];
+        }
+
+        if (!weekId) return;
+
+        try {
+            const theme = await suggestWeeklyTheme(project.selectedIdea, month.theme, weekIndex + 1);
+            store.updateWeekTheme(weekId, theme);
+        } catch (e) {
+            alert("주간 테마 생성에 실패했습니다.");
+        }
+    }, [store]);
+
+    const handleGenerateWeekTasks = useCallback(async (monthIndex: number, weekIndex: number) => {
+        const project = store.getActiveProject();
+        if (!project) return;
+        const month = project.monthlyPlan[monthIndex];
+        if (!month) return;
+
+        const normalizedMonth = store.months[month.id];
+        if (!normalizedMonth) return;
+
+        let weekId = normalizedMonth.weekIds[weekIndex];
+
+        // Auto initialize
+        if (!weekId) {
+            const monthId = month.id;
+            store.initializeMonthWeeks(monthId);
+            const updatedMonth = store.getMonth(monthId);
+            weekId = updatedMonth.weekIds[weekIndex];
+        }
+
+        if (!weekId) return;
+
+        // Capture weekId as const for closure safety
+        const targetWeekId = weekId;
+
+        const week = store.getWeek(targetWeekId);
+        if (!week) {
+            console.error("[AI_TASK_GEN] Week not found for ID:", targetWeekId);
+            return;
+        }
+
+        let currentTheme = week.theme;
+
+        // 테마가 없거나 기본값이면 테마부터 생성
+        if (!currentTheme || currentTheme.includes("작전 수립 중")) {
+            try {
+                console.log("[AI_TASK_GEN] Generating theme first...");
+                const newTheme = await suggestWeeklyTheme(project.selectedIdea, month.theme, weekIndex + 1);
+                store.updateWeekTheme(targetWeekId, newTheme);
+                currentTheme = newTheme;
+            } catch (e) {
+                console.error("[AI_TASK_GEN] Theme generation failed:", e);
+                return;
+            }
+        }
+
+        try {
+            console.log("[AI_TASK_GEN] Generating tasks for theme:", currentTheme);
+            const tasks = await suggestWeeklyTasks(project.selectedIdea, currentTheme);
+            console.log("[AI_TASK_GEN] Received tasks:", tasks);
+
+            if (tasks && tasks.length > 0) {
+                tasks.forEach(t => {
+                    console.log("[AI_TASK_GEN] Adding task:", t, "to week:", targetWeekId);
+                    store.addTask(targetWeekId, t);
+                });
+            } else {
+                console.warn("[AI_TASK_GEN] No tasks received from AI");
+            }
+        } catch (e) {
+            console.error("[AI_TASK_GEN] Task generation failed:", e);
+            alert("서브 태스크 생성에 실패했습니다.");
+        }
+    }, [store]);
+
+    const handleGenerateEntireSprint = useCallback(async (monthIndex: number) => {
+        const project = store.getActiveProject();
+        if (!project) return;
+        const month = project.monthlyPlan[monthIndex];
+        if (!month) return;
+
+        setIsGeneratingEntireSprint(true);
+
+        try {
+            console.log("[SPRINT_AUTO_GEN] Starting entire sprint generation for month:", monthIndex);
+
+            // Generate for all 4 weeks sequentially
+            for (let weekIndex = 0; weekIndex < 4; weekIndex++) {
+                console.log(`[SPRINT_AUTO_GEN] Processing Week ${weekIndex + 1}/4...`);
+
+                // Generate theme first
+                await handleGenerateWeekTheme(monthIndex, weekIndex);
+
+                // Then generate tasks (handleGenerateWeekTasks already handles theme check)
+                await handleGenerateWeekTasks(monthIndex, weekIndex);
+            }
+
+            console.log("[SPRINT_AUTO_GEN] Entire sprint generation completed!");
+        } catch (e) {
+            console.error("[SPRINT_AUTO_GEN] Failed to generate entire sprint:", e);
+            alert("전체 스프린트 자동 생성에 실패했습니다.");
+        } finally {
+            setIsGeneratingEntireSprint(false);
+        }
+    }, [store, handleGenerateWeekTheme, handleGenerateWeekTasks]);
+
     return {
         // Data
         projects,
@@ -526,6 +682,7 @@ export function useProjectHandlers() {
         isAdjustingPlan,
         isEditingVision,
         isRefiningVision,
+        isGeneratingEntireSprint,
         adjustmentModalOpen,
         compressModalOpen,
         previewOptions,
@@ -548,6 +705,7 @@ export function useProjectHandlers() {
 
         handleUpdateMonthGoal,
         handleUpdateMonthObjectives,
+        handleUpdateMonthGoalsByIndex,
         triggerSmartAdjustment,
         confirmAdjustment,
         handleExpandVision,
@@ -560,5 +718,9 @@ export function useProjectHandlers() {
         handleCancelEditVision,
         handleSaveVision,
         handleRefineVision,
+        handleInitializeMonth,
+        handleGenerateWeekTheme,
+        handleGenerateWeekTasks,
+        handleGenerateEntireSprint,
     };
 }

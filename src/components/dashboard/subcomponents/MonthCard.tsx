@@ -123,9 +123,9 @@ export function MonthCard({
                 ${isPast ? 'opacity-60 saturate-0 hover:saturate-100 hover:opacity-100' : ''}
             `}
             animate={{
-                y: isHovered ? -10 : 0,
-                height: isHovered ? 'auto' : 460,
-                zIndex: isHovered ? 50 : (isSelected ? 20 : 0)
+                y: isHovered || isEditing ? -10 : 0,
+                height: isHovered || isEditing ? 'auto' : 460,
+                zIndex: isHovered || isEditing ? 50 : (isSelected ? 20 : 0)
             }}
             transition={{
                 y: { type: "spring", stiffness: 400, damping: 30 },
@@ -178,7 +178,7 @@ export function MonthCard({
                             <CircularProgress percentage={progress} color={isSelected ? 'text-cyber-cyan' : 'text-white/30'} />
                         </div>
 
-                        <div className={`transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
+                        <div className={`transition-opacity duration-300 ${isHovered || isEditing ? 'opacity-100' : 'opacity-0'}`}>
                             {!isEditing && (
                                 <button
                                     onClick={(e) => { e.stopPropagation(); onEditStart(); }}
@@ -199,7 +199,7 @@ export function MonthCard({
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
-                                className="h-full flex flex-col bg-black/95 backdrop-blur-md absolute inset-0 z-30 -m-6 p-6 border border-cyber-cyan shadow-xl min-h-[400px]"
+                                className="h-full flex flex-col bg-black/95 backdrop-blur-md absolute inset-0 z-30 -m-6 p-6 pb-12 border border-cyber-cyan shadow-xl min-h-[400px]"
                                 onClick={(e) => e.stopPropagation()}
                             >
                                 <div className="mb-2 text-[10px] font-cyber text-cyber-cyan uppercase tracking-wider">R=VD Vision (Past Tense)</div>
