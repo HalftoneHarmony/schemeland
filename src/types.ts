@@ -394,7 +394,8 @@ export type PartialUpdate<T> = Partial<Omit<T, keyof BaseEntity>> & { id: string
 
 export enum CoachType {
   ELON = 'ELON',
-  GOGGINS = 'GOGGINS'
+  GOGGINS = 'GOGGINS',
+  CBUM = 'CBUM'
 }
 
 export interface ChatMessage extends BaseEntity {

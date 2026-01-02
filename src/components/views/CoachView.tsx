@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, User, Bot, Sparkles, Terminal, Dumbbell, Zap, Skull } from 'lucide-react';
+import { Send, User, Bot, Sparkles, Terminal, Dumbbell, Zap, Skull, Trophy } from 'lucide-react';
 import { useStore } from '../../store';
 import { CoachType, ChatMessage } from '../../types';
 import { chatWithCoach } from '../../services/coachService';
@@ -31,9 +31,19 @@ export const CoachView: React.FC<CoachViewProps> = ({ onBack }) => {
     // Initial greeting
     useEffect(() => {
         if (messages.length === 0) {
-            const greeting = coachType === CoachType.ELON
-                ? "First principles. What is the fundamental problem we are keeping existing today? Speak."
-                : "WHO'S GONNA CARRY THE BOATS?! I don't care how you feel. TELL ME WHAT YOU DID TODAY.";
+            const getGreeting = () => {
+                switch (coachType) {
+                    case CoachType.ELON:
+                        return "제1원리로 생각해보자. 지금 진짜 해결해야 할 근본적인 문제가 뭐야? 말해봐.";
+                    case CoachType.GOGGINS:
+                        return "WHO'S GONNA CARRY THE BOATS?! 오늘 뭘 했는지 보고해. 변명 말고.";
+                    case CoachType.CBUM:
+                        return "야, 반가워. 형이 20살 때도 존나 방황했어. 근데 지금 여기 있잖아. 너도 할 수 있어. 뭐 고민 있어? 말해봐. 💪";
+                    default:
+                        return "얘기해보자.";
+                }
+            };
+            const greeting = getGreeting();
 
             setMessages([{
                 id: 'init',
@@ -104,16 +114,33 @@ export const CoachView: React.FC<CoachViewProps> = ({ onBack }) => {
 
     // Styles based on coach
     const isElon = coachType === CoachType.ELON;
-    const accentColor = isElon ? 'border-cyber-cyan text-cyber-cyan' : 'border-red-500 text-red-500';
-    const bgGlow = isElon ? 'shadow-neon-cyan' : 'shadow-[0_0_20px_rgba(239,68,68,0.3)]';
-    const buttonClass = isElon
-        ? 'bg-cyber-cyan/10 hover:bg-cyber-cyan/20 border-cyber-cyan text-cyber-cyan'
-        : 'bg-red-900/10 hover:bg-red-900/20 border-red-500 text-red-500';
+    const isGoggins = coachType === CoachType.GOGGINS;
+    const isCbum = coachType === CoachType.CBUM;
+
+    const getAccentColor = () => {
+        switch (coachType) {
+            case CoachType.ELON: return 'border-cyber-cyan text-cyber-cyan';
+            case CoachType.GOGGINS: return 'border-red-500 text-red-500';
+            case CoachType.CBUM: return 'border-amber-400 text-amber-400';
+            default: return 'border-white text-white';
+        }
+    };
+
+    const getBgColor = () => {
+        switch (coachType) {
+            case CoachType.ELON: return 'bg-cyber-cyan/5';
+            case CoachType.GOGGINS: return 'bg-red-900/10';
+            case CoachType.CBUM: return 'bg-amber-400/5';
+            default: return 'bg-white/5';
+        }
+    };
+
+    const accentColor = getAccentColor();
 
     return (
         <div className="h-full flex flex-col relative overflow-hidden bg-zinc-950/80 backdrop-blur-md">
             {/* Background Atmosphere & Grid */}
-            <div className={`absolute inset-0 pointer-events-none opacity-20 ${isElon ? 'bg-cyber-cyan/5' : 'bg-red-900/10'}`}>
+            <div className={`absolute inset-0 pointer-events-none opacity-20 ${getBgColor()}`}>
                 <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:30px_30px]" />
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,black_100%)]" />
             </div>
@@ -142,26 +169,45 @@ export const CoachView: React.FC<CoachViewProps> = ({ onBack }) => {
                                 <span className="text-[9px] font-cyber font-black mt-2 tracking-widest">DAVID_GOGGINS</span>
                             </div>
                         </button>
+                        <button
+                            onClick={() => toggleCoach(CoachType.CBUM)}
+                            className={`p-4 border transition-all duration-300 relative group overflow-hidden cyber-clipper ${coachType === CoachType.CBUM ? 'bg-amber-400/10 border-amber-400 text-amber-400 shadow-[0_0_20px_rgba(251,191,36,0.4)]' : 'border-white/10 text-gray-500 hover:bg-white/5 hover:text-white'}`}
+                        >
+                            <div className={`absolute inset-0 bg-amber-400/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ${coachType === CoachType.CBUM ? 'opacity-20' : ''}`} />
+                            <div className="flex flex-col items-center relative z-10">
+                                <Trophy size={20} className={coachType === CoachType.CBUM ? 'animate-pulse' : ''} />
+                                <span className="text-[9px] font-cyber font-black mt-2 tracking-widest">CHRIS_BUMSTEAD</span>
+                            </div>
+                        </button>
                     </div>
 
                     <div className="h-10 w-[1px] bg-white/10 mx-2" />
 
                     <div>
                         <h2 className={`font-cyber text-2xl font-black italic uppercase tracking-wider ${accentColor} flex items-center gap-2`}>
-                            {isElon ? (
+                            {isElon && (
                                 <>
                                     <Terminal size={24} />
                                     <span>TECHNOKING</span>
                                 </>
-                            ) : (
+                            )}
+                            {isGoggins && (
                                 <>
                                     <Dumbbell size={24} />
                                     <span>DRILL INSTRUCTOR</span>
                                 </>
                             )}
+                            {isCbum && (
+                                <>
+                                    <Trophy size={24} />
+                                    <span>CLASSIC PHYSIQUE</span>
+                                </>
+                            )}
                         </h2>
                         <p className="text-white/40 text-sm font-mono flex items-center gap-2">
-                            {isElon ? "Targeting Mars. Optimizing constraints." : "Stay Hard. Taking Souls."}
+                            {isElon && "제1원리 사고. 근본부터 다시 생각하자."}
+                            {isGoggins && "STAY HARD. 한계를 넘어서."}
+                            {isCbum && "시작해. 엉망이어도 괜찮아. Let's go."}
                         </p>
                     </div>
                 </div>
@@ -190,17 +236,25 @@ export const CoachView: React.FC<CoachViewProps> = ({ onBack }) => {
                                 {/* Avatar */}
                                 <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 border 
                                     ${isAi
-                                        ? (isElon ? 'bg-black border-cyber-cyan text-cyber-cyan' : 'bg-black border-red-500 text-red-500')
+                                        ? (isElon ? 'bg-black border-cyber-cyan text-cyber-cyan'
+                                            : isGoggins ? 'bg-black border-red-500 text-red-500'
+                                                : 'bg-black border-amber-400 text-amber-400')
                                         : 'bg-white/10 border-white/20 text-white'}`}
                                 >
-                                    {isAi ? (isElon ? <Bot size={20} /> : <Skull size={20} />) : <User size={20} />}
+                                    {isAi ? (
+                                        isElon ? <Bot size={20} />
+                                            : isGoggins ? <Skull size={20} />
+                                                : <Trophy size={20} />
+                                    ) : <User size={20} />}
                                 </div>
 
                                 {/* Message Bubble */}
                                 <div className={`flex flex-col ${isAi ? 'items-start' : 'items-end'}`}>
                                     <div className={`p-5 border backdrop-blur-md relative overflow-hidden group cyber-clipper
                                         ${isAi
-                                            ? (isElon ? 'bg-cyber-cyan/5 border-cyber-cyan/30 text-cyber-cyan' : 'bg-red-500/5 border-red-500/30 text-red-100')
+                                            ? (isElon ? 'bg-cyber-cyan/5 border-cyber-cyan/30 text-cyber-cyan'
+                                                : isGoggins ? 'bg-red-500/5 border-red-500/30 text-red-100'
+                                                    : 'bg-amber-400/5 border-amber-400/30 text-amber-100')
                                             : 'bg-white/5 border-white/10 text-white'
                                         }
                                     `}>
@@ -223,15 +277,15 @@ export const CoachView: React.FC<CoachViewProps> = ({ onBack }) => {
                 {isTyping && (
                     <div className="flex justify-start animate-fade-in">
                         <div className="flex gap-4">
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center border bg-black ${isElon ? 'border-cyber-cyan text-cyber-cyan' : 'border-red-500 text-red-500'}`}>
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center border bg-black ${isElon ? 'border-cyber-cyan text-cyber-cyan' : isGoggins ? 'border-red-500 text-red-500' : 'border-amber-400 text-amber-400'}`}>
                                 <Sparkles size={16} className="animate-spin-slow" />
                             </div>
-                            <div className={`p-4 border flex items-center gap-2 cyber-clipper ${isElon ? 'bg-cyber-cyan/5 border-cyber-cyan/20' : 'bg-red-500/5 border-red-500/20'}`}>
-                                <div className={`w-1.5 h-1.5 rounded-none animate-pulse ${isElon ? 'bg-cyber-cyan' : 'bg-red-500'}`} style={{ animationDelay: '0s' }} />
-                                <div className={`w-1.5 h-1.5 rounded-none animate-pulse ${isElon ? 'bg-cyber-cyan' : 'bg-red-500'}`} style={{ animationDelay: '0.2s' }} />
-                                <div className={`w-1.5 h-1.5 rounded-none animate-pulse ${isElon ? 'bg-cyber-cyan' : 'bg-red-500'}`} style={{ animationDelay: '0.4s' }} />
+                            <div className={`p-4 border flex items-center gap-2 cyber-clipper ${isElon ? 'bg-cyber-cyan/5 border-cyber-cyan/20' : isGoggins ? 'bg-red-500/5 border-red-500/20' : 'bg-amber-400/5 border-amber-400/20'}`}>
+                                <div className={`w-1.5 h-1.5 rounded-none animate-pulse ${isElon ? 'bg-cyber-cyan' : isGoggins ? 'bg-red-500' : 'bg-amber-400'}`} style={{ animationDelay: '0s' }} />
+                                <div className={`w-1.5 h-1.5 rounded-none animate-pulse ${isElon ? 'bg-cyber-cyan' : isGoggins ? 'bg-red-500' : 'bg-amber-400'}`} style={{ animationDelay: '0.2s' }} />
+                                <div className={`w-1.5 h-1.5 rounded-none animate-pulse ${isElon ? 'bg-cyber-cyan' : isGoggins ? 'bg-red-500' : 'bg-amber-400'}`} style={{ animationDelay: '0.4s' }} />
                                 <span className="text-[10px] uppercase tracking-widest opacity-70 ml-2 font-cyber font-black">
-                                    {isElon ? 'NEURAL_PROCESSING...' : 'GRINDING_DATA...'}
+                                    {isElon ? 'NEURAL_PROCESSING...' : isGoggins ? 'GRINDING_DATA...' : 'LIFTING_WISDOM...'}
                                 </span>
                             </div>
                         </div>
@@ -242,15 +296,15 @@ export const CoachView: React.FC<CoachViewProps> = ({ onBack }) => {
 
             {/* Input Area */}
             <div className="p-6 relative z-20">
-                <div className={`p-1 border transition-all duration-300 flex gap-2 items-center cyber-clipper bg-black/40 ${isElon ? 'border-cyber-cyan/50 shadow-[0_0_30px_rgba(0,255,255,0.1)]' : 'border-red-500/50 shadow-[0_0_30px_rgba(239,68,68,0.1)]'}`}>
+                <div className={`p-1 border transition-all duration-300 flex gap-2 items-center cyber-clipper bg-black/40 ${isElon ? 'border-cyber-cyan/50 shadow-[0_0_30px_rgba(0,255,255,0.1)]' : isGoggins ? 'border-red-500/50 shadow-[0_0_30px_rgba(239,68,68,0.1)]' : 'border-amber-400/50 shadow-[0_0_30px_rgba(251,191,36,0.1)]'}`}>
                     <div className="flex-1 flex items-center">
-                        <span className={`pl-4 font-cyber font-black text-xs ${isElon ? 'text-cyber-cyan' : 'text-red-500'}`}>{'>'}</span>
+                        <span className={`pl-4 font-cyber font-black text-xs ${isElon ? 'text-cyber-cyan' : isGoggins ? 'text-red-500' : 'text-amber-400'}`}>{'>'}</span>
                         <input
                             type="text"
                             value={inputValue}
                             onChange={(e) => setInputValue(e.target.value)}
                             onKeyDown={handleKeyDown}
-                            placeholder={isElon ? "Identify constraints or input data..." : "DON'T BE WEAK. REPORT IN."}
+                            placeholder={isElon ? "프로젝트나 아이디어에 대해 물어봐..." : isGoggins ? "오늘 뭘 했는지 보고해. STAY HARD!" : "형한테 고민 말해봐. 같이 풀어보자."}
                             className="flex-1 bg-transparent border-none outline-none text-white placeholder-white/20 px-4 py-4 font-mono text-sm"
                             autoFocus
                         />
@@ -263,7 +317,9 @@ export const CoachView: React.FC<CoachViewProps> = ({ onBack }) => {
                                 ? 'opacity-30 cursor-not-allowed bg-white/5 text-white'
                                 : isElon
                                     ? 'bg-cyber-cyan text-black hover:bg-white hover:shadow-neon-white'
-                                    : 'bg-red-600 text-black hover:bg-red-500 hover:shadow-[0_0_20px_rgba(239,68,68,0.6)]'
+                                    : isGoggins
+                                        ? 'bg-red-600 text-black hover:bg-red-500 hover:shadow-[0_0_20px_rgba(239,68,68,0.6)]'
+                                        : 'bg-amber-400 text-black hover:bg-amber-300 hover:shadow-[0_0_20px_rgba(251,191,36,0.6)]'
                             }`}
                     >
                         <Send size={18} fill="currentColor" />
