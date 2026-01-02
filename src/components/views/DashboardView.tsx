@@ -115,6 +115,10 @@ export function DashboardView(props: DashboardViewProps) {
     const totalDaysInMonth = 30;
     const sprintProgress = Math.min(100, Math.round((sprintDaysPassed / totalDaysInMonth) * 100));
 
+    // Sprint Count Calculations
+    const currentSprintIndex = Math.min(activeProject.monthlyPlan.length, Math.floor(Math.max(0, today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 30)) + 1);
+    const totalSprints = activeProject.monthlyPlan.length;
+
     // Global (Year) Calculations
     const diffTimeTotal = Math.max(0, today.getTime() - startDate.getTime());
     const yearDaysPassed = Math.floor(diffTimeTotal / (1000 * 60 * 60 * 24));
@@ -235,6 +239,8 @@ export function DashboardView(props: DashboardViewProps) {
                                 progress={progress}
                                 sprintDaysPassed={sprintDaysPassed}
                                 sprintProgress={sprintProgress}
+                                currentSprintIndex={currentSprintIndex}
+                                totalSprints={totalSprints}
                                 yearDaysPassed={yearDaysPassed}
                                 yearProgress={yearProgress}
                                 isAhead={isAhead}

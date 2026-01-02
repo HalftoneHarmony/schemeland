@@ -267,13 +267,14 @@ export function CampaignSection({
                                                             className="h-full flex flex-col bg-black/95 backdrop-blur-md absolute inset-0 z-30 -m-6 p-6 border border-cyber-cyan shadow-xl min-h-[400px]"
                                                             onClick={(e) => e.stopPropagation()}
                                                         >
-                                                            <div className="mb-2 text-[10px] font-cyber text-cyber-cyan uppercase tracking-wider">Month Theme</div>
+                                                            <div className="mb-2 text-[10px] font-cyber text-cyber-cyan uppercase tracking-wider">R=VD Vision (Past Tense)</div>
                                                             <textarea
-                                                                className="w-full bg-white/5 border border-white/10 text-white p-3 focus:outline-none focus:border-cyber-cyan font-mono text-sm resize-none leading-relaxed h-20 mb-4 rounded-sm"
+                                                                className="w-full bg-white/5 border border-white/10 text-white p-3 focus:outline-none focus:border-cyber-cyan font-mono text-sm resize-none leading-relaxed h-20 mb-4 rounded-sm placeholder:text-white/20"
                                                                 value={month.theme}
                                                                 onChange={(e) => handleUpdateMonthGoal(e.target.value)}
                                                                 autoFocus
                                                                 spellCheck={false}
+                                                                placeholder='ex) "나는 이번 스프린트에서 핵심 기능을 완벽하게 구현했다."'
                                                             />
 
                                                             <div className="flex-1 overflow-y-auto custom-scrollbar">

@@ -37,7 +37,7 @@ import { SideNavigation } from './components/navigation/SideNavigation';
 import { QuickSearch } from './components/navigation/QuickSearch';
 
 // UI Components
-import { ConflictWarning } from './components/ui/ConflictWarning';
+import { ConflictWarning, MergeNotice } from './components/ui/ConflictWarning';
 
 export default function App() {
     // 1. Store Initialization (Data Migration)
@@ -205,6 +205,12 @@ export default function App() {
                 onDismiss={conflictDetection.dismissWarning}
                 onReload={conflictDetection.reloadPage}
                 sessionId={conflictDetection.sessionId}
+            />
+
+            {/* Merge Success Notice */}
+            <MergeNotice
+                isVisible={conflictDetection.isMergeNoticeVisible}
+                onDismiss={conflictDetection.dismissMergeNotice}
             />
 
             {/* Quick Search Modal */}

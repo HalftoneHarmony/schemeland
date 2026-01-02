@@ -1,15 +1,11 @@
 /**
  * @file store/storage.ts
- * 저장소 추상화 레이어 (v2.1 - Conflict Detection)
+ * 저장소 추상화 레이어 (v2.2 - Deep Merge Protection)
  * 
- * 다양한 저장소 백엔드를 지원하기 위한 추상화:
- * - localStorage (현재)
- * - IndexedDB (대용량 데이터용, 향후)
- * - 클라우드 동기화 (향후)
- * 
- * v2.1 변경사항:
- * - 세션 기반 충돌 감지 기능 추가
- * - 다중 브라우저 동시 접근 시 데이터 보호
+ * v2.2 변경사항:
+ * - 다중 브라우저 충돌 시 데이터 병합(Merge) 전략 적용
+ * - 기존 프로젝트 보호: 새 세션에서 기존 데이터를 덮어쓰지 않음
+ * - 세션 기반 충돌 감지 강화
  */
 
 // ============================================
@@ -21,11 +17,12 @@ let lastKnownServerTimestamp: string | null = null;
 let conflictCallback: ((conflict: ConflictInfo) => void) | null = null;
 
 export interface ConflictInfo {
-    type: 'EXTERNAL_CHANGE' | 'DATA_OVERWRITTEN';
+    type: 'EXTERNAL_CHANGE' | 'DATA_MERGED' | 'SAVE_BLOCKED';
     localTimestamp: string;
     serverTimestamp: string;
     sessionId: string;
     serverSessionId?: string;
+    mergedData?: boolean;
 }
 
 export function setConflictCallback(cb: (conflict: ConflictInfo) => void) {
@@ -37,38 +34,79 @@ export function getSessionId(): string {
 }
 
 // ============================================
+// Deep Merge Utility
+// ============================================
+
+/**
+ * 두 개의 store state를 병합합니다.
+ * 규칙:
+ * - 서버에 있는 기존 entity(id 기준)는 보존
+ * - 로컬에만 있는 새 entity는 추가
+ * - 동일 ID가 충돌하면 updatedAt 기준으로 최신 것 선택
+ */
+function mergeStoreData(serverData: any, localData: any): any {
+    if (!serverData) return localData;
+    if (!localData) return serverData;
+
+    try {
+        const serverParsed = typeof serverData === 'string' ? JSON.parse(serverData) : serverData;
+        const localParsed = typeof localData === 'string' ? JSON.parse(localData) : localData;
+
+        const merged = { ...serverParsed };
+
+        // 병합할 Record 타입 필드들
+        const recordFields = ['ideas', 'analyses', 'projects', 'months', 'weeks', 'tasks'];
+
+        for (const field of recordFields) {
+            if (localParsed[field] && typeof localParsed[field] === 'object') {
+                merged[field] = { ...(serverParsed[field] || {}) };
+
+                for (const id of Object.keys(localParsed[field])) {
+                    const localEntity = localParsed[field][id];
+                    const serverEntity = serverParsed[field]?.[id];
+
+                    if (!serverEntity) {
+                        // 서버에 없는 새 엔티티 → 추가
+                        merged[field][id] = localEntity;
+                    } else {
+                        // 동일 ID 충돌 → updatedAt 비교
+                        const localTime = new Date(localEntity.updatedAt || 0).getTime();
+                        const serverTime = new Date(serverEntity.updatedAt || 0).getTime();
+
+                        if (localTime > serverTime) {
+                            merged[field][id] = localEntity;
+                        }
+                        // else: 서버 데이터 유지
+                    }
+                }
+            }
+        }
+
+        // 비-Record 필드는 로컬 우선 (UI 상태 등)
+        const nonRecordFields = ['activeProjectId', 'currentView', 'selectedMonthIndex', 'version', 'isMigrated'];
+        for (const field of nonRecordFields) {
+            if (localParsed[field] !== undefined) {
+                merged[field] = localParsed[field];
+            }
+        }
+
+        return JSON.stringify(merged);
+    } catch (e) {
+        console.error('[Merge] Failed to merge data:', e);
+        return localData; // 병합 실패 시 로컬 데이터 사용
+    }
+}
+
+// ============================================
 // Storage Adapter Interface
 // ============================================
 
 export interface StorageAdapter {
-    /**
-     * 키에 해당하는 값을 가져옵니다
-     */
     get<T>(key: string): Promise<T | null>;
-
-    /**
-     * 키에 값을 저장합니다
-     */
     set<T>(key: string, value: T): Promise<void>;
-
-    /**
-     * 키에 해당하는 값을 삭제합니다
-     */
     remove(key: string): Promise<void>;
-
-    /**
-     * 모든 키를 가져옵니다
-     */
     keys(): Promise<string[]>;
-
-    /**
-     * 저장소를 비웁니다
-     */
     clear(): Promise<void>;
-
-    /**
-     * 변경 사항을 구독합니다 (선택적)
-     */
     subscribe?(key: string, callback: (value: unknown) => void): () => void;
 }
 
@@ -102,11 +140,8 @@ export class LocalStorageAdapter implements StorageAdapter {
             localStorage.setItem(this.getKey(key), JSON.stringify(value));
         } catch (error) {
             console.error(`[LocalStorageAdapter] Error writing key "${key}":`, error);
-
-            // 용량 초과 시 처리
             if (error instanceof DOMException && error.name === 'QuotaExceededError') {
-                console.warn('[LocalStorageAdapter] Storage quota exceeded');
-                throw new Error('저장 공간이 부족합니다. 일부 데이터를 삭제해주세요.');
+                throw new Error('저장 공간이 부족합니다.');
             }
             throw error;
         }
@@ -129,14 +164,9 @@ export class LocalStorageAdapter implements StorageAdapter {
 
     async clear(): Promise<void> {
         const keys = await this.keys();
-        keys.forEach((key) => {
-            localStorage.removeItem(this.getKey(key));
-        });
+        keys.forEach((key) => localStorage.removeItem(this.getKey(key)));
     }
 
-    /**
-     * storage 이벤트를 통해 다른 탭의 변경 사항을 구독
-     */
     subscribe(key: string, callback: (value: unknown) => void): () => void {
         const handler = (event: StorageEvent) => {
             if (event.key === this.getKey(key) && event.newValue !== null) {
@@ -147,14 +177,13 @@ export class LocalStorageAdapter implements StorageAdapter {
                 }
             }
         };
-
         window.addEventListener('storage', handler);
         return () => window.removeEventListener('storage', handler);
     }
 }
 
 // ============================================
-// IndexedDB Adapter (향후 대용량 데이터용)
+// IndexedDB Adapter
 // ============================================
 
 export class IndexedDBAdapter implements StorageAdapter {
@@ -172,14 +201,11 @@ export class IndexedDBAdapter implements StorageAdapter {
 
         return new Promise((resolve, reject) => {
             const request = indexedDB.open(this.dbName, 1);
-
             request.onerror = () => reject(request.error);
-
             request.onsuccess = () => {
                 this.db = request.result;
                 resolve(this.db);
             };
-
             request.onupgradeneeded = (event) => {
                 const db = (event.target as IDBOpenDBRequest).result;
                 if (!db.objectStoreNames.contains(this.storeName)) {
@@ -191,12 +217,10 @@ export class IndexedDBAdapter implements StorageAdapter {
 
     async get<T>(key: string): Promise<T | null> {
         const db = await this.getDB();
-
         return new Promise((resolve, reject) => {
             const transaction = db.transaction(this.storeName, 'readonly');
             const store = transaction.objectStore(this.storeName);
             const request = store.get(key);
-
             request.onerror = () => reject(request.error);
             request.onsuccess = () => resolve(request.result ?? null);
         });
@@ -204,12 +228,10 @@ export class IndexedDBAdapter implements StorageAdapter {
 
     async set<T>(key: string, value: T): Promise<void> {
         const db = await this.getDB();
-
         return new Promise((resolve, reject) => {
             const transaction = db.transaction(this.storeName, 'readwrite');
             const store = transaction.objectStore(this.storeName);
             const request = store.put(value, key);
-
             request.onerror = () => reject(request.error);
             request.onsuccess = () => resolve();
         });
@@ -217,12 +239,10 @@ export class IndexedDBAdapter implements StorageAdapter {
 
     async remove(key: string): Promise<void> {
         const db = await this.getDB();
-
         return new Promise((resolve, reject) => {
             const transaction = db.transaction(this.storeName, 'readwrite');
             const store = transaction.objectStore(this.storeName);
             const request = store.delete(key);
-
             request.onerror = () => reject(request.error);
             request.onsuccess = () => resolve();
         });
@@ -230,12 +250,10 @@ export class IndexedDBAdapter implements StorageAdapter {
 
     async keys(): Promise<string[]> {
         const db = await this.getDB();
-
         return new Promise((resolve, reject) => {
             const transaction = db.transaction(this.storeName, 'readonly');
             const store = transaction.objectStore(this.storeName);
             const request = store.getAllKeys();
-
             request.onerror = () => reject(request.error);
             request.onsuccess = () => resolve(request.result as string[]);
         });
@@ -243,12 +261,10 @@ export class IndexedDBAdapter implements StorageAdapter {
 
     async clear(): Promise<void> {
         const db = await this.getDB();
-
         return new Promise((resolve, reject) => {
             const transaction = db.transaction(this.storeName, 'readwrite');
             const store = transaction.objectStore(this.storeName);
             const request = store.clear();
-
             request.onerror = () => reject(request.error);
             request.onsuccess = () => resolve();
         });
@@ -301,71 +317,55 @@ export function createStorage(type: StorageType = 'localStorage'): StorageAdapte
     }
 }
 
-// ============================================
-// 기본 인스턴스 내보내기
-// ============================================
-
 export const storage = createStorage('localStorage');
 
 // ============================================
-// Zustand-compatible Server Storage (with Conflict Detection)
+// Server Storage with Deep Merge Protection
 // ============================================
 
 interface ServerDBMeta {
     _meta?: {
         lastUpdatedAt: string;
-        lastUpdatedBy: string; // session ID
+        lastUpdatedBy: string;
     };
     [key: string]: any;
 }
 
-/**
- * Zustand persist 미들웨어를 위한 서버 사이드 스토리지 어댑터
- * - 로컬 파일 시스템(via Vite API)에 데이터를 저장합니다.
- * - 오프라인 시 localStorage를 폴백으로 사용합니다.
- * - 최초 실행 시 localStorage 데이터를 서버로 자동 마이그레이션합니다.
- * - v2.1: 충돌 감지 기능 추가
- */
 export const serverStorage = {
     getItem: async (name: string): Promise<string | null> => {
         try {
-            // 1. 서버에서 데이터 로드
             const res = await fetch('/api/storage');
             if (!res.ok) throw new Error('Server unreachable');
 
             const db: ServerDBMeta = await res.json();
 
-            // 메타데이터 저장 (충돌 감지용)
+            // 메타데이터 저장
             if (db._meta?.lastUpdatedAt) {
                 lastKnownServerTimestamp = db._meta.lastUpdatedAt;
             }
 
-            // 2. 서버에 데이터가 존재하면 반환
             if (db[name]) {
-                // 로컬스토리지도 업데이트 (캐시)
                 localStorage.setItem(name, db[name]);
                 return db[name];
             }
 
-            // 3. 서버에 없다면 로컬스토리지 확인 (마이그레이션)
+            // 로컬 데이터가 있으면 마이그레이션 (서버가 비어있는 경우만)
             const localData = localStorage.getItem(name);
-            if (localData) {
-                console.log(`[mnt] Migrating ${name} to server storage...`);
-                // 서버로 업로드 (with meta)
+            if (localData && Object.keys(db).filter(k => k !== '_meta').length === 0) {
+                console.log(`[Storage] Initial migration to server...`);
                 const newDb: ServerDBMeta = {
-                    ...db,
                     [name]: localData,
                     _meta: {
                         lastUpdatedAt: new Date().toISOString(),
                         lastUpdatedBy: SESSION_ID
                     }
                 };
-                fetch('/api/storage', {
+                await fetch('/api/storage', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(newDb)
-                }).catch(e => console.error('Migration failed:', e));
-
+                });
+                lastKnownServerTimestamp = newDb._meta!.lastUpdatedAt;
                 return localData;
             }
 
@@ -378,45 +378,44 @@ export const serverStorage = {
 
     setItem: async (name: string, value: string): Promise<void> => {
         try {
-            // 1. 로컬 캐시 업데이트
-            localStorage.setItem(name, value);
-
-            // 2. 서버 DB 조회 (충돌 감지)
+            // 1. 서버 DB 조회
             const res = await fetch('/api/storage');
             const db: ServerDBMeta = res.ok ? await res.json() : {};
 
-            // 충돌 감지: 다른 세션이 변경했는지 확인
-            if (db._meta && lastKnownServerTimestamp) {
-                const serverTime = db._meta.lastUpdatedAt;
-                const serverSession = db._meta.lastUpdatedBy;
+            const serverValue = db[name];
+            const serverMeta = db._meta;
 
-                // 다른 세션이 변경했고, 우리가 알던 시간보다 새로운 경우
-                if (serverSession !== SESSION_ID && serverTime > lastKnownServerTimestamp) {
-                    console.warn(`[ServerStorage] ⚠️ CONFLICT DETECTED!`);
-                    console.warn(`  - Our last known: ${lastKnownServerTimestamp}`);
-                    console.warn(`  - Server has: ${serverTime} (by session ${serverSession.slice(0, 8)}...)`);
+            // 2. 충돌 감지 및 병합
+            let finalValue = value;
 
-                    // 충돌 콜백 호출
-                    if (conflictCallback) {
-                        conflictCallback({
-                            type: 'EXTERNAL_CHANGE',
-                            localTimestamp: lastKnownServerTimestamp,
-                            serverTimestamp: serverTime,
-                            sessionId: SESSION_ID,
-                            serverSessionId: serverSession
-                        });
-                    }
+            if (serverValue && serverValue !== value) {
+                // 서버에 기존 데이터가 있고, 현재 저장하려는 것과 다름
+                console.log('[ServerStorage] 🔀 Merging with existing server data...');
 
-                    // 일단 저장은 진행하되, 사용자에게는 알림
+                finalValue = mergeStoreData(serverValue, value);
+
+                // 병합 완료 알림
+                if (conflictCallback && serverMeta) {
+                    conflictCallback({
+                        type: 'DATA_MERGED',
+                        localTimestamp: lastKnownServerTimestamp || new Date().toISOString(),
+                        serverTimestamp: serverMeta.lastUpdatedAt,
+                        sessionId: SESSION_ID,
+                        serverSessionId: serverMeta.lastUpdatedBy,
+                        mergedData: true
+                    });
                 }
             }
 
-            // 동일한 값이면 스킵
-            if (db[name] === value) return;
+            // 3. 로컬 캐시 업데이트 (병합된 데이터로)
+            localStorage.setItem(name, finalValue);
 
-            // 3. 새로운 타임스탬프와 함께 저장
+            // 4. 동일한 값이면 스킵
+            if (db[name] === finalValue) return;
+
+            // 5. 서버에 저장
             const newTimestamp = new Date().toISOString();
-            db[name] = value;
+            db[name] = finalValue;
             db._meta = {
                 lastUpdatedAt: newTimestamp,
                 lastUpdatedBy: SESSION_ID
@@ -428,8 +427,8 @@ export const serverStorage = {
                 body: JSON.stringify(db)
             });
 
-            // 로컬 타임스탬프 업데이트
             lastKnownServerTimestamp = newTimestamp;
+            console.log(`[ServerStorage] ✅ Saved successfully (session: ${SESSION_ID.slice(0, 8)}...)`);
 
         } catch (error) {
             console.error('[ServerStorage] Save failed:', error);

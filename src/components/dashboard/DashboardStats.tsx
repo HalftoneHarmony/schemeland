@@ -8,10 +8,12 @@ interface DashboardStatsProps {
     sprintProgress: number;
     yearDaysPassed: number;
     yearProgress: number;
+    currentSprintIndex: number;
+    totalSprints: number;
     isAhead: boolean;
 }
 
-export function DashboardStats({ progress, sprintDaysPassed, sprintProgress, yearDaysPassed, yearProgress, isAhead }: DashboardStatsProps) {
+export function DashboardStats({ progress, sprintDaysPassed, sprintProgress, yearDaysPassed, yearProgress, currentSprintIndex, totalSprints, isAhead }: DashboardStatsProps) {
     return (
         <div className="flex flex-col gap-4">
             {/* XP Bar */}
@@ -101,15 +103,19 @@ export function DashboardStats({ progress, sprintDaysPassed, sprintProgress, yea
                     <div className="flex justify-between items-start mb-2">
                         <div className="flex items-center gap-2">
                             <div className="w-1.5 h-1.5 rounded-full bg-cyber-yellow animate-pulse shadow-[0_0_10px_rgba(255,255,0,0.8)]" />
-                            <span className="text-[9px] font-medium text-zinc-400 uppercase tracking-widest">Sprint Elapsed</span>
+                            <span className="text-[9px] font-medium text-zinc-400 uppercase tracking-widest">Sprint Status</span>
                         </div>
                         <Zap size={16} className="text-cyber-yellow opacity-50" />
                     </div>
 
                     <div className="flex items-baseline gap-1 mb-3">
-                        <span className="text-3xl font-black text-white tracking-tighter">{sprintDaysPassed}</span>
-                        <span className="text-xs font-medium text-zinc-500">/30</span>
-                        <span className="text-[9px] font-medium text-zinc-600 ml-1">days</span>
+                        <span className="text-3xl font-black text-white tracking-tighter">Sprint {currentSprintIndex}</span>
+                        <span className="text-xs font-medium text-zinc-500">/{totalSprints}</span>
+                    </div>
+
+                    <div className="flex justify-between items-end mb-1">
+                        <span className="text-[9px] font-mono text-zinc-500">Current Phase Progress</span>
+                        <span className="text-[9px] font-mono text-cyber-yellow">{sprintDaysPassed} / 30 days</span>
                     </div>
 
                     <div className="h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/5">
