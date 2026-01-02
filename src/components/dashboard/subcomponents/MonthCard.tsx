@@ -1,10 +1,10 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronsRight, RefreshCw, X } from 'lucide-react';
+import { ChevronsRight, RefreshCw, X, TrendingUp } from 'lucide-react';
 import { Button } from '../../ui';
 import { cardVariants } from '../constants';
-import { MonthlyGoal } from '../../../types'; // 타입 확인: MonthlyGoal
+import { MonthlyGoal } from '../../../types';
 
 interface MonthCardProps {
     month: MonthlyGoal;
@@ -19,6 +19,47 @@ interface MonthCardProps {
     onUpdateTheme: (text: string) => void;
     onUpdateObjectives: (goals: string[]) => void;
     onAiAdjustment: () => void;
+}
+
+function CircularProgress({ percentage, size = 36, strokeWidth = 3, color = "text-cyber-cyan" }: { percentage: number, size?: number, strokeWidth?: number, color?: string }) {
+    const radius = (size - strokeWidth) / 2;
+    const circumference = radius * 2 * Math.PI;
+    const offset = circumference - (percentage / 100) * circumference;
+
+    return (
+        <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
+            <svg className="transform -rotate-90 w-full h-full">
+                <circle
+                    className="text-white/10"
+                    strokeWidth={strokeWidth}
+                    stroke="currentColor"
+                    fill="transparent"
+                    r={radius}
+                    cx={size / 2}
+                    cy={size / 2}
+                />
+                <motion.circle
+                    className={color}
+                    strokeWidth={strokeWidth}
+                    strokeDasharray={circumference}
+                    initial={{ strokeDashoffset: circumference }}
+                    animate={{ strokeDashoffset: offset }}
+                    transition={{ duration: 1.5, ease: "easeOut", delay: 0.2 }}
+                    strokeLinecap="round"
+                    stroke="currentColor"
+                    fill="transparent"
+                    r={radius}
+                    cx={size / 2}
+                    cy={size / 2}
+                />
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center flex-col">
+                <span className={`text-[8px] font-cyber font-bold ${color}`}>
+                    {percentage}%
+                </span>
+            </div>
+        </div>
+    );
 }
 
 export function MonthCard({
@@ -37,7 +78,21 @@ export function MonthCard({
 }: MonthCardProps) {
     const [isHovered, setIsHovered] = useState(false);
 
-    // 내부 핸들러
+    // Calculate Progress from Detailed Plan Tasks
+    const progress = useMemo(() => {
+        if (!month.detailedPlan) return 0;
+        let total = 0;
+        let completed = 0;
+        month.detailedPlan.forEach(week => {
+            if (week.tasks) {
+                total += week.tasks.length;
+                completed += week.tasks.filter(t => t.isCompleted).length;
+            }
+        });
+        return total === 0 ? 0 : Math.round((completed / total) * 100);
+    }, [month.detailedPlan]);
+
+    // Handlers
     const handleGoalChange = (idx: number, val: string) => {
         const newGoals = [...month.goals];
         newGoals[idx] = val;
@@ -117,15 +172,22 @@ export function MonthCard({
                         )}
                     </div>
 
-                    <div className="flex gap-2 items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        {!isEditing && (
-                            <button
-                                onClick={(e) => { e.stopPropagation(); onEditStart(); }}
-                                className="p-2 bg-white/5 border border-white/10 text-white/40 hover:text-white hover:border-white transition-all rounded-full"
-                            >
-                                <RefreshCw size={12} />
-                            </button>
-                        )}
+                    <div className="flex gap-3 items-center">
+                        {/* Progress Indicator (Enhanced) */}
+                        <div className={`transition-opacity duration-300 ${isSelected || isHovered || progress > 0 ? 'opacity-100' : 'opacity-30'}`}>
+                            <CircularProgress percentage={progress} color={isSelected ? 'text-cyber-cyan' : 'text-white/30'} />
+                        </div>
+
+                        <div className={`transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
+                            {!isEditing && (
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); onEditStart(); }}
+                                    className="p-2 bg-white/5 border border-white/10 text-white/40 hover:text-white hover:border-white transition-all rounded-full"
+                                >
+                                    <RefreshCw size={12} />
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
 
@@ -190,7 +252,10 @@ export function MonthCard({
                                 </h3>
 
                                 <div className="flex-1 relative">
-                                    <span className="text-[9px] font-mono text-white/20 uppercase tracking-widest block mb-3 border-b border-white/5 pb-1">Primary_Objectives</span>
+                                    <span className="text-[9px] font-mono text-white/20 uppercase tracking-widest block mb-3 border-b border-white/5 pb-1 flex justify-between items-center">
+                                        <span>Primary_Objectives</span>
+                                        {progress === 100 && <span className="text-cyber-cyan flex items-center gap-1"><TrendingUp size={10} /> COMPLETED</span>}
+                                    </span>
 
                                     <motion.ul className="space-y-3 relative z-10">
                                         <AnimatePresence>
