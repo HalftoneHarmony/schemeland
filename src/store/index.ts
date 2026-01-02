@@ -15,7 +15,6 @@
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { serverStorage } from './storage';
 import {
     ProjectIdea,
     IdeaAnalysis,
@@ -788,17 +787,19 @@ export const useStore = create<Store>()(
             },
 
             save: async () => {
+                // Zustand persist가 자동으로 저장하므로, 수동 저장은 localStorage 직접 사용
                 const state = get();
                 const partialize = useStore.persist.getOptions().partialize;
                 if (partialize) {
                     const part = partialize(state);
-                    await serverStorage.setItem('schemeland-store', JSON.stringify(part));
+                    localStorage.setItem('schemeland-store', JSON.stringify(part));
+                    console.log('💾 Data saved to localStorage');
                 }
             },
         }),
         {
             name: 'schemeland-store',
-            storage: createJSONStorage(() => serverStorage),
+            storage: createJSONStorage(() => localStorage),
             partialize: (state) => ({
                 ideas: state.ideas,
                 analyses: state.analyses,

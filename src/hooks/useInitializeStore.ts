@@ -8,7 +8,7 @@
 
 import { useEffect, useState } from 'react';
 import { useStore } from '../store';
-import { checkMigrationNeeded, migrateFromLocalStorage } from '../store/migration';
+import { checkMigrationNeeded, migrateFromLocalStorage, cleanupLegacyData } from '../store/migration';
 import { scanForCorruption, repairCorruptedData, CorruptionReport } from '../utils/dataValidator';
 
 
@@ -142,6 +142,9 @@ export function useInitializeStore(): InitializationState {
                     });
 
                     console.log('✅ Migration completed:', result.message);
+
+                    // 🔥 레거시 데이터 삭제 (중복 마이그레이션 방지)
+                    cleanupLegacyData();
 
                     setState({
                         isInitialized: true,

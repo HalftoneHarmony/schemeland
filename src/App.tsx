@@ -2,9 +2,9 @@
  * @file App.tsx
  * 애플리케이션 메인 진입점
  * 
- * v2.3 변경사항:
- * - 뷰 렌더링 로직을 AppContent로 분리하여 App.tsx 다이어트
- * - 가독성 및 유지보수성 향상
+ * v2.4 변경사항:
+ * - 충돌 감지, 세션 락, 읽기 전용 모드 제거 (단순화)
+ * - 저장 로직을 localStorage 직접 사용으로 변경
  */
 
 import React, { useEffect } from 'react';
@@ -18,8 +18,6 @@ import { APP_NAME } from './constants';
 import { useStore } from './store';
 import { useInitializeStore } from './hooks/useInitializeStore';
 import { useHistorySync } from './hooks/useHistorySync';
-import { useConflictDetection } from './hooks/useConflictDetection';
-import { useSessionLock } from './hooks/useSessionLock';
 import { useTaskHandlers } from './hooks/useTaskHandlers';
 import { useIdeaHandlers, useProjectHandlers, useTimer } from './features';
 
@@ -28,21 +26,12 @@ import { SideNavigation } from './components/navigation/SideNavigation';
 import { QuickSearch } from './components/navigation/QuickSearch';
 import { AppContent } from './components/layout/AppContent';
 
-// UI Components
-import { ConflictWarning, MergeNotice, ReadOnlyBanner } from './components/ui/ConflictWarning';
-
 export default function App() {
     // 1. Store Initialization (Data Migration)
     const { isInitialized, isMigrating } = useInitializeStore();
 
     // 1.5 History Sync (Back button support)
     useHistorySync();
-
-    // 1.6 Conflict Detection (Multi-browser protection)
-    const conflictDetection = useConflictDetection();
-
-    // 1.7 Session Lock (Prevent concurrent writes)
-    const sessionLock = useSessionLock();
 
     // 2. Zustand Store (Global State)
     const store = useStore();
@@ -97,29 +86,6 @@ export default function App() {
 
     return (
         <div className="min-h-screen bg-background text-textMain font-sans selection:bg-cyber-pink/30">
-            {/* Conflict Warning Banner */}
-            <ConflictWarning
-                isVisible={conflictDetection.isWarningVisible}
-                onDismiss={conflictDetection.dismissWarning}
-                onReload={conflictDetection.reloadPage}
-                sessionId={conflictDetection.sessionId}
-            />
-
-            {/* Merge Success Notice */}
-            <MergeNotice
-                isVisible={conflictDetection.isMergeNoticeVisible}
-                onDismiss={conflictDetection.dismissMergeNotice}
-            />
-
-            {/* Read-Only Mode Banner */}
-            <ReadOnlyBanner
-                isVisible={!sessionLock.isOwner && !sessionLock.isChecking}
-                ownerSessionId={sessionLock.ownerInfo?.sessionId}
-                ownerConnectedAt={sessionLock.ownerInfo?.connectedAt}
-                onRequestOwnership={sessionLock.requestOwnership}
-                onReload={() => window.location.reload()}
-            />
-
             {/* Quick Search Modal */}
             <QuickSearch
                 isOpen={isQuickSearchOpen}
