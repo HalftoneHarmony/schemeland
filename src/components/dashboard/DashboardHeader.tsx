@@ -46,8 +46,18 @@ export function DashboardHeader({
 
     const titleText = useScrambleText(activeProject.selectedIdea.title, true);
 
+    // Floating Particles for the Icon area
+    const particles = [...Array(8)].map((_, i) => ({
+        id: i,
+        x: Math.random() * 100 - 50,
+        y: Math.random() * 100 - 50,
+        size: 2 + Math.random() * 3,
+        duration: 3 + Math.random() * 4,
+        delay: Math.random() * 2,
+    }));
+
     return (
-        <header className="mb-20 relative group/header perspective-[2000px]">
+        <header className="mb-20 relative group/header">
             {/* 1. Dynamic Background Grid */}
             <div className="absolute inset-0 -mx-4 md:-mx-10 -my-4 rounded-3xl overflow-hidden pointer-events-none border border-white/5">
                 <div className="absolute inset-0 bg-zinc-950/80 backdrop-blur-sm" />
@@ -61,46 +71,110 @@ export function DashboardHeader({
                     transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
                     className="absolute left-0 right-0 h-[1px] bg-cyan-500/50 blur-[2px] shadow-[0_0_20px_rgba(0,255,255,0.5)]"
                 />
+
+                {/* Additional horizontal scan */}
+                <motion.div
+                    animate={{ left: ['-10%', '110%'] }}
+                    transition={{ duration: 8, repeat: Infinity, ease: "linear", delay: 2 }}
+                    className="absolute top-1/2 w-40 h-[1px] bg-gradient-to-r from-transparent via-cyber-pink/50 to-transparent blur-[1px]"
+                />
             </div>
 
             <div className="relative py-8 px-4 flex flex-col md:flex-row gap-8 items-center justify-between z-10">
 
                 <div className="flex flex-col md:flex-row items-center md:items-start gap-8 z-10 w-full">
-                    {/* 2. Holographic Projection Icon */}
-                    <div className="relative shrink-0 perspective-[1000px] group/icon">
-                        <motion.div
-                            initial={{ scale: 0, opacity: 0, rotateX: 90 }}
-                            animate={{ scale: 1, opacity: 1, rotateX: 0 }}
-                            transition={{ type: "spring", stiffness: 100, delay: 0.2 }}
-                            whileHover={{ rotateY: 180, scale: 1.1 }}
-                            className="w-36 h-36 relative flex items-center justify-center transform-style-3d cursor-pointer"
-                        >
-                            {/* Emitter Base */}
-                            <div className="absolute bottom-0 w-24 h-24 bg-gradient-to-t from-cyan-500/20 to-transparent rounded-full blur-xl animate-pulse" />
+                    {/* 2. Holographic Projection Icon - Smoother animations, no 3D flip */}
+                    <div className="relative shrink-0 group/icon">
+                        {/* Floating Particles */}
+                        {particles.map((p) => (
+                            <motion.div
+                                key={p.id}
+                                initial={{ opacity: 0, x: 0, y: 0 }}
+                                animate={{
+                                    opacity: [0, 0.8, 0],
+                                    x: [0, p.x],
+                                    y: [0, p.y],
+                                }}
+                                transition={{
+                                    duration: p.duration,
+                                    repeat: Infinity,
+                                    delay: p.delay,
+                                    ease: "easeOut"
+                                }}
+                                className="absolute top-1/2 left-1/2 rounded-full bg-cyan-400 pointer-events-none"
+                                style={{ width: p.size, height: p.size }}
+                            />
+                        ))}
 
-                            {/* Rotating Hologram Rings */}
-                            {[...Array(3)].map((_, i) => (
-                                <motion.div
-                                    key={i}
-                                    animate={{ rotateZ: [0, 360], scale: [1, 1.1, 1] }}
-                                    transition={{ duration: 5 + i * 2, repeat: Infinity, ease: "linear", delay: i }}
-                                    className={`absolute inset-${i * 2} rounded-full border border-cyan-500/${20 - i * 5} border-dashed`}
-                                />
-                            ))}
+                        {/* Outer Pulsing Ring */}
+                        <motion.div
+                            animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.1, 0.3] }}
+                            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                            className="absolute -inset-4 rounded-full border border-cyan-500/20"
+                        />
+
+                        {/* Rotating Dashed Ring */}
+                        <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                            className="absolute -inset-2 rounded-full border border-dashed border-cyan-500/30"
+                        />
+
+                        {/* Main Icon Container */}
+                        <motion.div
+                            initial={{ scale: 0.5, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ type: "spring", stiffness: 150, delay: 0.2 }}
+                            whileHover={{ scale: 1.08 }}
+                            className="w-36 h-36 relative flex items-center justify-center cursor-pointer"
+                        >
+                            {/* Emitter Base Glow */}
+                            <div className="absolute bottom-0 w-28 h-20 bg-gradient-to-t from-cyan-500/30 to-transparent rounded-full blur-2xl animate-pulse" />
+
+                            {/* Orbiting Dots */}
+                            <motion.div
+                                animate={{ rotate: 360 }}
+                                transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                                className="absolute inset-0"
+                            >
+                                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-2 bg-cyan-400 rounded-full shadow-[0_0_10px_cyan]" />
+                            </motion.div>
+                            <motion.div
+                                animate={{ rotate: -360 }}
+                                transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+                                className="absolute inset-2"
+                            >
+                                <div className="absolute bottom-0 right-0 w-1.5 h-1.5 bg-cyber-pink rounded-full shadow-[0_0_8px_#FF2D55]" />
+                            </motion.div>
 
                             {/* Main Content Container */}
-                            <div className="relative w-full h-full bg-black/40 backdrop-blur-md border border-white/10 cyber-clipper flex items-center justify-center shadow-[0_0_30px_rgba(0,255,255,0.1)] group-hover/icon:shadow-[0_0_50px_rgba(0,255,255,0.3)] transition-shadow duration-500">
-                                <span className="text-7xl drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] filter grayscale group-hover/icon:grayscale-0 transition-all duration-500 backface-visible">
+                            <div className="relative w-full h-full bg-black/60 backdrop-blur-md border border-white/10 cyber-clipper flex items-center justify-center shadow-[0_0_30px_rgba(0,255,255,0.1)] group-hover/icon:shadow-[0_0_60px_rgba(0,255,255,0.25)] transition-shadow duration-500 overflow-hidden">
+                                {/* Emoji */}
+                                <motion.span
+                                    animate={{ y: [0, -4, 0] }}
+                                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                                    className="text-7xl drop-shadow-[0_0_20px_rgba(255,255,255,0.6)] filter grayscale-[30%] group-hover/icon:grayscale-0 transition-all duration-500"
+                                >
                                     {activeProject.selectedIdea.emoji || '🚀'}
-                                </span>
+                                </motion.span>
 
                                 {/* Vertical Scan Beam */}
-                                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-400/10 to-transparent h-[10%] w-full animate-scanline pointer-events-none" />
+                                <motion.div
+                                    animate={{ top: ['-20%', '120%'] }}
+                                    transition={{ duration: 2.5, repeat: Infinity, ease: "linear", repeatDelay: 1 }}
+                                    className="absolute left-0 right-0 h-[15%] bg-gradient-to-b from-transparent via-cyan-400/20 to-transparent pointer-events-none"
+                                />
+
+                                {/* Corner accents */}
+                                <div className="absolute top-2 left-2 w-3 h-3 border-t border-l border-cyan-500/50" />
+                                <div className="absolute top-2 right-2 w-3 h-3 border-t border-r border-cyan-500/50" />
+                                <div className="absolute bottom-2 left-2 w-3 h-3 border-b border-l border-cyan-500/50" />
+                                <div className="absolute bottom-2 right-2 w-3 h-3 border-b border-r border-cyan-500/50" />
                             </div>
                         </motion.div>
 
                         {/* Floor Reflection */}
-                        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-32 h-8 bg-cyan-500/20 blur-2xl rounded-[100%] opacity-0 group-hover/icon:opacity-60 transition-opacity duration-500" />
+                        <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-28 h-6 bg-cyan-500/20 blur-2xl rounded-[100%] opacity-50 group-hover/icon:opacity-80 transition-opacity duration-500" />
                     </div>
 
                     <div className="pt-2 flex-1 text-center md:text-left">
@@ -163,10 +237,16 @@ export function DashboardHeader({
                                 onAbandonQuest();
                             }
                         }}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
                         className="relative group/btn overflow-hidden px-8 py-4 bg-red-950/20 border border-red-500/30 hover:border-red-500 transition-all cyber-clipper"
                     >
                         {/* Hazard Stripes Background */}
-                        <div className="absolute inset-0 opacity-0 group-hover/btn:opacity-20 bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,#ef4444_10px,#ef4444_20px)] animate-[shine_1s_linear_infinite]" />
+                        <motion.div
+                            animate={{ x: ['-100%', '100%'] }}
+                            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                            className="absolute inset-0 opacity-0 group-hover/btn:opacity-20 bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,#ef4444_10px,#ef4444_20px)]"
+                        />
 
                         <div className="relative z-10 flex items-center gap-3">
                             <AlertTriangle size={18} className="text-red-500 animate-pulse" />

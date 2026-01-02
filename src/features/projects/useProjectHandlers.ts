@@ -134,7 +134,7 @@ export function useProjectHandlers() {
                 monthlyPlan: Array.from({ length: 12 }, (_, i) => ({
                     id: crypto.randomUUID(),
                     month: i + 1,
-                    theme: `${i + 1}월 목표`,
+                    theme: `"나는 Sprint ${String(i + 1).padStart(2, '0')}에서 목표를 달성했다."`,
                     goals: ["목표를 설정하세요"],
                     detailedPlan: [] as WeeklyMilestone[],
                     createdAt: new Date().toISOString(),
@@ -210,7 +210,7 @@ export function useProjectHandlers() {
     // Dashboard & Plan Manipulation Handlers
     // ==========================================
 
-    // 월 목표 수정
+    // 스프린트 비전 수정
     const handleUpdateMonthGoal = useCallback((newText: string) => {
         const activeMonth = store.getActiveMonthPlan();
         if (!activeMonth) return;

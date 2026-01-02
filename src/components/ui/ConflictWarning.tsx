@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertTriangle, RefreshCw, X, Shield, GitMerge, Check } from 'lucide-react';
+import { AlertTriangle, RefreshCw, X, Shield, GitMerge, Check, Lock, Eye } from 'lucide-react';
 
 interface ConflictWarningProps {
     isVisible: boolean;
@@ -97,13 +97,80 @@ export const MergeNotice: React.FC<MergeNoticeProps> = ({
                             DATA_MERGED
                         </h3>
                         <p className="text-green-200/80 text-xs leading-relaxed">
-                            다른 세션의 데이터와 자동으로 병합되었습니다. 기존 프로젝트는 안전하게 보존됩니다.
+                            다른 세션의 데이터와 자동으로 병합되었습니다.
                         </p>
                     </div>
 
                     <button onClick={onDismiss} className="p-1 text-green-500/50 hover:text-green-500 transition-colors">
                         <X size={16} />
                     </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+interface ReadOnlyBannerProps {
+    isVisible: boolean;
+    ownerSessionId?: string;
+    ownerConnectedAt?: string;
+    onRequestOwnership: () => void;
+    onReload: () => void;
+}
+
+/**
+ * 읽기 전용 모드 배너
+ * 다른 세션이 활성화되어 있어 쓰기가 차단된 경우 표시
+ */
+export const ReadOnlyBanner: React.FC<ReadOnlyBannerProps> = ({
+    isVisible,
+    ownerSessionId,
+    ownerConnectedAt,
+    onRequestOwnership,
+    onReload
+}) => {
+    if (!isVisible) return null;
+
+    const connectedTime = ownerConnectedAt
+        ? new Date(ownerConnectedAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
+        : '알 수 없음';
+
+    return (
+        <div className="fixed top-0 left-0 right-0 z-[9998] animate-slide-down">
+            <div className="bg-amber-950/95 backdrop-blur-xl border-b border-amber-500/50 p-3 shadow-[0_4px_20px_rgba(245,158,11,0.2)]">
+                <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-amber-500/20 border border-amber-500 flex items-center justify-center cyber-clipper">
+                            <Eye size={20} className="text-amber-500" />
+                        </div>
+                        <div>
+                            <h3 className="font-cyber font-black text-amber-400 text-xs uppercase tracking-widest flex items-center gap-2">
+                                <Lock size={12} />
+                                READ_ONLY::MODE
+                            </h3>
+                            <p className="text-amber-200/70 text-xs">
+                                다른 브라우저가 {connectedTime}부터 활성 상태입니다.
+                                변경사항이 저장되지 않습니다.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="flex gap-2">
+                        <button
+                            onClick={onRequestOwnership}
+                            className="flex items-center gap-2 px-3 py-1.5 bg-amber-500 text-black font-cyber font-black text-[10px] uppercase tracking-widest hover:bg-amber-400 transition-all cyber-clipper"
+                        >
+                            <Lock size={12} />
+                            권한 요청
+                        </button>
+                        <button
+                            onClick={onReload}
+                            className="flex items-center gap-2 px-3 py-1.5 border border-amber-500/30 text-amber-400 font-cyber font-black text-[10px] uppercase tracking-widest hover:bg-amber-500/10 transition-all cyber-clipper"
+                        >
+                            <RefreshCw size={12} />
+                            새로고침
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

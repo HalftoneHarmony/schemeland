@@ -20,6 +20,7 @@ import { useStore } from './store';
 import { useInitializeStore } from './hooks/useInitializeStore';
 import { useHistorySync } from './hooks/useHistorySync';
 import { useConflictDetection } from './hooks/useConflictDetection';
+import { useSessionLock } from './hooks/useSessionLock';
 import { useIdeaHandlers, useProjectHandlers, useTimer } from './features';
 
 // View Components
@@ -36,8 +37,9 @@ import { CoachView } from './components/views/CoachView';
 import { SideNavigation } from './components/navigation/SideNavigation';
 import { QuickSearch } from './components/navigation/QuickSearch';
 
+
 // UI Components
-import { ConflictWarning, MergeNotice } from './components/ui/ConflictWarning';
+import { ConflictWarning, MergeNotice, ReadOnlyBanner } from './components/ui/ConflictWarning';
 
 export default function App() {
     // 1. Store Initialization (Data Migration)
@@ -48,6 +50,9 @@ export default function App() {
 
     // 1.6 Conflict Detection (Multi-browser protection)
     const conflictDetection = useConflictDetection();
+
+    // 1.7 Session Lock (Prevent concurrent writes)
+    const sessionLock = useSessionLock();
 
     // 2. Zustand Store (Global State)
     const store = useStore();
@@ -211,6 +216,15 @@ export default function App() {
             <MergeNotice
                 isVisible={conflictDetection.isMergeNoticeVisible}
                 onDismiss={conflictDetection.dismissMergeNotice}
+            />
+
+            {/* Read-Only Mode Banner */}
+            <ReadOnlyBanner
+                isVisible={!sessionLock.isOwner && !sessionLock.isChecking}
+                ownerSessionId={sessionLock.ownerInfo?.sessionId}
+                ownerConnectedAt={sessionLock.ownerInfo?.connectedAt}
+                onRequestOwnership={sessionLock.requestOwnership}
+                onReload={() => window.location.reload()}
             />
 
             {/* Quick Search Modal */}
