@@ -246,6 +246,8 @@ export interface NormalizedMonthlyGoal extends BaseEntity {
 export interface YearPlan {
   vision: string;
   keyResults: string[];
+  /** Base64 인코딩된 비전 이미지 (선택) */
+  visionImage?: string;
 }
 
 export interface ThreeYearVision extends BaseEntity {
@@ -412,4 +414,6 @@ export interface CoachPersona {
   description: string;
   avatar: string; // URL or Emoji
   themeColor: string;
+  /** Base64 인코딩된 커스텀 아바타 이미지 (선택) */
+  customAvatar?: string;
 }

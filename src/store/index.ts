@@ -96,12 +96,16 @@ interface StoreActions
     // Data Repair
     repairCorruptedData: () => Promise<{ repairCount: number; saved: boolean }>;
 
+    // Image Management
+    updateYearVisionImage: (projectId: string, yearIndex: number, imageData: string | null) => void;
+
     // Computed Helpers (레거시 호환용)
     getActiveProject: () => ProjectScheme | null;
     getActiveMonthPlan: () => MonthlyGoal | null;
     getActiveWeeklyPlan: () => WeeklyMilestone[];
     save: () => Promise<void>;
 }
+
 
 
 export type Store = StoreState & StoreActions;
@@ -613,6 +617,46 @@ export const useStore = create<Store>()(
                         [projectId]: {
                             ...state.projects[projectId],
                             threeYearVision: vision,
+                            updatedAt: now(),
+                        },
+                    },
+                }));
+            },
+
+            /** 특정 연도의 비전 이미지 업데이트 */
+            updateYearVisionImage: (projectId: string, yearIndex: number, imageData: string | null) => {
+                const state = get();
+                const project = state.projects[projectId];
+                if (!project) return;
+
+                const yearKey = `year${yearIndex + 1}` as 'year1' | 'year2' | 'year3';
+
+                // threeYearVision이 없으면 yearlyPlan을 사용하여 초기화
+                const currentVision = project.threeYearVision || {
+                    id: crypto.randomUUID(),
+                    year1: { vision: '', keyResults: [] },
+                    year2: { vision: '', keyResults: [] },
+                    year3: { vision: '', keyResults: [] },
+                    ultimateGoal: '',
+                    createdAt: now(),
+                    updatedAt: now(),
+                };
+
+                const updatedVision = {
+                    ...currentVision,
+                    [yearKey]: {
+                        ...currentVision[yearKey],
+                        visionImage: imageData,
+                    },
+                    updatedAt: now(),
+                };
+
+                set((state) => ({
+                    projects: {
+                        ...state.projects,
+                        [projectId]: {
+                            ...state.projects[projectId],
+                            threeYearVision: updatedVision,
                             updatedAt: now(),
                         },
                     },

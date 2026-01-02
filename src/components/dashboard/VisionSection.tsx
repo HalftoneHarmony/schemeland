@@ -1,12 +1,14 @@
 
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Flag, Rocket, Crown } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Flag, Rocket, Crown, ImagePlus, X, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ProjectScheme, ThreeYearVision } from '../../types';
 import { containerVariants, cardVariants, glowPulseVariants, scanlineVariants } from './constants';
 import {
     VisionHeader, VisionForm, VisionDisplay, VisionPagination, LockedView
 } from './subcomponents';
+import { uploadImage } from '../../utils/imageUtils';
+import { useStore } from '../../store';
 
 interface VisionSectionProps {
     activeProject: ProjectScheme;
@@ -24,10 +26,45 @@ export function VisionSection({
     activeProject, isEditingVision, visionDraft, isExpandingVision,
     handleEditVision, handleCancelEditVision, handleSaveVision, handleExpandVision, setVisionDraft
 }: VisionSectionProps) {
+    const updateYearVisionImage = useStore((s) => s.updateYearVisionImage);
 
     const [activeYearIndex, setActiveYearIndex] = useState(0);
     const [direction, setDirection] = useState(0);
     const [isHovered, setIsHovered] = useState(false);
+    const [isUploadingImage, setIsUploadingImage] = useState(false);
+
+    // 현재 연도의 이미지 가져오기
+    const getCurrentVisionImage = (): string | undefined => {
+        const vision = activeProject.threeYearVision;
+        if (!vision) return undefined;
+        const yearKey = `year${activeYearIndex + 1}` as 'year1' | 'year2' | 'year3';
+        return vision[yearKey]?.visionImage;
+    };
+
+    const currentVisionImage = getCurrentVisionImage();
+
+    // 이미지 업로드 핸들러
+    const handleImageUpload = async () => {
+        if (!activeProject.id) return;
+        setIsUploadingImage(true);
+        try {
+            const result = await uploadImage();
+            if (result) {
+                updateYearVisionImage(activeProject.id, activeYearIndex, result.base64);
+            }
+        } catch (error) {
+            console.error('이미지 업로드 실패:', error);
+            alert(error instanceof Error ? error.message : '이미지 업로드에 실패했습니다.');
+        } finally {
+            setIsUploadingImage(false);
+        }
+    };
+
+    // 이미지 삭제 핸들러
+    const handleImageRemove = () => {
+        if (!activeProject.id) return;
+        updateYearVisionImage(activeProject.id, activeYearIndex, null);
+    };
 
     const hasVision = !!activeProject.threeYearVision;
 
@@ -145,6 +182,18 @@ export function VisionSection({
                         ${currentTheme.border} ${currentTheme.shadow}
                     `}
                 >
+                    {/* Custom Vision Image Background */}
+                    {currentVisionImage && (
+                        <div className="absolute inset-0 z-0">
+                            <img
+                                src={currentVisionImage}
+                                alt="Vision Background"
+                                className="w-full h-full object-cover opacity-30"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-black/50" />
+                        </div>
+                    )}
+
                     {/* Background Effects */}
                     <motion.div
                         className={`absolute top-0 right-0 w-80 h-80 ${currentTheme.bg} blur-[120px] -mr-40 -mt-40`}
@@ -158,6 +207,35 @@ export function VisionSection({
                         transition={{ delay: 1.5 }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80" />
+
+                    {/* Image Upload Button */}
+                    <div className="absolute top-4 right-4 z-30 flex gap-2">
+                        {currentVisionImage && (
+                            <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={handleImageRemove}
+                                className="p-2 bg-red-500/20 border border-red-500/50 text-red-400 hover:bg-red-500/30 transition-all cyber-clipper"
+                                title="이미지 삭제"
+                            >
+                                <X size={16} />
+                            </motion.button>
+                        )}
+                        <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={handleImageUpload}
+                            disabled={isUploadingImage}
+                            className={`p-2 border transition-all cyber-clipper flex items-center gap-2 ${currentTheme.border} ${currentTheme.text} ${currentTheme.bg} hover:opacity-80 disabled:opacity-50`}
+                            title="비전 이미지 업로드"
+                        >
+                            {isUploadingImage ? (
+                                <Loader2 size={16} className="animate-spin" />
+                            ) : (
+                                <ImagePlus size={16} />
+                            )}
+                        </motion.button>
+                    </div>
 
                     {/* Scanline Effect */}
                     <div className="absolute inset-0 overflow-hidden pointer-events-none">

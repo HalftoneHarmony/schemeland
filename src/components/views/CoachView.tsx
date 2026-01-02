@@ -1,8 +1,29 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, User, Bot, Sparkles, Terminal, Dumbbell, Zap, Skull, Trophy } from 'lucide-react';
+import { Send, User, Bot, Sparkles, Terminal, Dumbbell, Zap, Skull, Trophy, ImagePlus, X, Loader2 } from 'lucide-react';
 import { useStore } from '../../store';
 import { CoachType, ChatMessage } from '../../types';
 import { chatWithCoach } from '../../services/coachService';
+import { uploadImage } from '../../utils/imageUtils';
+
+// localStorage 키 상수
+const COACH_AVATAR_STORAGE_KEY = 'schemeland_coach_avatars';
+
+// 코치 아바타 저장/불러오기 헬퍼
+const getCoachAvatars = (): Record<CoachType, string | null> => {
+    try {
+        const stored = localStorage.getItem(COACH_AVATAR_STORAGE_KEY);
+        if (stored) return JSON.parse(stored);
+    } catch (e) {
+        console.error('코치 아바타 로드 실패:', e);
+    }
+    return { [CoachType.ELON]: null, [CoachType.GOGGINS]: null, [CoachType.CBUM]: null };
+};
+
+const saveCoachAvatar = (type: CoachType, imageData: string | null) => {
+    const avatars = getCoachAvatars();
+    avatars[type] = imageData;
+    localStorage.setItem(COACH_AVATAR_STORAGE_KEY, JSON.stringify(avatars));
+};
 
 interface CoachViewProps {
     onBack: () => void;
@@ -19,6 +40,36 @@ export const CoachView: React.FC<CoachViewProps> = ({ onBack }) => {
     const [inputValue, setInputValue] = useState('');
     const [isTyping, setIsTyping] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    // 커스텀 아바타 상태
+    const [coachAvatars, setCoachAvatars] = useState<Record<CoachType, string | null>>(getCoachAvatars);
+    const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
+    // 현재 코치의 커스텀 아바타
+    const currentCoachAvatar = coachAvatars[coachType];
+
+    // 아바타 업로드 핸들러
+    const handleAvatarUpload = async () => {
+        setIsUploadingAvatar(true);
+        try {
+            const result = await uploadImage();
+            if (result) {
+                saveCoachAvatar(coachType, result.base64);
+                setCoachAvatars(getCoachAvatars());
+            }
+        } catch (error) {
+            console.error('아바타 업로드 실패:', error);
+            alert(error instanceof Error ? error.message : '아바타 업로드에 실패했습니다.');
+        } finally {
+            setIsUploadingAvatar(false);
+        }
+    };
+
+    // 아바타 삭제 핸들러
+    const handleAvatarRemove = () => {
+        saveCoachAvatar(coachType, null);
+        setCoachAvatars(getCoachAvatars());
+    };
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -158,7 +209,11 @@ export const CoachView: React.FC<CoachViewProps> = ({ onBack }) => {
                         >
                             <div className={`absolute inset-0 bg-cyber-cyan/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ${coachType === CoachType.ELON ? 'opacity-20' : ''}`} />
                             <div className="flex flex-col items-center relative z-10">
-                                <Zap size={20} className={coachType === CoachType.ELON ? 'animate-pulse' : ''} />
+                                {coachAvatars[CoachType.ELON] ? (
+                                    <img src={coachAvatars[CoachType.ELON]!} alt="Elon" className="w-6 h-6 rounded-full object-cover" />
+                                ) : (
+                                    <Zap size={20} className={coachType === CoachType.ELON ? 'animate-pulse' : ''} />
+                                )}
                                 <span className="text-[9px] font-cyber font-black mt-2 tracking-widest">ELON_MUSK</span>
                             </div>
                         </button>
@@ -168,7 +223,11 @@ export const CoachView: React.FC<CoachViewProps> = ({ onBack }) => {
                         >
                             <div className={`absolute inset-0 bg-red-500/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ${coachType === CoachType.GOGGINS ? 'opacity-20' : ''}`} />
                             <div className="flex flex-col items-center relative z-10">
-                                <Skull size={20} className={coachType === CoachType.GOGGINS ? 'animate-pulse' : ''} />
+                                {coachAvatars[CoachType.GOGGINS] ? (
+                                    <img src={coachAvatars[CoachType.GOGGINS]!} alt="Goggins" className="w-6 h-6 rounded-full object-cover" />
+                                ) : (
+                                    <Skull size={20} className={coachType === CoachType.GOGGINS ? 'animate-pulse' : ''} />
+                                )}
                                 <span className="text-[9px] font-cyber font-black mt-2 tracking-widest">DAVID_GOGGINS</span>
                             </div>
                         </button>
@@ -178,9 +237,38 @@ export const CoachView: React.FC<CoachViewProps> = ({ onBack }) => {
                         >
                             <div className={`absolute inset-0 bg-amber-400/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ${coachType === CoachType.CBUM ? 'opacity-20' : ''}`} />
                             <div className="flex flex-col items-center relative z-10">
-                                <Trophy size={20} className={coachType === CoachType.CBUM ? 'animate-pulse' : ''} />
+                                {coachAvatars[CoachType.CBUM] ? (
+                                    <img src={coachAvatars[CoachType.CBUM]!} alt="Cbum" className="w-6 h-6 rounded-full object-cover" />
+                                ) : (
+                                    <Trophy size={20} className={coachType === CoachType.CBUM ? 'animate-pulse' : ''} />
+                                )}
                                 <span className="text-[9px] font-cyber font-black mt-2 tracking-widest">CHRIS_BUMSTEAD</span>
                             </div>
+                        </button>
+                    </div>
+
+                    {/* Avatar Upload Button */}
+                    <div className="flex gap-2 ml-2">
+                        {currentCoachAvatar && (
+                            <button
+                                onClick={handleAvatarRemove}
+                                className="p-2 bg-red-500/20 border border-red-500/50 text-red-400 hover:bg-red-500/30 transition-all cyber-clipper"
+                                title="아바타 삭제"
+                            >
+                                <X size={14} />
+                            </button>
+                        )}
+                        <button
+                            onClick={handleAvatarUpload}
+                            disabled={isUploadingAvatar}
+                            className={`p-2 border transition-all cyber-clipper flex items-center gap-1 ${isElon ? 'border-cyber-cyan/50 text-cyber-cyan hover:bg-cyber-cyan/10' : isGoggins ? 'border-red-500/50 text-red-400 hover:bg-red-500/10' : 'border-amber-400/50 text-amber-400 hover:bg-amber-400/10'} disabled:opacity-50`}
+                            title="코치 아바타 업로드"
+                        >
+                            {isUploadingAvatar ? (
+                                <Loader2 size={14} className="animate-spin" />
+                            ) : (
+                                <ImagePlus size={14} />
+                            )}
                         </button>
                     </div>
 
@@ -237,7 +325,7 @@ export const CoachView: React.FC<CoachViewProps> = ({ onBack }) => {
                         >
                             <div className={`max-w-[80%] md:max-w-[70%] flex gap-4 ${isAi ? 'flex-row' : 'flex-row-reverse'}`}>
                                 {/* Avatar */}
-                                <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 border 
+                                <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 border overflow-hidden
                                     ${isAi
                                         ? (isElon ? 'bg-black border-cyber-cyan text-cyber-cyan'
                                             : isGoggins ? 'bg-black border-red-500 text-red-500'
@@ -245,9 +333,13 @@ export const CoachView: React.FC<CoachViewProps> = ({ onBack }) => {
                                         : 'bg-white/10 border-white/20 text-white'}`}
                                 >
                                     {isAi ? (
-                                        isElon ? <Bot size={20} />
-                                            : isGoggins ? <Skull size={20} />
-                                                : <Trophy size={20} />
+                                        currentCoachAvatar ? (
+                                            <img src={currentCoachAvatar} alt="Coach" className="w-full h-full object-cover" />
+                                        ) : (
+                                            isElon ? <Bot size={20} />
+                                                : isGoggins ? <Skull size={20} />
+                                                    : <Trophy size={20} />
+                                        )
                                     ) : <User size={20} />}
                                 </div>
 
