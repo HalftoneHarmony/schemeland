@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, User, Bot, Sparkles, Terminal, Dumbbell, Zap, Skull, Trophy, ImagePlus, X, Loader2 } from 'lucide-react';
+import { Send, User, Bot, Sparkles, Terminal, Dumbbell, Zap, Skull, Trophy, ImagePlus, X, Loader2, Trash2 } from 'lucide-react';
+
 import { useStore } from '../../store';
 import { CoachType, ChatMessage } from '../../types';
 import { chatWithCoach } from '../../services/coachService';
@@ -35,11 +36,22 @@ export const CoachView: React.FC<CoachViewProps> = ({ onBack }) => {
     const activeProject = activeProjectId ? store.projects[activeProjectId] : undefined;
     const currentIdea = activeProject ? store.ideas[activeProject.ideaId] : undefined;
 
+    // Zustand 스토어 데이터
+    const coachMessages = store.coachMessages;
+    const addCoachMessage = store.addCoachMessage;
+    const clearCoachMessages = store.clearCoachMessages;
+
+
     const [coachType, setCoachType] = useState<CoachType>(CoachType.ELON);
-    const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [inputValue, setInputValue] = useState('');
     const [isTyping, setIsTyping] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const greetingTriggered = useRef<Record<string, boolean>>({});
+
+
+    // 현재 선택된 코치의 메시지만 필터링
+    const messages = coachMessages.filter(m => m.coachType === coachType);
+
 
     // 커스텀 아바타 상태
     const [coachAvatars, setCoachAvatars] = useState<Record<CoachType, string | null>>(getCoachAvatars);
@@ -81,7 +93,14 @@ export const CoachView: React.FC<CoachViewProps> = ({ onBack }) => {
 
     // Initial greeting
     useEffect(() => {
-        if (messages.length === 0) {
+        // 이미 이번 세션에서 인사말을 보냈거나 이미 대화 기록이 있으면 건너뜀
+        if (greetingTriggered.current[coachType]) return;
+
+        const coachHasMessages = coachMessages.some(m => m.coachType === coachType);
+
+        if (!coachHasMessages) {
+            greetingTriggered.current[coachType] = true;
+
             const getGreeting = () => {
                 switch (coachType) {
                     case CoachType.ELON:
@@ -96,17 +115,19 @@ export const CoachView: React.FC<CoachViewProps> = ({ onBack }) => {
             };
             const greeting = getGreeting();
 
-            setMessages([{
-                id: 'init',
+            addCoachMessage({
+                id: `init-${coachType}-${Date.now()}`,
                 sender: 'ai',
                 text: greeting,
                 coachType,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
                 timestamp: new Date().toISOString()
-            }]);
+            });
         }
-    }, [coachType]);
+    }, [coachType, coachMessages, addCoachMessage]);
+
+
 
     const handleSendMessage = async () => {
         if (!inputValue.trim()) return;
@@ -121,9 +142,10 @@ export const CoachView: React.FC<CoachViewProps> = ({ onBack }) => {
             timestamp: new Date().toISOString() // Compatibility
         };
 
-        setMessages(prev => [...prev, userMsg]);
+        addCoachMessage(userMsg);
         setInputValue('');
         setIsTyping(true);
+
 
         try {
             const responseText = await chatWithCoach(
@@ -141,7 +163,8 @@ export const CoachView: React.FC<CoachViewProps> = ({ onBack }) => {
                 updatedAt: new Date().toISOString(),
                 timestamp: new Date().toISOString()
             };
-            setMessages(prev => [...prev, aiMsg]);
+            addCoachMessage(aiMsg);
+
         } catch (error) {
             console.error("Coach error", error);
         } finally {
@@ -162,9 +185,9 @@ export const CoachView: React.FC<CoachViewProps> = ({ onBack }) => {
     const toggleCoach = (type: CoachType) => {
         if (type !== coachType) {
             setCoachType(type);
-            setMessages([]); // Clear chat on switch or maybe keep history? Clearing for now.
         }
     };
+
 
     // Styles based on coach
     const isElon = coachType === CoachType.ELON;
@@ -311,7 +334,32 @@ export const CoachView: React.FC<CoachViewProps> = ({ onBack }) => {
                             <span className="text-sm font-bold text-white max-w-[200px] truncate font-mono bg-white/5 px-2 py-1 rounded-none cyber-clipper">{currentIdea?.title || 'Unknown'}</span>
                         </div>
                     )}
+
+                    <div className="h-10 w-[1px] bg-white/10 mx-2" />
+
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => {
+                                if (confirm('현재 코치와의 대화 기록을 모두 지우시겠습니까?')) {
+                                    clearCoachMessages(coachType);
+                                }
+                            }}
+
+                            className="p-3 border border-white/10 text-white/40 hover:border-red-500/50 hover:text-red-500 transition-all cyber-clipper group"
+                            title="대화 기록 초기화"
+                        >
+                            <Trash2 size={18} className="group-hover:scale-110 transition-transform" />
+                        </button>
+
+                        <button
+                            onClick={onBack}
+                            className="p-3 border border-white/10 text-white/60 hover:border-white/40 hover:bg-white/5 transition-all cyber-clipper"
+                        >
+                            <X size={20} />
+                        </button>
+                    </div>
                 </div>
+
             </div>
 
             {/* Chat Area */}

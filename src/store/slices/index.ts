@@ -70,3 +70,13 @@ export {
     initialUIState,
     createUISlice,
 } from './uiSlice';
+
+// Coach 슬라이스
+export {
+    type CoachState,
+    type CoachActions,
+    type CoachSlice,
+    initialCoachState,
+    createCoachSlice,
+} from './coachSlice';
+

@@ -28,6 +28,7 @@ import {
     MonthlyGoal,
     WeeklyMilestone,
     MilestoneTask,
+    ChatMessage,
     TaskStatus,
     Priority,
 } from '../types';
@@ -41,6 +42,7 @@ import {
     MonthSlice,
     ProjectSlice,
     UISlice,
+    CoachSlice,
     initialIdeaState,
     initialAnalysisState,
     initialTaskState,
@@ -48,6 +50,8 @@ import {
     initialMonthState,
     initialProjectState,
     initialUIState,
+    initialCoachState,
+    createCoachSlice,
     denormalizeProject,
 } from './slices';
 
@@ -71,6 +75,8 @@ interface StoreState {
     activeProjectId: string | null;
     currentView: AppView;
     selectedMonthIndex: number;
+    coachMessages: ChatMessage[];
+
 
     // 버전 및 마이그레이션
     version: number;
@@ -87,7 +93,9 @@ interface StoreActions
     Omit<WeekSlice, keyof StoreState>,
     Omit<MonthSlice, keyof StoreState>,
     Omit<ProjectSlice, keyof StoreState>,
-    Omit<UISlice, keyof StoreState> {
+    Omit<UISlice, keyof StoreState>,
+    Omit<CoachSlice, keyof StoreState> {
+
     // Migration & Reset
     migrateFromLegacy: () => void;
     reset: () => void;
@@ -122,7 +130,9 @@ const initialState: StoreState = {
     ...initialMonthState,
     ...initialProjectState,
     ...initialUIState,
+    ...initialCoachState,
     version: STORE_VERSION,
+
     legacyProjects: [],
     legacyIdeas: [],
     legacyAnalyses: [],
@@ -142,8 +152,10 @@ const now = () => new Date().toISOString();
 
 export const useStore = create<Store>()(
     persist(
-        (set, get) => ({
+        (set, get, store) => ({
             ...initialState,
+            ...createCoachSlice(set, get, store),
+
 
             // ========== Idea Actions ==========
             addIdea: (ideaData) => {
@@ -854,9 +866,11 @@ export const useStore = create<Store>()(
                 activeProjectId: state.activeProjectId,
                 currentView: state.currentView,
                 selectedMonthIndex: state.selectedMonthIndex,
+                coachMessages: state.coachMessages,
                 version: state.version,
                 isMigrated: state.isMigrated,
             }),
+
         }
     )
 );
